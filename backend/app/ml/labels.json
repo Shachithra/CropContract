@@ -1,0 +1,78 @@
+{
+  "_comment": "Class index -> disease metadata used by the inference service",
+  "classes": [
+    {
+      "index": 0,
+      "disease": "Healthy Leaf",
+      "severity": "low"
+    },
+    {
+      "index": 1,
+      "disease": "Leaf Blight",
+      "severity": "high"
+    },
+    {
+      "index": 2,
+      "disease": "Leaf Rust",
+      "severity": "moderate"
+    },
+    {
+      "index": 3,
+      "disease": "Powdery Mildew",
+      "severity": "moderate"
+    },
+    {
+      "index": 4,
+      "disease": "Bacterial Spot",
+      "severity": "high"
+    },
+    {
+      "index": 5,
+      "disease": "Nitrogen Deficiency",
+      "severity": "low"
+    }
+  ],
+  "treatments": {
+    "Healthy Leaf": [
+      "Continue current irrigation and fertiliser schedule",
+      "Scout the field weekly for early symptoms",
+      "Maintain weed control to reduce humidity around plants"
+    ],
+    "Leaf Blight": [
+      "Remove and burn affected leaves immediately",
+      "Spray copper-based fungicide (e.g. copper oxychloride) every 7-10 days",
+      "Improve airflow by widening plant spacing",
+      "Avoid overhead watering; irrigate at soil level"
+    ],
+    "Leaf Rust": [
+      "Apply triazole fungicide at first sign of orange pustules",
+      "Repeat spray after 14 days if pustules persist",
+      "Collect and destroy fallen infected leaves",
+      "Rotate crops next season to break the disease cycle"
+    ],
+    "Powdery Mildew": [
+      "Spray wettable sulphur or potassium bicarbonate solution",
+      "Water early in the morning so leaves dry quickly",
+      "Prune dense canopy to increase sunlight penetration"
+    ],
+    "Bacterial Spot": [
+      "Remove infected plant material - do not compost",
+      "Apply copper hydroxide bactericide weekly",
+      "Disinfect tools and wash hands between plants",
+      "Use certified disease-free seed for the next planting"
+    ],
+    "Nitrogen Deficiency": [
+      "Top-dress with urea (46% N) at recommended field rate",
+      "Mix compost or well-rotted cattle manure into topsoil",
+      "Re-scan leaves in 10 days after treatment"
+    ]
+  },
+  "advice": {
+    "Healthy Leaf": "Crop looks healthy. Keep monitoring weekly.",
+    "Leaf Blight": "High risk of spread. Act within 48 hours.",
+    "Leaf Rust": "Moderate risk. Treat this week and rescan after spraying.",
+    "Powdery Mildew": "Moderate risk. Improve airflow and treat promptly.",
+    "Bacterial Spot": "High risk - quarantine affected plants and treat now.",
+    "Nitrogen Deficiency": "Nutrition issue, not disease. Fertilise and rescan."
+  }
+}

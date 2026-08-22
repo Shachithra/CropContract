@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+
+# Builds
+frontend/dist/
+frontend/dev-dist/
+backend/.pytest_cache/
+
+# Env (keep examples committed instead)
+.env.local
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

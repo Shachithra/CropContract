@@ -1,0 +1,152 @@
+{
+  "appName": "CropContract",
+  "tagline": "Know demand before you plant",
+  "nav": {
+    "home": "Home",
+    "marketplace": "Marketplace",
+    "myContracts": "My Contracts",
+    "scan": "Leaf Scan",
+    "dashboard": "Dashboard",
+    "post": "Post Contract",
+    "review": "Review",
+    "logout": "Log out"
+  },
+  "auth": {
+    "welcomeBack": "Welcome back",
+    "createAccount": "Create your account",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "noAccount": "No account yet?",
+    "haveAccount": "Already registered?",
+    "name": "Full name",
+    "phone": "Phone (optional)",
+    "region": "Region",
+    "role": "I am a…",
+    "farmer": "Farmer",
+    "buyer": "Buyer",
+    "officer": "Ag Officer",
+    "language": "Preferred language",
+    "demoAccounts": "Demo accounts (password: demo1234)",
+    "loginFailed": "Incorrect email or password"
+  },
+  "roles": {
+    "farmer": "Farmer",
+    "buyer": "Buyer",
+    "officer": "Officer"
+  },
+  "home": {
+    "greeting": "Ayubowan, {{name}}",
+    "subtitle": "Here is your farm at a glance",
+    "activeContracts": "Active contracts",
+    "committedKg": "Committed volume",
+    "estEarnings": "Est. earnings",
+    "scansDone": "Leaf scans",
+    "cropJourney": "Crop journey",
+    "regionalAlert": "Regional alert",
+    "riskLow": "Low risk in your region. Good growing conditions.",
+    "riskModerate": "Moderate disease pressure reported nearby. Scout fields weekly.",
+    "riskHigh": "High-risk outbreak near {{region}}. Scan leaves showing spots."
+  },
+  "contract": {
+    "openContracts": "Open contracts",
+    "perKg": "/kg",
+    "quotaFilled": "{{percent}}% quota filled",
+    "deadline": "Commit by {{date}}",
+    "delivery": "Delivery {{date}}",
+    "commit": "Commit volume",
+    "commitTitle": "Commit to this contract",
+    "quantity": "Quantity (kg)",
+    "remaining": "Remaining: {{kg}} kg",
+    "committed": "Committed!",
+    "queuedOffline": "Saved offline — will sync when you reconnect",
+    "searchCrops": "Search crops…",
+    "allRegions": "All regions",
+    "grade": "Grade",
+    "status": {
+      "open": "Open",
+      "fulfilled": "Fulfilled",
+      "closed": "Closed",
+      "pending": "Pending sync",
+      "synced": "Synced"
+    },
+    "postTitle": "Post a new contract",
+    "postSubtitle": "Specify what you need — farmers commit before planting season.",
+    "cropType": "Crop type",
+    "totalKg": "Total volume (kg)",
+    "pricePerKg": "Price per kg (LKR)",
+    "posted": "Contract posted!"
+  },
+  "journey": {
+    "contracted": "Contracted",
+    "committed": "Committed",
+    "growing": "Growing",
+    "ready": "Ready to harvest",
+    "harvested": "Harvested",
+    "delivered": "Delivered & paid"
+  },
+  "scan": {
+    "title": "AI Leaf Disease Scan",
+    "subtitle": "Photograph the affected leaf — diagnosis works on-device queue even offline.",
+    "capture": "Take / choose photo",
+    "analyze": "Analyze leaf",
+    "retake": "Retake",
+    "diagnosis": "Diagnosis",
+    "confidence": "Confidence",
+    "severity": {
+      "low": "Low risk",
+      "moderate": "Moderate risk",
+      "high": "HIGH RISK"
+    },
+    "treatment": "Treatment plan",
+    "advice": "Advice",
+    "offlineQueued": "You are offline — scan queued and will diagnose after sync.",
+    "history": "Recent scans"
+  },
+  "buyer": {
+    "myContracts": "My posted contracts",
+    "totalContracts": "Contracts",
+    "openNow": "Open now",
+    "committedVolume": "Committed volume",
+    "fulfillment": "Avg fulfillment",
+    "intakeByWeek": "Intake by crop",
+    "commitmentsTable": "Farmer commitments",
+    "farmer": "Farmer",
+    "crop": "Crop",
+    "qty": "Qty (kg)",
+    "date": "Date",
+    "noCommitments": "No commitments yet. Post a contract to attract farmers."
+  },
+  "officer": {
+    "flaggedScans": "Flagged scans for review",
+    "outbreakWatch": "Outbreak watch",
+    "cases": "cases",
+    "confirm": "Confirm",
+    "dismiss": "Dismiss",
+    "confirmed": "Confirmed",
+    "dismissed": "Dismissed",
+    "empty": "No flagged scans right now. Fields look healthy."
+  },
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "loading": "Loading…",
+    "error": "Something went wrong",
+    "online": "Online",
+    "offline": "Offline — actions queued",
+    "syncing": "Syncing…",
+    "pendingSync": "{{count}} pending sync",
+    "empty": "Nothing here yet",
+    "kg": "kg",
+    "viewAll": "View all"
+  },
+  "regions": {
+    "Dambulla": "Dambulla",
+    "Nuwara Eliya": "Nuwara Eliya",
+    "Jaffna": "Jaffna",
+    "Colombo": "Colombo",
+    "Anuradhapura": "Anuradhapura",
+    "Matara": "Matara"
+  }
+}

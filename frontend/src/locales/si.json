@@ -1,0 +1,152 @@
+{
+  "appName": "CropContract",
+  "tagline": "වීමට පෙර ඉල්ලුම දැනගන්න",
+  "nav": {
+    "home": "මුල් පිටුව",
+    "marketplace": "වෙළඳපොළ",
+    "myContracts": "මගේ ගිවිසුම්",
+    "scan": "කොළ සෝදිස්තිය",
+    "dashboard": "උපකරණ පුවරුව",
+    "post": "ගිවිසුමක් ඉදිරිපත් කරන්න",
+    "review": "සමාලෝචනය",
+    "logout": "ඉවත් වන්න"
+  },
+  "auth": {
+    "welcomeBack": "සාදරයෙන් පිළිගනිමු",
+    "createAccount": "ඔබගේ ගිණුම සාදන්න",
+    "email": "ඊමේල්",
+    "password": "මුරපදය",
+    "signIn": "ඇතුල් වන්න",
+    "signUp": "ලියාපදිංචි වන්න",
+    "noAccount": "තවම ගිණුමක් නැද්ද?",
+    "haveAccount": "දැනටමත් ලියාපදිංචිද?",
+    "name": "සම්පූර්ණ නම",
+    "phone": "දුරකථන (විකල්ප)",
+    "region": "ප්‍රදේශය",
+    "role": "මම…",
+    "farmer": "ගොවියා",
+    "buyer": "මිලදී ගන්නා",
+    "officer": "කෘෂි නිලධාරී",
+    "language": "කැමති භාෂාව",
+    "demoAccounts": "ආදර්ශ ගිණුම් (මුරපදය: demo1234)",
+    "loginFailed": "ඊමේල් හෝ මුරපදය වැරදිය"
+  },
+  "roles": {
+    "farmer": "ගොවියා",
+    "buyer": "මිලදී ගන්නා",
+    "officer": "නිලධාරී"
+  },
+  "home": {
+    "greeting": "ආයුබෝවන්, {{name}}",
+    "subtitle": "ඔබගේ ගොවිපළ එක් බැල්මකින්",
+    "activeContracts": "ක්‍රියාකාරී ගිවිසුම්",
+    "committedKg": "දායක කළ ප්‍රමාණය",
+    "estEarnings": "ඇස්තමේන්තුගත ආදායම",
+    "scansDone": "කොළ සෝදිස්ති",
+    "cropJourney": "බෝග ගමන",
+    "regionalAlert": "ප්‍රාදේශීය අනතුරු ඇඟවීම",
+    "riskLow": "ඔබේ ප්‍රදේශයේ අවදානම අඩුයි. හොඳ වගා කොන්දේසි.",
+    "riskModerate": "ආසන්නයේ මධ්‍යම රෝග පීඩාවක් වාර්තා වී ඇත. සතිපතා පරීක්ෂා කරන්න.",
+    "riskHigh": "{{region}} ආසන්නයේ අධි අවදානම් පැතිරීමක්. ලප ඇති කොළ සෝදිස්ති කරන්න."
+  },
+  "contract": {
+    "openContracts": "විවෘත ගිවිසුම්",
+    "perKg": "/කිලෝ",
+    "quotaFilled": "කෝටාව {{percent}}% පිරී ඇත",
+    "deadline": "{{date}} දක්වා දායක වන්න",
+    "delivery": "භාරදීම {{date}}",
+    "commit": "ප්‍රමාණය දායක කරන්න",
+    "commitTitle": "මෙම ගිවිසුමට දායක වන්න",
+    "quantity": "ප්‍රමාණය (කිලෝ)",
+    "remaining": "ඉතිරි: {{kg}} කිලෝ",
+    "committed": "දායක විය!",
+    "queuedOffline": "ඕෆ්ලයින්ව සුරකින ලදී — නැවත සම්බන්ධ වූ විට sync වේ",
+    "searchCrops": "බෝග සොයන්න…",
+    "allRegions": "සියලු ප්‍රදේශ",
+    "grade": "නියම",
+    "status": {
+      "open": "විවෘත",
+      "fulfilled": "සම්පූර්ණ",
+      "closed": "වසා ඇත",
+      "pending": "sync බලාපොරොත්තුවෙන්",
+      "synced": "sync විය"
+    },
+    "postTitle": "නව ගිවිසුමක් ඉදිරිපත් කරන්න",
+    "postSubtitle": "ඔබට අවශ්‍ය දේ සඳහන් කරන්න — වගා කාලයට පෙර ගොවීන් දායක වේ.",
+    "cropType": "බෝග වර්ගය",
+    "totalKg": "මුළු ප්‍රමාණය (කිලෝ)",
+    "pricePerKg": "කිලෝවක මිල (රු.)",
+    "posted": "ගිවිසුම පළ කරන ලදී!"
+  },
+  "journey": {
+    "contracted": "ගිවිසුම්ගත",
+    "committed": "දායක",
+    "growing": "වගා වෙමින්",
+    "ready": "අස්වැන්නට සූදානම්",
+    "harvested": "අස්වනු නෙළා",
+    "delivered": "භාරදී ගෙවා ඇත"
+  },
+  "scan": {
+    "title": "AI කොළ රෝග සෝදිස්තිය",
+    "subtitle": "රෝගී කොළයේ ඡායාරූපය ගන්න — ඕෆ්ලයින් වුවද queue වේ.",
+    "capture": "ඡායාරූපය ගන්න / තෝරන්න",
+    "analyze": "කොළය විශ්ලේෂණය",
+    "retake": "නැවත ගන්න",
+    "diagnosis": "රෝග විනිශ්චය",
+    "confidence": "විශ්වාසය",
+    "severity": {
+      "low": "අවදානම අඩුයි",
+      "moderate": "මධ්‍යම අවදානම",
+      "high": "අධි අවදානම"
+    },
+    "treatment": "ප්‍රතිකාර සැලසුම",
+    "advice": "උපදෙස්",
+    "offlineQueued": "ඔබ ඕෆ්ලයින් — සෝදිස්තිය queue වී sync වූ පසු විනිශ්චය වේ.",
+    "history": "මෑත සෝදිස්ති"
+  },
+  "buyer": {
+    "myContracts": "මම පළ කළ ගිවිසුම්",
+    "totalContracts": "ගිවිසුම්",
+    "openNow": "දැන් විවෘත",
+    "committedVolume": "දායක පරිමාව",
+    "fulfillment": "සාමාන්‍ය සම්පූර්ණත්වය",
+    "intakeByWeek": "බෝග අනුව ලැබීම්",
+    "commitmentsTable": "ගොවි දායකත්ව",
+    "farmer": "ගොවියා",
+    "crop": "බෝගය",
+    "qty": "ප්‍රමාණය (කිලෝ)",
+    "date": "දිනය",
+    "noCommitments": "තවම දායකත්ව නැත. ගොවීන් ආකර්ෂණය කිරීමට ගිවිසුමක් පළ කරන්න."
+  },
+  "officer": {
+    "flaggedScans": "සමාලෝචනය සඳහා සලකුණු කළ සෝදිස්ති",
+    "outbreakWatch": "පැතිරීම් නිරීක්ෂණය",
+    "cases": "සිද්ධි",
+    "confirm": "තහවුරු කරන්න",
+    "dismiss": "අත්හළ",
+    "confirmed": "තහවුරු කළා",
+    "dismissed": "අත්හළා",
+    "empty": "දැනට සලකුණු කළ සෝදිස්ති නැත. කෙත් නිරෝගීය."
+  },
+  "common": {
+    "cancel": "අවලංගු",
+    "save": "සුරකින්න",
+    "loading": "පූරණය වෙමින්…",
+    "error": "යමක් වැරදී ගියා",
+    "online": "සම්බන්ධිත",
+    "offline": "ඕෆ්ලයින් — ක්‍රියා queue විය",
+    "syncing": "Sync වෙමින්…",
+    "pendingSync": "sync ඉතිරි {{count}}",
+    "empty": "තවම කිසිවක් නැත",
+    "kg": "කිලෝ",
+    "viewAll": "සියල්ල බලන්න"
+  },
+  "regions": {
+    "Dambulla": "දඹුල්ල",
+    "Nuwara Eliya": "නුවරඑළිය",
+    "Jaffna": "යාපනය",
+    "Colombo": "කොළඹ",
+    "Anuradhapura": "අනුරාධපුරය",
+    "Matara": "මාතර"
+  }
+}

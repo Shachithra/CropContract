@@ -1,0 +1,16 @@
+:root {
+  /* ---- Agri-Tech Emerald Design Tokens (Blueprint §4) ---- */
+  --bg-dark: #061912;         /* Deep Forest Charcoal - primary background */
+  --surface-dark: #102A20;    /* Elevated card & container backgrounds */
+  --surface-border: #1B3E30;  /* Subtle borders */
+  --emerald: #10B981;         /* Primary accent - CTAs, active states */
+  --mint: #34D399;            /* Secondary accent - hover, progress bars */
+  --gold: #F59E0B;            /* Contract badges, quota warnings */
+  --alert-red: #EF4444;       /* Disease diagnostics & high risk */
+  --text-main: #F0FDF4;       /* Off-white light mint typography */
+  --text-muted: #86EFAC;      /* Soft sage secondary text */
+
+  /* Typography stack */
+  --font-display: 'Space Grotesk', 'Noto Sans', sans-serif;
+  --font-body: 'Noto Sans', 'Noto Sans Sinhala', 'Noto Sans Tamil', sans-serif;
+}
