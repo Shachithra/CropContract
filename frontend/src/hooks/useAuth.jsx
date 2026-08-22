@@ -13,8 +13,19 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const onExpired = () => setUser(null)
+    const onUpdated = () => {
+      try {
+        setUser(JSON.parse(localStorage.getItem('cc_user') || 'null'))
+      } catch {
+        setUser(null)
+      }
+    }
     window.addEventListener('cc_auth_expired', onExpired)
-    return () => window.removeEventListener('cc_auth_expired', onExpired)
+    window.addEventListener('cc_user_updated', onUpdated)
+    return () => {
+      window.removeEventListener('cc_auth_expired', onExpired)
+      window.removeEventListener('cc_user_updated', onUpdated)
+    }
   }, [])
 
   const login = useCallback(async (api, email, password) => {

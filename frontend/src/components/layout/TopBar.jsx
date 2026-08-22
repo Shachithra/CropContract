@@ -32,7 +32,10 @@ export default function TopBar() {
           <LanguageToggle />
           {user && (
             <>
-              <div className="hidden sm:flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border border-surface-border bg-surface">
+              <button
+                onClick={() => navigate('/profile')}
+                className="hidden sm:flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border border-surface-border bg-surface hover:border-emerald/50 transition cursor-pointer"
+              >
                 <span
                   className={`w-6 h-6 rounded-full grid place-items-center text-[10px] font-bold uppercase ${roleColor[user.role] || 'bg-mint text-forest'}`}
                 >
@@ -42,7 +45,7 @@ export default function TopBar() {
                   <p className="text-xs font-semibold text-textmain">{user.name}</p>
                   <p className="text-[10px] text-textmuted">{t(`roles.${user.role}`)}</p>
                 </div>
-              </div>
+              </button>
               <button
                 onClick={() => {
                   logout()

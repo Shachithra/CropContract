@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from app.config import settings
 from app.database_stub import hash_password, next_id, users_db, verify_password
-from app.schemas.user import TokenResponse, UserLogin, UserOut, UserRegister
+from app.schemas.user import ProfileUpdate, TokenResponse, UserLogin, UserOut, UserRegister
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 bearer = HTTPBearer(auto_error=False)
@@ -71,3 +71,13 @@ def login(body: UserLogin):
     if not user or not verify_password(body.password, user["hashed_password"]):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect email or password")
     return TokenResponse(access_token=create_token(user), user=UserOut(**user))
+
+
+@router.put("/profile", response_model=UserOut)
+def update_profile(body: ProfileUpdate, user: dict = Depends(get_current_user)):
+    updates = body.model_dump(exclude_unset=True)
+    for key, value in updates.items():
+        if value is not None:
+            user[key] = value
+    users_db[str(user["id"])] = user
+    return UserOut(**user)

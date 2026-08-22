@@ -30,3 +30,10 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserOut
+
+
+class ProfileUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=2, max_length=80)
+    phone: str | None = None
+    region: str | None = None
+    preferred_language: str | None = None

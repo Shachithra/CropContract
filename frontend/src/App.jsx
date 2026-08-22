@@ -14,6 +14,7 @@ import BuyerDashboard from './pages/buyer/BuyerDashboard.jsx'
 import PostContract from './pages/buyer/PostContract.jsx'
 
 import OfficerReview from './pages/officer/OfficerReview.jsx'
+import Profile from './pages/shared/Profile.jsx'
 
 function ProtectedLayout() {
   const { user } = useAuth()
@@ -64,6 +65,7 @@ export default function App() {
 
         {/* Shared */}
         <Route path="/marketplace" element={<Marketplace />} />
+        <Route path="/profile" element={<Profile />} />
       </Route>
 
       <Route path="*" element={<RootRedirect />} />

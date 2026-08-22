@@ -9,7 +9,8 @@
     "dashboard": "Dashboard",
     "post": "Post Contract",
     "review": "Review",
-    "logout": "Log out"
+    "logout": "Log out",
+    "profile": "Profile"
   },
   "auth": {
     "welcomeBack": "Welcome back",
