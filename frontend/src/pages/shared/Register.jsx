@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Tractor, Briefcase, ClipboardCheck } from 'lucide-react'
+import { Tractor, Briefcase, ClipboardCheck, Eye, EyeOff } from 'lucide-react'
 import Button from '../../components/common/Button.jsx'
 import { homePathFor, useAuth } from '../../hooks/useAuth.jsx'
 
@@ -32,6 +32,7 @@ export default function Register() {
     phone: '',
     preferred_language: 'en',
   })
+  const [showPw, setShowPw] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -100,7 +101,24 @@ export default function Register() {
             </div>
             <div>
               <label className="label-muted" htmlFor="password">{t('auth.password')}</label>
-              <input id="password" type="password" required className="input-dark" value={form.password} onChange={set('password')} />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPw ? 'text' : 'password'}
+                  required
+                  className="input-dark pr-10"
+                  value={form.password}
+                  onChange={set('password')}
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  onClick={() => setShowPw((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-textmuted hover:text-mint transition"
+                >
+                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
           </div>
 

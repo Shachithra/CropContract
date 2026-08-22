@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Leaf, ScanLine, FileSignature, WifiOff } from 'lucide-react'
+import { Leaf, ScanLine, FileSignature, WifiOff, Eye, EyeOff } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Button from '../../components/common/Button.jsx'
 import { homePathFor, useAuth } from '../../hooks/useAuth.jsx'
@@ -18,6 +18,7 @@ export default function Login() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPw, setShowPw] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -105,16 +106,26 @@ export default function Login() {
           </div>
           <div>
             <label className="label-muted" htmlFor="password">{t('auth.password')}</label>
-            <input
-              id="password"
-              type="password"
-              required
-              autoComplete="current-password"
-              className="input-dark"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div className="relative">
+              <input
+                id="password"
+                type={showPw ? 'text' : 'password'}
+                required
+                autoComplete="current-password"
+                className="input-dark pr-10"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                tabIndex={-1}
+                onClick={() => setShowPw((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-textmuted hover:text-mint transition"
+              >
+                {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
           </div>
 
           {error && (
