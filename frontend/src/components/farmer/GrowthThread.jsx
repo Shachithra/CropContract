@@ -1,42 +1,44 @@
-import { Check } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { useTranslation } from 'react-i18next'
 
-const STAGES = ['committed', 'growing', 'ready', 'harvested', 'delivered']
+const STAGES = ['contracted', 'committed', 'growing', 'ready', 'delivered']
 
-/** Vertical "crop journey" timeline for a farmer commitment. */
-export default function GrowthThread({ progress = 2, title }) {
-  const { t } = useTranslation()
-
+export default function GrowthThread({ progress = 0, title }) {
   return (
-    <div>
-      {title && <p className="font-display font-bold text-sm mb-3">{title}</p>}
-      <ol className="relative ml-1.5 border-l border-surface-border space-y-4">
-        {STAGES.map((stage, i) => {
-          const done = i < progress
-          const current = i === progress
-          return (
-            <li key={stage} className="ml-5 relative">
-              <motion.span
+    <div className="space-y-2">
+      {title && <p className="font-display font-bold text-sm text-paddy">{title}</p>}
+      <div className="flex items-center gap-1">
+        {STAGES.map((stage, i) => (
+          <div key={stage} className="flex-1 flex items-center gap-1">
+            <div className="relative flex-1">
+              <div className="h-1.5 rounded-full bg-surface overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: i <= progress ? '100%' : '0%' }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  className={`h-full rounded-full ${
+                    i < progress ? 'bg-turmeric' : i === progress ? 'bg-paddy' : 'bg-surface-border'
+                  }`}
+                />
+              </div>
+            </div>
+            {i === progress && (
+              <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ delay: i * 0.08 }}
-                className={`absolute -left-[27px] top-0.5 w-4 h-4 rounded-full grid place-items-center ${
-                  done ? 'bg-emerald' : current ? 'bg-gold shadow-glow' : 'bg-forest border border-surface-border'
-                }`}
-              >
-                {done && <Check size={10} className="text-forest" strokeWidth={3.5} />}
-              </motion.span>
-              <p
-                className={`text-sm font-semibold ${done || current ? 'text-textmain' : 'text-textmuted/50'}`}
-              >
-                {t(`journey.${stage}`)}
-              </p>
-              {current && <p className="text-[11px] text-gold">In progress…</p>}
-            </li>
-          )
-        })}
-      </ol>
+                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                className="w-3 h-3 rounded-full bg-paddy border-2 border-white shadow-sm shrink-0"
+              />
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-between text-[9px] text-text-muted font-medium">
+        {STAGES.map((s, i) => (
+          <span key={s} className={i <= progress ? 'text-paddy font-semibold' : ''}>
+            {s.charAt(0).toUpperCase() + s.slice(1)}
+          </span>
+        ))}
+      </div>
     </div>
   )
 }

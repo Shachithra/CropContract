@@ -5,6 +5,7 @@ Client posts queued offline actions after reconnect. Each action carries a
 duplicate commitments/scans are created.
 """
 
+import base64
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -61,9 +62,16 @@ def sync(body: SyncRequest, user: dict = Depends(get_current_user)):
                 contract = contracts_db.get(cid)
                 if not contract or contract["status"] != "open":
                     raise ValueError("Contract unavailable")
-                qty = min(int(action.payload["quantity_kg"]), contract["total_kg"] - contract["committed_kg"])
-                if qty <= 0:
-                    raise ValueError("Quota already filled")
+                remaining = contract["total_kg"] - contract["committed_kg"]
+                requested = int(action.payload["quantity_kg"])
+                if remaining <= 0:
+                    raise ValueError("OVER_COMMITTED:Quota already filled")
+                qty = min(requested, remaining)
+                if qty < requested:
+                    raise ValueError(
+                        f"OVER_COMMITTED:Only {remaining}kg remaining on this contract "
+                        f"(you committed {requested}kg)"
+                    )
 
                 mid = next_id("commitment")
                 commitment = {

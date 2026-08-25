@@ -9,20 +9,25 @@
     "dashboard": "Dashboard",
     "post": "Post Contract",
     "review": "Review",
+    "issueAlert": "Issue Alert",
+    "outbreaks": "Outbreaks",
     "logout": "Log out",
-    "profile": "Profile"
+    "profile": "Profile",
+    "fulfilment": "Fulfilment"
   },
   "auth": {
     "welcomeBack": "Welcome back",
     "createAccount": "Create your account",
-    "email": "Email",
+    "phone": "Phone number",
+    "otp": "OTP code",
+    "otpSent": "OTP sent to your phone",
     "password": "Password",
     "signIn": "Sign in",
     "signUp": "Sign up",
     "noAccount": "No account yet?",
     "haveAccount": "Already registered?",
     "name": "Full name",
-    "phone": "Phone (optional)",
+    "email": "Email (optional)",
     "region": "Region",
     "role": "I am a…",
     "farmer": "Farmer",
@@ -30,12 +35,32 @@
     "officer": "Ag Officer",
     "language": "Preferred language",
     "demoAccounts": "Demo accounts (password: demo1234)",
-    "loginFailed": "Incorrect email or password"
+    "loginFailed": "Incorrect phone or password",
+    "farmName": "Farm name",
+    "farmLocation": "Farm location",
+    "farmSize": "Farm size (acres)",
+    "cropTypes": "Primary crops",
+    "yearsExperience": "Years of experience",
+    "companyName": "Company name",
+    "businessType": "Business type",
+    "purchaseVolume": "Monthly purchase volume (tons)",
+    "preferredCrops": "Preferred crops",
+    "deliveryAddress": "Delivery address",
+    "officerId": "Officer ID",
+    "department": "Department",
+    "district": "District",
+    "designation": "Designation",
+    "yearsOfService": "Years of service"
   },
   "roles": {
     "farmer": "Farmer",
     "buyer": "Buyer",
     "officer": "Officer"
+  },
+  "roleDesc": {
+    "farmer": "Register your farm, browse contracts, commit volumes, and scan crops for disease.",
+    "buyer": "Post contract specs, track farmer commitments, and manage fulfilment.",
+    "officer": "Review flagged disease scans, issue regional alerts, and monitor outbreaks."
   },
   "home": {
     "greeting": "Ayubowan, {{name}}",
@@ -70,14 +95,25 @@
       "fulfilled": "Fulfilled",
       "closed": "Closed",
       "pending": "Pending sync",
-      "synced": "Synced"
+      "synced": "Synced",
+      "committed": "Committed",
+      "growing": "Growing",
+      "ready": "Ready",
+      "delivered": "Delivered",
+      "paid": "Paid"
     },
     "postTitle": "Post a new contract",
     "postSubtitle": "Specify what you need — farmers commit before planting season.",
     "cropType": "Crop type",
     "totalKg": "Total volume (kg)",
     "pricePerKg": "Price per kg (LKR)",
-    "posted": "Contract posted!"
+    "posted": "Contract posted!",
+    "details": "Contract details",
+    "buyer": "Buyer",
+    "region": "Region",
+    "committedKg": "Committed",
+    "availableKg": "Available",
+    "commitNow": "Commit now"
   },
   "journey": {
     "contracted": "Contracted",
@@ -98,12 +134,14 @@
     "severity": {
       "low": "Low risk",
       "moderate": "Moderate risk",
-      "high": "HIGH RISK"
+      "high": "HIGH RISK",
+      "critical": "CRITICAL"
     },
     "treatment": "Treatment plan",
     "advice": "Advice",
     "offlineQueued": "You are offline — scan queued and will diagnose after sync.",
-    "history": "Recent scans"
+    "history": "Recent scans",
+    "selectCrop": "Select crop type"
   },
   "buyer": {
     "myContracts": "My posted contracts",
@@ -117,7 +155,11 @@
     "crop": "Crop",
     "qty": "Qty (kg)",
     "date": "Date",
-    "noCommitments": "No commitments yet. Post a contract to attract farmers."
+    "noCommitments": "No commitments yet. Post a contract to attract farmers.",
+    "fulfilment": "Contract fulfilment",
+    "progress": "Fulfilment progress",
+    "deliveryConfirm": "Confirm delivery",
+    "qualityGrade": "Quality grade"
   },
   "officer": {
     "flaggedScans": "Flagged scans for review",
@@ -125,22 +167,80 @@
     "cases": "cases",
     "confirm": "Confirm",
     "dismiss": "Dismiss",
+    "markValid": "Mark Valid",
     "confirmed": "Confirmed",
     "dismissed": "Dismissed",
-    "empty": "No flagged scans right now. Fields look healthy."
+    "valid": "Valid",
+    "empty": "No flagged scans right now. Fields look healthy.",
+    "issueAlert": "Issue regional alert",
+    "alertRegion": "Alert region",
+    "alertDisease": "Disease",
+    "alertMessage": "Alert message",
+    "sendAlert": "Send alert",
+    "alertSent": "Alert sent successfully",
+    "regionalOutbreaks": "Regional outbreaks",
+    "riskLevel": "Risk level",
+    "trend": "Trend",
+    "casesByWeek": "Cases by week",
+    "regionDetail": "Region detail",
+    "reviewScan": "Review scan"
+  },
+  "alert": {
+    "newAlert": "New disease alert",
+    "viewDetails": "View details"
+  },
+  "disease": {
+    "DISEASE_TOMATO_EARLY_BLIGHT": "Tomato Early Blight",
+    "DISEASE_TOMATO_LATE_BLIGHT": "Tomato Late Blight",
+    "DISEASE_TOMATO_LEAF_MOLD": "Tomato Leaf Mold",
+    "DISEASE_TOMATO_SEPTORIA_LEAF_SPOT": "Tomato Septoria Leaf Spot",
+    "DISEASE_TOMATO_SPIDER_MITES": "Tomato Spider Mites",
+    "DISEASE_TOMATO_TARGET_SPOT": "Tomato Target Spot",
+    "DISEASE_TOMATO_YELLOW_LEAF_CURL_VIRUS": "Tomato Yellow Leaf Curl Virus",
+    "DISEASE_TOMATO_BACTERIAL_SPOT": "Tomato Bacterial Spot",
+    "DISEASE_TOMATO_HEALTHY": "Healthy Tomato",
+    "DISEASE_CHILLI_BACTERIAL_SPOT": "Chilli Bacterial Spot",
+    "DISEASE_CHILLI_LEAF_CURL": "Chilli Leaf Curl",
+    "DISEASE_CHILLI_HEALTHY": "Healthy Chilli"
+  },
+  "advice": {
+    "ADVICE_TOMATO_EARLY_BLIGHT": "Remove affected leaves and apply copper-based fungicide. Avoid overhead watering.",
+    "ADVICE_TOMATO_LATE_BLIGHT": "Remove infected plants immediately. Apply fungicide containing chlorothalonil or mancozeb.",
+    "ADVICE_TOMATO_HEALTHY": "Your crop looks healthy! Continue regular monitoring.",
+    "ADVICE_CHILLI_BACTERIAL_SPOT": "Remove infected leaves. Apply copper-based bactericide. Ensure good air circulation.",
+    "ADVICE_CHILLI_HEALTHY": "Your chilli crop looks healthy! Maintain current care practices."
+  },
+  "treatment": {
+    "TREATMENT_REMOVE_AFFECTED_LEAVES": "Remove and destroy all affected leaves",
+    "TREATMENT_APPLY_COPPER_FUNGICIDE_48H": "Apply copper-based fungicide within 48 hours",
+    "TREATMENT_AVOID_OVERHEAD_WATERING": "Avoid overhead watering to reduce humidity",
+    "TREATMENT_ENSURE_AIR_CIRCULATION": "Ensure proper spacing for air circulation",
+    "TREATMENT_REMOVE_INFECTED_PLANTS": "Remove and destroy severely infected plants",
+    "TREATMENT_APPLY_FUNGICIDE": "Apply fungicide containing chlorothalonil or mancozeb",
+    "TREATMENT_ROTATE_CROPS": "Rotate crops to prevent soil-borne disease buildup",
+    "TREATMENT_MONITOR_WEEKLY": "Monitor crop weekly for early signs of disease",
+    "TREATMENT_USE_RESISTANT_VARIETIES": "Consider planting disease-resistant varieties"
   },
   "common": {
     "cancel": "Cancel",
     "save": "Save",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "publish": "Publish",
     "loading": "Loading…",
     "error": "Something went wrong",
     "online": "Online",
     "offline": "Offline — actions queued",
     "syncing": "Syncing…",
+    "synced": "Synced",
     "pendingSync": "{{count}} pending sync",
     "empty": "Nothing here yet",
     "kg": "kg",
-    "viewAll": "View all"
+    "viewAll": "View all",
+    "step": "Step {{current}} of {{total}}",
+    "review": "Review",
+    "published": "Published!"
   },
   "regions": {
     "Dambulla": "Dambulla",
@@ -148,6 +248,26 @@
     "Jaffna": "Jaffna",
     "Colombo": "Colombo",
     "Anuradhapura": "Anuradhapura",
-    "Matara": "Matara"
+    "Matara": "Matara",
+    "Gampaha": "Gampaha",
+    "Kalutara": "Kalutara",
+    "Kandy": "Kandy",
+    "Matale": "Matale",
+    "Galle": "Galle",
+    "Hambantota": "Hambantota",
+    "Kilinochchi": "Kilinochchi",
+    "Mannar": "Mannar",
+    "Vavuniya": "Vavuniya",
+    "Mullaitivu": "Mullaitivu",
+    "Trincomalee": "Trincomalee",
+    "Batticaloa": "Batticaloa",
+    "Ampara": "Ampara",
+    "Kurunegala": "Kurunegala",
+    "Puttalam": "Puttalam",
+    "Polonnaruwa": "Polonnaruwa",
+    "Badulla": "Badulla",
+    "Monaragala": "Monaragala",
+    "Ratnapura": "Ratnapura",
+    "Kegalle": "Kegalle"
   }
 }

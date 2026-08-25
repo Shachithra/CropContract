@@ -1,20 +1,36 @@
+import { lazy, Suspense } from 'react'
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { homePathFor, useAuth } from './hooks/useAuth.jsx'
 
 import Login from './pages/shared/Login.jsx'
 import Register from './pages/shared/Register.jsx'
-import Marketplace from './pages/shared/Marketplace.jsx'
 import AppShell from './components/layout/AppShell.jsx'
 
-import FarmerHome from './pages/farmer/FarmerHome.jsx'
-import DiseaseScan from './pages/farmer/DiseaseScan.jsx'
-import MyContracts from './pages/farmer/MyContracts.jsx'
+const Marketplace = lazy(() => import('./pages/shared/Marketplace.jsx'))
+const Profile = lazy(() => import('./pages/shared/Profile.jsx'))
 
-import BuyerDashboard from './pages/buyer/BuyerDashboard.jsx'
-import PostContract from './pages/buyer/PostContract.jsx'
+const FarmerHome = lazy(() => import('./pages/farmer/FarmerHome.jsx'))
+const DiseaseScan = lazy(() => import('./pages/farmer/DiseaseScan.jsx'))
+const MyContracts = lazy(() => import('./pages/farmer/MyContracts.jsx'))
+const ContractDetail = lazy(() => import('./pages/farmer/ContractDetail.jsx'))
 
-import OfficerReview from './pages/officer/OfficerReview.jsx'
-import Profile from './pages/shared/Profile.jsx'
+const BuyerDashboard = lazy(() => import('./pages/buyer/BuyerDashboard.jsx'))
+const PostContract = lazy(() => import('./pages/buyer/PostContract.jsx'))
+const ContractFulfilment = lazy(() => import('./pages/buyer/ContractFulfilment.jsx'))
+const CommitmentDetail = lazy(() => import('./pages/buyer/CommitmentDetail.jsx'))
+
+const OfficerReview = lazy(() => import('./pages/officer/OfficerReview.jsx'))
+const IssueAlert = lazy(() => import('./pages/officer/IssueAlert.jsx'))
+const RegionalOutbreaks = lazy(() => import('./pages/officer/RegionalOutbreaks.jsx'))
+const RegionDetail = lazy(() => import('./pages/officer/RegionDetail.jsx'))
+
+function PageSpinner() {
+  return (
+    <div className="flex items-center justify-center py-24">
+      <div className="w-8 h-8 border-3 border-paddy/20 border-t-paddy rounded-full animate-spin" />
+    </div>
+  )
+}
 
 function ProtectedLayout() {
   const { user } = useAuth()
@@ -40,35 +56,43 @@ function RootRedirect() {
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+    <Suspense fallback={<PageSpinner />}>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-      <Route element={<ProtectedLayout />}>
-        {/* Farmer */}
-        <Route element={<RoleRoute roles={['farmer']} />}>
-          <Route path="/farmer" element={<FarmerHome />} />
-          <Route path="/farmer/scan" element={<DiseaseScan />} />
-          <Route path="/farmer/contracts" element={<MyContracts />} />
+        <Route element={<ProtectedLayout />}>
+          {/* Farmer */}
+          <Route element={<RoleRoute roles={['farmer']} />}>
+            <Route path="/farmer" element={<FarmerHome />} />
+            <Route path="/farmer/scan" element={<DiseaseScan />} />
+            <Route path="/farmer/contracts" element={<MyContracts />} />
+          </Route>
+
+          {/* Buyer */}
+          <Route element={<RoleRoute roles={['buyer']} />}>
+            <Route path="/buyer" element={<BuyerDashboard />} />
+            <Route path="/buyer/post" element={<PostContract />} />
+            <Route path="/buyer/fulfilment" element={<ContractFulfilment />} />
+            <Route path="/buyer/commitment/:id" element={<CommitmentDetail />} />
+          </Route>
+
+          {/* Officer */}
+          <Route element={<RoleRoute roles={['officer']} />}>
+            <Route path="/officer" element={<OfficerReview />} />
+            <Route path="/officer/alert" element={<IssueAlert />} />
+            <Route path="/officer/outbreaks" element={<RegionalOutbreaks />} />
+            <Route path="/officer/outbreaks/:region" element={<RegionDetail />} />
+          </Route>
+
+          {/* Shared */}
+          <Route path="/marketplace" element={<Marketplace />} />
+          <Route path="/marketplace/:id" element={<ContractDetail />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
 
-        {/* Buyer */}
-        <Route element={<RoleRoute roles={['buyer']} />}>
-          <Route path="/buyer" element={<BuyerDashboard />} />
-          <Route path="/buyer/post" element={<PostContract />} />
-        </Route>
-
-        {/* Officer */}
-        <Route element={<RoleRoute roles={['officer']} />}>
-          <Route path="/officer" element={<OfficerReview />} />
-        </Route>
-
-        {/* Shared */}
-        <Route path="/marketplace" element={<Marketplace />} />
-        <Route path="/profile" element={<Profile />} />
-      </Route>
-
-      <Route path="*" element={<RootRedirect />} />
-    </Routes>
+        <Route path="*" element={<RootRedirect />} />
+      </Routes>
+    </Suspense>
   )
 }

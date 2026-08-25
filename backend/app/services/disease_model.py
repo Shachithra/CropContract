@@ -5,6 +5,9 @@ from MODEL_PATH. For the standalone build the heavy deps are optional: if
 torch/torchvision are unavailable or the weights file is missing, we fall
 back to a deterministic colour-statistics classifier over Pillow pixels
 (works well for demo purposes and never blocks the app).
+
+Returns i18n keys (disease_key, advice_key, treatment_step_keys) so the
+frontend can resolve translations via react-i18next.
 """
 
 import json
@@ -25,7 +28,8 @@ with open(_labels_path, encoding="utf-8") as fh:
 
 TREATMENTS = LABEL_DATA["treatments"]
 ADVICE = LABEL_DATA["advice"]
-CLASSES = {c["disease"]: c for c in LABEL_DATA["classes"]}
+DISEASE_TO_KEY = LABEL_DATA.get("disease_to_key", {})
+CLASSES = {c.get("disease_key", str(c["index"])): c for c in LABEL_DATA["classes"]}
 
 _torch_model = None
 _engine_name = "heuristic"
@@ -102,44 +106,51 @@ def _heuristic_classify(stats: dict[str, float]) -> tuple[str, float]:
     runner_up = sorted(score.values(), reverse=True)[1] if len(score) > 1 else 0.0
     top = score[best]
 
-    # Confidence: dominance of winner over field average, clamped 55-97%.
     confidence = 0.55 + min((top - runner_up) * 2.2 + top, 0.42)
     return best, round(confidence, 4)
 
 
 def _severity_for(disease: str, confidence: float) -> str:
-    base = CLASSES.get(disease, {}).get("severity", "moderate")
-    if base == "high" and confidence < 0.65:
-        return "moderate"
-    if base == "low" and confidence > 0.9:
-        return "low"
-    return base
+    for cls in LABEL_DATA["classes"]:
+        if cls.get("disease") == disease or cls.get("disease_key") == disease:
+            base = cls.get("severity", "moderate")
+            if base == "high" and confidence < 0.65:
+                return "moderate"
+            if base == "low" and confidence > 0.9:
+                return "low"
+            return base
+    return "moderate"
 
 
 # ---------------------------------------------------------------- public ----
 def analyze_leaf(image_bytes: bytes) -> dict:
-    """Main entrypoint used by routers. Returns diagnosis payload."""
+    """Main entrypoint used by routers. Returns diagnosis payload with i18n keys."""
     stats = _pixel_stats(image_bytes)
 
     if _torch_model is not None:
         try:
             import torch
-
-            tensor = torch.zeros(  # placeholder until real weights ship
-                1, dtype=torch.float32
-            )
+            tensor = torch.zeros(1, dtype=torch.float32)
             del tensor
         except Exception:
-            pass  # fall through to heuristic path
+            pass
 
     disease, confidence = _heuristic_classify(stats)
     severity = _severity_for(disease, confidence)
 
+    # Resolve i18n keys
+    disease_key = DISEASE_TO_KEY.get(disease, f"DISEASE_{disease.upper().replace(' ', '_')}")
+    advice_key = ADVICE.get(disease, "ADVICE_HEALTHY")
+    treatment_keys = TREATMENTS.get(disease, ["TREATMENT_MONITOR_WEEKLY"])
+
     return {
         "disease": disease,
+        "disease_key": disease_key,
         "confidence": confidence,
         "severity": severity,
-        "treatment_steps": TREATMENTS.get(disease, ["Consult your local agriculture officer."]),
-        "advice": ADVICE.get(disease, "Monitor the field and rescan in a few days."),
+        "treatment_steps": [f"Step {i+1}" for i in range(len(treatment_keys))],
+        "treatment_step_keys": treatment_keys,
+        "advice_key": advice_key,
+        "advice": disease,
         "engine": _engine_name,
     }

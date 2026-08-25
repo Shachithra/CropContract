@@ -9,20 +9,24 @@
     "dashboard": "උපකරණ පුවරුව",
     "post": "ගිවිසුමක් ඉදිරිපත් කරන්න",
     "review": "සමාලෝචනය",
+    "issueAlert": "අනතුරු ඇඟවීමක් කරන්න",
+    "outbreaks": "පැතිරීම්",
     "logout": "ඉවත් වන්න",
-    "profile": "පැතිකඩ"
+    "profile": "පැතිකඩ",
+    "fulfilment": "සම්පූර්ණත්වය"
   },
   "auth": {
     "welcomeBack": "සාදරයෙන් පිළිගනිමු",
     "createAccount": "ඔබගේ ගිණුම සාදන්න",
-    "email": "ඊමේල්",
+    "phone": "දුරකථන අංකය",
+    "otp": "OTP කේතය",
     "password": "මුරපදය",
     "signIn": "ඇතුල් වන්න",
     "signUp": "ලියාපදිංචි වන්න",
     "noAccount": "තවම ගිණුමක් නැද්ද?",
     "haveAccount": "දැනටමත් ලියාපදිංචිද?",
     "name": "සම්පූර්ණ නම",
-    "phone": "දුරකථන (විකල්ප)",
+    "email": "ඊමේල් (විකල්ප)",
     "region": "ප්‍රදේශය",
     "role": "මම…",
     "farmer": "ගොවියා",
@@ -30,12 +34,32 @@
     "officer": "කෘෂි නිලධාරී",
     "language": "කැමති භාෂාව",
     "demoAccounts": "ආදර්ශ ගිණුම් (මුරපදය: demo1234)",
-    "loginFailed": "ඊමේල් හෝ මුරපදය වැරදිය"
+    "loginFailed": "දුරකථන අංකය හෝ මුරපදය වැරදිය",
+    "farmName": "ගොවිපළ නම",
+    "farmLocation": "ගොවිපළ ස්ථානය",
+    "farmSize": "ගොවිපළ ප්‍රමාණය (අක්කර)",
+    "cropTypes": "ප්‍රධාන බෝග",
+    "yearsExperience": "අත්දැකීම් වසර",
+    "companyName": "සමාගම් නම",
+    "businessType": "ව්‍යාපාර වර්ගය",
+    "purchaseVolume": "මාසික මිලදී ගැනීමේ පරිමාව (ටොන්)",
+    "preferredCrops": "කැමති බෝග",
+    "deliveryAddress": "භාරදීමේ ලිපිනය",
+    "officerId": "නිලධාරී ID",
+    "department": "දෙපාර්තමේන්තුව",
+    "district": "දිස්ත්‍රික්කය",
+    "designation": "තනතුර",
+    "yearsOfService": "සේවා වසර"
   },
   "roles": {
     "farmer": "ගොවියා",
     "buyer": "මිලදී ගන්නා",
     "officer": "නිලධාරී"
+  },
+  "roleDesc": {
+    "farmer": "ඔබගේ ගොවිපළ ලියාපදිංචි කරන්න, ගිවිසුම් බලන්න, ප්‍රමාණ දායක කරන්න, සහ බෝග රෝග සඳහා සෝදිස්ති කරන්න.",
+    "buyer": "ගිවිසුම් විස්තර පළ කරන්න, ගොවි දායකත්ව අනුගමනය කරන්න, සහ සම්පූර්ණත්වය කළමනාකරණය කරන්න.",
+    "officer": "සලකුණු කළ රෝග සෝදිස්ති සමාලෝචනය කරන්න, ප්‍රාදේශීය අනතුරු ඇඟවීම් කරන්න, සහ පැතිරීම් නිරීක්ෂණය කරන්න."
   },
   "home": {
     "greeting": "ආයුබෝවන්, {{name}}",
@@ -70,14 +94,25 @@
       "fulfilled": "සම්පූර්ණ",
       "closed": "වසා ඇත",
       "pending": "sync බලාපොරොත්තුවෙන්",
-      "synced": "sync විය"
+      "synced": "sync විය",
+      "committed": "දායක",
+      "growing": "වගා වෙමින්",
+      "ready": "සූදානම්",
+      "delivered": "භාරදී ඇත",
+      "paid": "ගෙවා ඇත"
     },
     "postTitle": "නව ගිවිසුමක් ඉදිරිපත් කරන්න",
     "postSubtitle": "ඔබට අවශ්‍ය දේ සඳහන් කරන්න — වගා කාලයට පෙර ගොවීන් දායක වේ.",
     "cropType": "බෝග වර්ගය",
     "totalKg": "මුළු ප්‍රමාණය (කිලෝ)",
     "pricePerKg": "කිලෝවක මිල (රු.)",
-    "posted": "ගිවිසුම පළ කරන ලදී!"
+    "posted": "ගිවිසුම පළ කරන ලදී!",
+    "details": "ගිවිසුම් විස්තර",
+    "buyer": "මිලදී ගන්නා",
+    "region": "ප්‍රදේශය",
+    "committedKg": "දායක",
+    "availableKg": "ලබා ගත හැකි",
+    "commitNow": "දැන් දායක වන්න"
   },
   "journey": {
     "contracted": "ගිවිසුම්ගත",
@@ -98,12 +133,14 @@
     "severity": {
       "low": "අවදානම අඩුයි",
       "moderate": "මධ්‍යම අවදානම",
-      "high": "අධි අවදානම"
+      "high": "අධි අවදානම",
+      "critical": "බරපතල"
     },
     "treatment": "ප්‍රතිකාර සැලසුම",
     "advice": "උපදෙස්",
     "offlineQueued": "ඔබ ඕෆ්ලයින් — සෝදිස්තිය queue වී sync වූ පසු විනිශ්චය වේ.",
-    "history": "මෑත සෝදිස්ති"
+    "history": "මෑත සෝදිස්ති",
+    "selectCrop": "බෝග වර්ගය තෝරන්න"
   },
   "buyer": {
     "myContracts": "මම පළ කළ ගිවිසුම්",
@@ -117,7 +154,11 @@
     "crop": "බෝගය",
     "qty": "ප්‍රමාණය (කිලෝ)",
     "date": "දිනය",
-    "noCommitments": "තවම දායකත්ව නැත. ගොවීන් ආකර්ෂණය කිරීමට ගිවිසුමක් පළ කරන්න."
+    "noCommitments": "තවම දායකත්ව නැත. ගොවීන් ආකර්ෂණය කිරීමට ගිවිසුමක් පළ කරන්න.",
+    "fulfilment": "ගිවිසුම් සම්පූර්ණත්වය",
+    "progress": "සම්පූර්ණත්ව ප්‍රගතිය",
+    "deliveryConfirm": "භාරදීම තහවුරු කරන්න",
+    "qualityGrade": "ගුණාත්මකභාවය"
   },
   "officer": {
     "flaggedScans": "සමාලෝචනය සඳහා සලකුණු කළ සෝදිස්ති",
@@ -125,22 +166,85 @@
     "cases": "සිද්ධි",
     "confirm": "තහවුරු කරන්න",
     "dismiss": "අත්හළ",
+    "markValid": "වලංගු ලෙස සලකුණු කරන්න",
     "confirmed": "තහවුරු කළා",
     "dismissed": "අත්හළා",
-    "empty": "දැනට සලකුණු කළ සෝදිස්ති නැත. කෙත් නිරෝගීය."
+    "valid": "වලංගු",
+    "empty": "දැනට සලකුණු කළ සෝදිස්ති නැත. කෙත් නිරෝගීය.",
+    "issueAlert": "ප්‍රාදේශීය අනතුරු ඇඟවීමක් කරන්න",
+    "alertRegion": "අනතුරු ඇඟවීමේ ප්‍රදේශය",
+    "alertDisease": "රෝගය",
+    "alertMessage": "අනතුරු ඇඟවීමේ පණිවිඩය",
+    "sendAlert": "අනතුරු ඇඟවීම යවන්න",
+    "alertSent": "අනතුරු ඇඟවීම සාර්ථකව යවන ලදී",
+    "regionalOutbreaks": "ප්‍රාදේශීය පැතිරීම්",
+    "riskLevel": "අවදානම් මට්ටම",
+    "trend": "ප්‍රවණතාව",
+    "casesByWeek": "සතියකට සිද්ධි",
+    "regionDetail": "ප්‍රදේශ විස්තරය",
+    "reviewScan": "සෝදිස්තිය සමාලෝචනය"
+  },
+  "alert": {
+    "newAlert": "නව රෝග අනතුරු ඇඟවීම",
+    "viewDetails": "විස්තර බලන්න"
+  },
+  "disease": {
+    "DISEASE_HEALTHY_LEAF": "නිරෝගී කොළ",
+    "DISEASE_LEAF_BLIGHT": "කොළ කුණුවීම",
+    "DISEASE_LEAF_RUST": "කොළ වැලි",
+    "DISEASE_POWDERY_MILDEW": "පොව්වා දිලීර",
+    "DISEASE_BACTERIAL_SPOT": "බැක්ටීරියා ලප",
+    "DISEASE_NITROGEN_DEFICIENCY": "නයිට්‍රජන් ඌනතාව",
+    "DISEASE_TOMATO_EARLY_BLIGHT": "තක්කාලි මුල් කුණුවීම",
+    "DISEASE_TOMATO_LATE_BLIGHT": "තක්කාලි ප්‍රමාද කුණුවීම",
+    "DISEASE_TOMATO_HEALTHY": "නිරෝගී තක්කාලි",
+    "DISEASE_CHILLI_BACTERIAL_SPOT": "මිරිස් බැක්ටීරියා ලප",
+    "DISEASE_CHILLI_HEALTHY": "නිරෝගී මිරිස්"
+  },
+  "advice": {
+    "ADVICE_HEALTHY": "ඔබේ බෝගය නිරෝගීයි! නිතිපතා නිරීක්ෂණය දිගටම කරන්න.",
+    "ADVICE_LEAF_BLIGHT": "අධි අවදානමක්. පැය 48 ක් ඇතුළත ක්‍රියා කරන්න.",
+    "ADVICE_LEAF_RUST": "මධ්‍යම අවදානමක්. මෙම සතියේ ප්‍රතිකාර කර සෝදිස්තිය නැවත කරන්න.",
+    "ADVICE_POWDERY_MILDEW": "මධ්‍යම අවදානමක්. වාතාශ්‍රය වැඩි කර ඉක්මනින් ප්‍රතිකාර කරන්න.",
+    "ADVICE_BACTERIAL_SPOT": "අධි අවදානමක් - පැතිරීම වැළැක්වීමට බලපත්‍ර ලබා දෙන්න.",
+    "ADVICE_NITROGEN_DEFICIENCY": "පෝෂණ ගැටලුවක්, රෝගයක් නොවේ. පොහොර යොදා නැවත සෝදිස්ති කරන්න.",
+    "ADVICE_TOMATO_EARLY_BLIGHT": "බලපෑමට ලක්වූ කොළ ඉවත් කර තඹ පදනම් වූ දිලීර නාශක යොදන්න.",
+    "ADVICE_TOMATO_LATE_BLIGHT": "රෝගී ශාක ක්ෂණයෙන් ඉවත් කරන්න. ච්ලෝරොතලොනිල් හෝ මැන්කොසෙබ් අඩංගු දිලීර නාශක යොදන්න.",
+    "ADVICE_TOMATO_HEALTHY": "ඔබේ බෝගය නිරෝගීයි! නිතිපතා නිරීක්ෂණය දිගටම කරන්න.",
+    "ADVICE_CHILLI_BACTERIAL_SPOT": "රෝගී කොළ ඉවත් කරන්න. තඹ පදනම් වූ බැක්ටීරියා නාශක යොදන්න.",
+    "ADVICE_CHILLI_HEALTHY": "ඔබේ මිරිස් බෝගය නිරෝගීයි!"
+  },
+  "treatment": {
+    "TREATMENT_REMOVE_AFFECTED_LEAVES": "බලපෑමට ලක්වූ සියලු කොළ ඉවත් කර විනාශ කරන්න",
+    "TREATMENT_APPLY_COPPER_FUNGICIDE_48H": "පැය 48 ක් ඇතුළත තඹ පදනම් වූ දිලීර නාශකයක් යොදන්න",
+    "TREATMENT_AVOID_OVERHEAD_WATERING": "ආර්ද්‍රතාවය අඩු කිරීමට ඉහළ සිට වතුර දැමීමෙන් වළකින්න",
+    "TREATMENT_ENSURE_AIR_CIRCULATION": "වාතාශ්‍රය සඳහා නිසි පරතරය සහතික කරන්න",
+    "TREATMENT_REMOVE_INFECTED_PLANTS": "බරපතල ලෙස රෝගී ශාක ඉවත් කර විනාශ කරන්න",
+    "TREATMENT_APPLY_FUNGICIDE": "ච්ලෝරොතලොනිල් හෝ මැන්කොසෙබ් අඩංගු දිලීර නාශකයක් යොදන්න",
+    "TREATMENT_ROTATE_CROPS": "පස මගින් බෝග වැළැක්වීමට බෝග භ්‍රමණය කරන්න",
+    "TREATMENT_MONITOR_WEEKLY": "රෝගයේ මුල් ලක්ෂණ සඳහා සතිපතා බෝගය නිරීක්ෂණය කරන්න",
+    "TREATMENT_USE_RESISTANT_VARIETIES": "රෝග ප්‍රතිරෝධී වර්ග වගා කිරීම සලකා බලන්න"
   },
   "common": {
     "cancel": "අවලංගු",
     "save": "සුරකින්න",
+    "confirm": "තහවුරු කරන්න",
+    "back": "ආපසු",
+    "next": "ඊළඟ",
+    "publish": "පළ කරන්න",
     "loading": "පූරණය වෙමින්…",
     "error": "යමක් වැරදී ගියා",
     "online": "සම්බන්ධිත",
     "offline": "ඕෆ්ලයින් — ක්‍රියා queue විය",
     "syncing": "Sync වෙමින්…",
+    "synced": "Sync විය",
     "pendingSync": "sync ඉතිරි {{count}}",
     "empty": "තවම කිසිවක් නැත",
     "kg": "කිලෝ",
-    "viewAll": "සියල්ල බලන්න"
+    "viewAll": "සියල්ල බලන්න",
+    "step": "පියවර {{current}} / {{total}}",
+    "review": "සමාලෝචනය",
+    "published": "පළ කරන ලදී!"
   },
   "regions": {
     "Dambulla": "දඹුල්ල",
@@ -148,6 +252,26 @@
     "Jaffna": "යාපනය",
     "Colombo": "කොළඹ",
     "Anuradhapura": "අනුරාධපුරය",
-    "Matara": "මාතර"
+    "Matara": "මාතර",
+    "Gampaha": "ගම්පහ",
+    "Kalutara": "කළුතර",
+    "Kandy": "මහනුවර",
+    "Matale": "මාතලේ",
+    "Galle": "ගාල්ල",
+    "Hambantota": "හම්බන්තොට",
+    "Kilinochchi": "කිලිනොච්චි",
+    "Mannar": "මන්නාරම",
+    "Vavuniya": "වව්නියා",
+    "Mullaitivu": "මුලතිව්",
+    "Trincomalee": "ත්‍රිකුණාමලය",
+    "Batticaloa": "මඩකලපුව",
+    "Ampara": "අම්පාර",
+    "Kurunegala": "කුරුණෑගල",
+    "Puttalam": "පුත්තලම",
+    "Polonnaruwa": "පොළොන්නරුව",
+    "Badulla": "බදුල්ල",
+    "Monaragala": "මොණරාගල",
+    "Ratnapura": "රත්නපුර",
+    "Kegalle": "කෑගල්ල"
   }
 }

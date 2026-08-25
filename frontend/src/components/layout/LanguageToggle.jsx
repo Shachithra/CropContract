@@ -9,20 +9,20 @@ const LANGS = [
 
 export default function LanguageToggle() {
   const { i18n } = useTranslation()
-  const current = i18n.resolvedLanguage?.slice(0, 2) || 'en'
 
   return (
-    <div className="flex items-center gap-0.5 rounded-full border border-surface-border bg-surface p-0.5">
-      <Globe size={13} className="text-textmuted ml-1.5 mr-0.5" />
-      {LANGS.map(({ code, label }) => (
+    <div className="flex items-center gap-0.5 bg-paddy/20 rounded-lg p-0.5">
+      {LANGS.map((l) => (
         <button
-          key={code}
-          onClick={() => i18n.changeLanguage(code)}
-          className={`px-2 py-1 rounded-full text-[10px] font-bold tracking-wide transition ${
-            current === code ? 'bg-emerald text-forest' : 'text-textmuted hover:text-mint'
+          key={l.code}
+          onClick={() => i18n.changeLanguage(l.code)}
+          className={`px-2 py-1 text-[10px] font-bold rounded-md transition ${
+            i18n.language === l.code
+              ? 'bg-turmeric text-white'
+              : 'text-cream/70 hover:text-white'
           }`}
         >
-          {label}
+          {l.label}
         </button>
       ))}
     </div>

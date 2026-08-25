@@ -7,37 +7,45 @@
     -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply bg-forest text-textmain font-body antialiased;
-    background-image: radial-gradient(ellipse at top, rgba(16, 185, 129, 0.06), transparent 60%);
+    background-color: #EFE9D8;
+    color: #2F5233;
+    font-family: 'Noto Sans', 'Noto Sans Sinhala', 'Noto Sans Tamil', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     min-height: 100dvh;
   }
   ::selection {
-    @apply bg-emerald/40 text-white;
+    background-color: rgba(227, 160, 8, 0.3);
+    color: #2F5233;
   }
 }
 
 @layer components {
   .card-surface {
-    @apply bg-surface border border-surface-border rounded-2xl shadow-card;
+    @apply bg-white border border-surface-border rounded-2xl shadow-card;
   }
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-display font-semibold text-sm text-forest
-      bg-emerald-mint hover:brightness-110 active:scale-[0.98] transition disabled:opacity-40 disabled:pointer-events-none;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-display font-semibold text-sm text-white
+      bg-paddy hover:brightness-110 active:scale-[0.98] transition disabled:opacity-40 disabled:pointer-events-none;
+  }
+  .btn-turmeric {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-display font-semibold text-sm text-white
+      bg-turmeric hover:brightness-110 active:scale-[0.98] transition disabled:opacity-40 disabled:pointer-events-none;
   }
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-display font-semibold text-sm text-mint
-      border border-emerald/50 hover:bg-emerald/10 active:scale-[0.98] transition disabled:opacity-40 disabled:pointer-events-none;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-display font-semibold text-sm text-paddy
+      border border-paddy/30 hover:bg-paddy/5 active:scale-[0.98] transition disabled:opacity-40 disabled:pointer-events-none;
   }
   .btn-danger {
     @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 font-display font-semibold text-xs text-white
-      bg-alert hover:brightness-110 transition;
+      bg-clay hover:brightness-110 transition;
   }
-  .input-dark {
-    @apply w-full rounded-xl bg-forest border border-surface-border px-4 py-2.5 text-sm text-textmain placeholder:text-textmuted/40
-      outline-none focus:border-emerald focus:ring-1 focus:ring-emerald/50 transition;
+  .input-field {
+    @apply w-full rounded-xl bg-white border border-surface-border px-4 py-2.5 text-sm text-paddy placeholder:text-text-muted/50
+      outline-none focus:border-turmeric focus:ring-1 focus:ring-turmeric/50 transition;
   }
   .label-muted {
-    @apply block text-xs font-medium uppercase tracking-wider text-textmuted mb-1.5;
+    @apply block text-xs font-medium uppercase tracking-wider text-text-muted mb-1.5;
   }
   .chip {
     @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide;

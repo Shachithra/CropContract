@@ -1,16 +1,39 @@
 :root {
-  /* ---- Agri-Tech Emerald Design Tokens (Blueprint §4) ---- */
-  --bg-dark: #061912;         /* Deep Forest Charcoal - primary background */
-  --surface-dark: #102A20;    /* Elevated card & container backgrounds */
-  --surface-border: #1B3E30;  /* Subtle borders */
-  --emerald: #10B981;         /* Primary accent - CTAs, active states */
-  --mint: #34D399;            /* Secondary accent - hover, progress bars */
-  --gold: #F59E0B;            /* Contract badges, quota warnings */
-  --alert-red: #EF4444;       /* Disease diagnostics & high risk */
-  --text-main: #F0FDF4;       /* Off-white light mint typography */
-  --text-muted: #86EFAC;      /* Soft sage secondary text */
+  /* Color — Blueprint §6 cream/paddy/turmeric design system */
+  --paddy:    #2F5233;   /* primary — headers, nav, dark text */
+  --turmeric: #E3A008;   /* accent / CTA buttons */
+  --clay:     #B5533C;   /* alerts / disease / critical risk */
+  --cream:    #EFE9D8;   /* background */
+  --indigo:   #263A52;   /* buyer/data side accents */
+  --teal:     #1F7A5C;   /* success / synced state */
+  --white:    #FFFFFF;
+  --text-muted: #6B6558;
 
-  /* Typography stack */
-  --font-display: 'Space Grotesk', 'Noto Sans', sans-serif;
-  --font-body: 'Noto Sans', 'Noto Sans Sinhala', 'Noto Sans Tamil', sans-serif;
+  /* Risk levels (officer flow) */
+  --risk-low:      var(--teal);
+  --risk-moderate: var(--turmeric);
+  --risk-high:     #D9772E;
+  --risk-critical: var(--clay);
+
+  /* Typography */
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body:    'Noto Sans', 'Noto Sans Sinhala', 'Noto Sans Tamil', sans-serif;
+  --text-xs:  12px;
+  --text-sm:  14px;
+  --text-base: 16px;
+  --text-lg:  20px;
+  --text-xl:  24px;
+  --text-2xl: 32px;
+
+  /* Spacing (4px base scale) */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px;  --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px;
+
+  /* Radius */
+  --radius-sm: 8px;   --radius-md: 12px;   --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  /* Shadow */
+  --shadow-card: 0 2px 8px rgba(47, 82, 51, 0.08);
+  --shadow-raised: 0 4px 16px rgba(47, 82, 51, 0.12);
 }

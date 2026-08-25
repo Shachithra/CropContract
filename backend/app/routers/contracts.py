@@ -48,6 +48,7 @@ def create_contract(body: ContractCreate, user: dict = Depends(require_role("buy
         "committed_kg": 0,
         "price_per_kg": body.price_per_kg,
         "region": body.region,
+        "notes": body.notes or "",
         "commit_deadline": deadline.isoformat(),
         "delivery_date": delivery.isoformat(),
         "status": "open",

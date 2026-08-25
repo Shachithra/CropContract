@@ -9,6 +9,7 @@ class ContractCreate(BaseModel):
     total_kg: int = Field(gt=0)
     price_per_kg: float = Field(gt=0)
     region: str
+    notes: str | None = None
     commit_deadline: date | None = None
     delivery_date: date | None = None
 
@@ -23,6 +24,7 @@ class ContractOut(BaseModel):
     committed_kg: int
     price_per_kg: float
     region: str
+    notes: str | None = None
     commit_deadline: str | None = None
     delivery_date: str | None = None
     status: str

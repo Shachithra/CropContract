@@ -1,13 +1,11 @@
-"""Temporary in-memory storage.
+"""In-memory storage for CropContract demo.
 
-Standalone build (no Postgres/Mongo/Docker). All state lives in plain
-dicts keyed by id, seeded with demo accounts & contracts so the app is
-usable the moment it boots.
+All state lives in plain dicts keyed by id, seeded with demo accounts &
+contracts so the app is usable the moment it boots.
 """
 
 import threading
 from datetime import date, timedelta
-from pathlib import Path
 
 from passlib.context import CryptContext
 
@@ -19,8 +17,18 @@ users_db: dict[str, dict] = {}
 contracts_db: dict[str, dict] = {}
 commitments_db: dict[str, dict] = {}
 scans_db: dict[str, dict] = {}
+alerts_db: dict[str, dict] = {}
+outbreaks_db: dict[str, dict] = {}
+deliveries_db: dict[str, dict] = {}
 
-_counters = {"user": 0, "contract": 0, "commitment": 0, "scan": 0}
+_counters = {
+    "user": 0,
+    "contract": 0,
+    "commitment": 0,
+    "scan": 0,
+    "alert": 0,
+    "delivery": 0,
+}
 
 
 def next_id(kind: str) -> int:
@@ -47,7 +55,7 @@ def seed() -> None:
 
     today = date.today()
 
-    def add_user(name, email, role, region, password, language="en"):
+    def add_user(name, email, role, region, password, language="en", **extra):
         uid = next_id("user")
         users_db[str(uid)] = {
             "id": uid,
@@ -58,12 +66,18 @@ def seed() -> None:
             "preferred_language": language,
             "hashed_password": hash_password(password),
             "created_at": today.isoformat(),
+            **extra,
         }
         return uid
 
-    buyer_id = add_user("Ravi Perera", "buyer@demo.lk", "buyer", "Colombo", "demo1234")
-    farmer_id = add_user("Kumari Silva", "farmer@demo.lk", "farmer", "Dambulla", "demo1234")
-    add_user("Officer Nimal", "officer@demo.lk", "officer", "Nuwara Eliya", "demo1234")
+    buyer_id = add_user("Ravi Perera", "buyer@demo.lk", "buyer", "Colombo", "demo1234",
+                        company_name="Perera Exports", business_type="Wholesale")
+    farmer_id = add_user("Kumari Silva", "farmer@demo.lk", "farmer", "Dambulla", "demo1234",
+                         farm_name="Silva Farm", farm_location="Dambulla", farm_size_acres=5.0,
+                         crop_types=["Tomato", "Green Chilli"], years_experience=8)
+    add_user("Officer Nimal", "officer@demo.lk", "officer", "Nuwara Eliya", "demo1234",
+             officer_id="AGR-001", department="Agriculture", district="Nuwara Eliya",
+             designation="Senior Officer", years_of_service=12)
 
     def add_contract(crop_type, grade, total_kg, committed_kg, price, region, days):
         cid = next_id("contract")
@@ -99,3 +113,27 @@ def seed() -> None:
         "client_action_id": None,
     }
     contracts_db[str(c1)]["committed_kg"] = 1250
+
+    # Demo alert
+    alert_id = next_id("alert")
+    alerts_db[str(alert_id)] = {
+        "id": alert_id,
+        "region": "Dambulla",
+        "disease": "Tomato Early Blight",
+        "message": "Moderate outbreak of Early Blight detected in Dambulla region. Farmers should inspect crops and apply preventive fungicide.",
+        "issued_by": 3,
+        "issued_by_name": "Officer Nimal",
+        "issued_at": today.isoformat(),
+    }
+
+    # Demo outbreak
+    outbreaks_db["Dambulla"] = {
+        "disease": "Tomato Early Blight",
+        "case_count": 12,
+        "risk_level": "moderate",
+        "trend": "up",
+        "trend_pct": 15.0,
+        "cases_by_week": {"W28": 5, "W29": 7, "W30": 12},
+        "week_of": "W30",
+        "generated_at": today.isoformat(),
+    }

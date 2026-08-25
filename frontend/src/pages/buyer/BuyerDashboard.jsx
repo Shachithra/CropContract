@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { FileSignature, Unlock, Weight, Percent, Plus } from 'lucide-react'
@@ -13,7 +13,6 @@ import { useQuery } from '@tanstack/react-query'
 
 export default function BuyerDashboard() {
   const { t } = useTranslation()
-  const [mineOnly] = useState(true)
 
   const { data: contracts = [] } = useQuery({
     queryKey: ['contracts', 'all'],
@@ -22,7 +21,6 @@ export default function BuyerDashboard() {
 
   const mine = useMemo(() => contracts.filter((c) => c.buyer_id), [contracts])
 
-  // Buyer-scoped commitments
   const { data: commitments = [] } = useQuery({
     queryKey: ['buyer-commitments'],
     queryFn: async () => (await api.get('/commitments/mine')).data,
@@ -57,8 +55,8 @@ export default function BuyerDashboard() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-bold">{t('nav.dashboard')}</h1>
-        <Link to="/buyer/post" className="btn-primary !px-3 !py-2 shrink-0">
+        <h1 className="font-display text-2xl font-bold text-paddy">{t('nav.dashboard')}</h1>
+        <Link to="/buyer/post" className="btn-turmeric !px-3 !py-2 shrink-0">
           <Plus size={15} />
           {t('nav.post')}
         </Link>
@@ -67,17 +65,16 @@ export default function BuyerDashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard icon={FileSignature} value={stats.count} label={t('buyer.totalContracts')} delay={0} />
         <StatCard icon={Unlock} value={stats.open} label={t('buyer.openNow')} tone="gold" delay={0.05} />
-        <StatCard icon={Weight} value={`${(stats.committedKg / 1000).toFixed(1)}t`} label={t('buyer.committedVolume')} tone="mint" delay={0.1} />
+        <StatCard icon={Weight} value={`${(stats.committedKg / 1000).toFixed(1)}t`} label={t('buyer.committedVolume')} tone="teal" delay={0.1} />
         <StatCard icon={Percent} value={`${stats.pct}%`} label={t('buyer.fulfillment')} tone="emerald" delay={0.15} />
       </div>
 
-      {/* My posted contracts */}
       <div className="space-y-3">
-        <p className="font-display font-bold text-sm">{t('buyer.myContracts')}</p>
+        <p className="font-display font-bold text-sm text-paddy">{t('buyer.myContracts')}</p>
         {mine.length === 0 ? (
           <Card className="text-center py-10 space-y-3">
-            <p className="text-textmuted text-sm">{t('buyer.noCommitments')}</p>
-            <Link to="/buyer/post" className="btn-primary">{t('nav.post')}</Link>
+            <p className="text-text-muted text-sm">{t('buyer.noCommitments')}</p>
+            <Link to="/buyer/post" className="btn-turmeric">{t('nav.post')}</Link>
           </Card>
         ) : (
           mine.map((c) => {
@@ -85,16 +82,16 @@ export default function BuyerDashboard() {
             return (
               <Card key={c.id} className="space-y-2.5">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="font-display font-bold">
+                  <p className="font-display font-bold text-paddy">
                     {c.crop_type}
-                    <span className="text-xs text-textmuted font-body font-normal ml-2">
+                    <span className="text-xs text-text-muted font-body font-normal ml-2">
                       Rs. {c.price_per_kg}/kg · {(c.total_kg / 1000).toFixed(1)}t · {t(`regions.${c.region}`, { defaultValue: c.region })}
                     </span>
                   </p>
                   <Chip tone={c.status}>{t(`contract.status.${c.status}`)}</Chip>
                 </div>
                 <ProgressBar value={c.committed_kg} max={c.total_kg} />
-                <div className="flex justify-between text-[11px] text-textmuted">
+                <div className="flex justify-between text-[11px] text-text-muted">
                   <span>{t('contract.quotaFilled', { percent: pct })}</span>
                   <span>{c.committed_kg.toLocaleString()} / {c.total_kg.toLocaleString()} kg</span>
                 </div>

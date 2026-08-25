@@ -1,9 +1,16 @@
 import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Tractor, Briefcase, ClipboardCheck, Eye, EyeOff } from 'lucide-react'
+import { Tractor, Briefcase, ClipboardCheck } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import Button from '../../components/common/Button.jsx'
 import { homePathFor, useAuth } from '../../hooks/useAuth.jsx'
+import { SRI_LANKA_DISTRICTS } from '../../lib/sriLankaRegions.js'
+import { ALL_CROPS } from '../../lib/sriLankaCrops.js'
+import { requestNotificationPermission } from '../../lib/notifications.js'
 
 const ROLES = [
   { value: 'farmer', icon: Tractor },
@@ -11,46 +18,81 @@ const ROLES = [
   { value: 'officer', icon: ClipboardCheck },
 ]
 
-const REGIONS = ['Dambulla', 'Nuwara Eliya', 'Jaffna', 'Colombo', 'Anuradhapura', 'Matara']
 const LANGS = [
   { code: 'en', label: 'English' },
   { code: 'si', label: 'සිංහල' },
   { code: 'ta', label: 'தமிழ்' },
 ]
 
+const baseSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  phone: z.string().optional(),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  preferred_language: z.string(),
+})
+
 export default function Register() {
   const { t } = useTranslation()
   const { user, register } = useAuth()
   const navigate = useNavigate()
-
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    password: '',
-    role: 'farmer',
-    region: 'Dambulla',
-    phone: '',
-    preferred_language: 'en',
-  })
-  const [showPw, setShowPw] = useState(false)
+  const [step, setStep] = useState(0)
+  const [selectedRole, setSelectedRole] = useState('farmer')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  const {
+    register: registerField,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    setValue,
+  } = useForm({
+    resolver: zodResolver(baseSchema),
+    defaultValues: {
+      name: '',
+      phone: '',
+      password: '',
+      region: 'Colombo',
+      preferred_language: 'en',
+      farm_name: '',
+      farm_location: '',
+      farm_size_acres: '',
+      years_experience: '',
+      company_name: '',
+      business_type: '',
+      purchase_volume_tons: '',
+      delivery_address: '',
+      officer_id: '',
+      department: '',
+      district: '',
+      designation: '',
+      years_of_service: '',
+    },
+  })
+
   if (user) return <Navigate to={homePathFor(user.role)} replace />
 
-  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
-
-  async function onSubmit(e) {
-    e.preventDefault()
-    if (form.password.length < 6) {
-      setError('Password must be at least 6 characters')
-      return
-    }
+  async function onSubmit(data) {
     setError('')
     setLoading(true)
     try {
       const { default: api } = await import('../../lib/api.js')
-      const u = await register(api, form)
+      const body = {
+        name: data.name,
+        email: data.phone ? `${data.phone}@cropcontract.lk` : `user${Date.now()}@cropcontract.lk`,
+        password: data.password,
+        role: selectedRole,
+        region: selectedRole === 'officer' ? data.district : data.region,
+        phone: data.phone,
+        preferred_language: data.preferred_language,
+      }
+      const u = await register(api, body)
+
+      // Request notification permission for farmers after registration
+      if (selectedRole === 'farmer') {
+        requestNotificationPermission()
+      }
+
       navigate(homePathFor(u.role), { replace: true })
     } catch (err) {
       const detail = err.response?.data?.detail
@@ -60,109 +102,189 @@ export default function Register() {
     }
   }
 
-  return (
-    <div className="min-h-dvh flex flex-col items-center px-4 py-10">
-      <div className="w-full max-w-lg">
-        <h1 className="font-display text-3xl font-bold">{t('auth.createAccount')}</h1>
-        <p className="text-textmuted text-sm mt-1 mb-8">{t('tagline')}</p>
+  if (step === 0) {
+    return (
+      <div className="min-h-dvh flex flex-col items-center justify-center px-4 py-10 bg-cream">
+        <div className="w-full max-w-lg text-center space-y-6">
+          <div className="flex items-center justify-center gap-2 font-display font-bold text-2xl text-paddy mb-4">
+            <span className="w-10 h-10 rounded-xl bg-paddy grid place-items-center">
+              <span className="text-turmeric font-bold text-lg">CC</span>
+            </span>
+            CropContract
+          </div>
+          <h1 className="font-display text-3xl font-bold text-paddy">{t('auth.createAccount')}</h1>
+          <p className="text-text-muted text-sm">{t('tagline')}</p>
 
-        <form onSubmit={onSubmit} className="space-y-4">
-          {/* Role picker */}
-          <div>
-            <label className="label-muted">{t('auth.role')}</label>
-            <div className="grid grid-cols-3 gap-2">
-              {ROLES.map(({ value, icon: Icon }) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setForm((f) => ({ ...f, role: value }))}
-                  className={`flex flex-col items-center gap-1.5 rounded-xl border py-3.5 font-display text-xs font-semibold transition ${
-                    form.role === value
-                      ? 'border-emerald bg-emerald/10 text-mint shadow-glow'
-                      : 'border-surface-border bg-surface text-textmuted hover:border-emerald/40'
-                  }`}
-                >
-                  <Icon size={20} />
-                  {t(`auth.${value}`)}
-                </button>
-              ))}
-            </div>
+          <div className="grid grid-cols-1 gap-3 mt-8">
+            {ROLES.map(({ value, icon: Icon }, i) => (
+              <motion.button
+                key={value}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                onClick={() => { setSelectedRole(value); setStep(1) }}
+                className="flex items-center gap-4 p-4 rounded-2xl border border-surface-border bg-white hover:border-paddy/40 hover:shadow-card transition text-left"
+              >
+                <div className="w-12 h-12 rounded-xl bg-paddy/10 grid place-items-center shrink-0">
+                  <Icon size={24} className="text-paddy" />
+                </div>
+                <div>
+                  <p className="font-display font-bold text-paddy">{t(`auth.${value}`)}</p>
+                  <p className="text-xs text-text-muted mt-0.5">{t(`roleDesc.${value}`)}</p>
+                </div>
+              </motion.button>
+            ))}
           </div>
 
+          <p className="mt-8 text-sm text-text-muted">
+            {t('auth.haveAccount')}{' '}
+            <Link to="/login" className="font-semibold text-paddy hover:text-turmeric transition">
+              {t('auth.signIn')}
+            </Link>
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-dvh flex flex-col items-center px-4 py-10 bg-cream">
+      <div className="w-full max-w-lg">
+        <button onClick={() => setStep(0)} className="text-sm text-text-muted hover:text-paddy mb-4">
+          ← {t('common.back')}
+        </button>
+        <h1 className="font-display text-2xl font-bold text-paddy">{t(`auth.${selectedRole}`)}</h1>
+        <p className="text-text-muted text-sm mt-1 mb-6">{t('tagline')}</p>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <label className="label-muted" htmlFor="name">{t('auth.name')}</label>
-            <input id="name" required minLength={2} className="input-dark" value={form.name} onChange={set('name')} />
+            <input
+              id="name"
+              className={`input-field ${errors.name ? 'border-clay focus:border-clay focus:ring-clay/50' : ''}`}
+              {...registerField('name')}
+            />
+            {errors.name && <p className="text-clay text-xs mt-1">{errors.name.message}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="label-muted" htmlFor="email">{t('auth.email')}</label>
-              <input id="email" type="email" required className="input-dark" value={form.email} onChange={set('email')} />
+              <label className="label-muted" htmlFor="phone">{t('auth.phone')}</label>
+              <input id="phone" type="tel" className="input-field" placeholder="+94 77 123 4567" {...registerField('phone')} />
             </div>
             <div>
               <label className="label-muted" htmlFor="password">{t('auth.password')}</label>
-              <div className="relative">
-                <input
-                  id="password"
-                  type={showPw ? 'text' : 'password'}
-                  required
-                  className="input-dark pr-10"
-                  value={form.password}
-                  onChange={set('password')}
-                />
-                <button
-                  type="button"
-                  tabIndex={-1}
-                  onClick={() => setShowPw((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-textmuted hover:text-mint transition"
-                >
-                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
+              <input
+                id="password"
+                type="password"
+                className={`input-field ${errors.password ? 'border-clay focus:border-clay focus:ring-clay/50' : ''}`}
+                {...registerField('password')}
+              />
+              {errors.password && <p className="text-clay text-xs mt-1">{errors.password.message}</p>}
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="label-muted" htmlFor="region">{t('auth.region')}</label>
-              <select id="region" className="input-dark" value={form.region} onChange={set('region')}>
-                {REGIONS.map((r) => (
-                  <option key={r} value={r}>{t(`regions.${r}`, { defaultValue: r })}</option>
-                ))}
-              </select>
-            </div>
+          {selectedRole === 'farmer' && (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="label-muted" htmlFor="farm_name">{t('auth.farmName')}</label>
+                  <input id="farm_name" className="input-field" {...registerField('farm_name')} />
+                </div>
+                <div>
+                  <label className="label-muted" htmlFor="farm_location">{t('auth.farmLocation')}</label>
+                  <input id="farm_location" className="input-field" {...registerField('farm_location')} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="label-muted" htmlFor="farm_size">{t('auth.farmSize')}</label>
+                  <input id="farm_size" type="number" step="0.1" className="input-field" {...registerField('farm_size_acres')} />
+                </div>
+                <div>
+                  <label className="label-muted" htmlFor="experience">{t('auth.yearsExperience')}</label>
+                  <input id="experience" type="number" className="input-field" {...registerField('years_experience')} />
+                </div>
+              </div>
+              <div>
+                <label className="label-muted" htmlFor="region">{t('auth.region')}</label>
+                <select id="region" className="input-field" {...registerField('region')}>
+                  {SRI_LANKA_DISTRICTS.map((r) => (
+                    <option key={r} value={r}>{t(`regions.${r}`, { defaultValue: r })}</option>
+                  ))}
+                </select>
+              </div>
+            </>
+          )}
+
+          {selectedRole === 'buyer' && (
+            <>
+              <div>
+                <label className="label-muted" htmlFor="company">{t('auth.companyName')}</label>
+                <input id="company" className="input-field" {...registerField('company_name')} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="label-muted" htmlFor="biz_type">{t('auth.businessType')}</label>
+                  <input id="biz_type" className="input-field" placeholder="e.g. Wholesale" {...registerField('business_type')} />
+                </div>
+                <div>
+                  <label className="label-muted" htmlFor="volume">{t('auth.purchaseVolume')}</label>
+                  <input id="volume" type="number" step="0.1" className="input-field" {...registerField('purchase_volume_tons')} />
+                </div>
+              </div>
+              <div>
+                <label className="label-muted" htmlFor="delivery">{t('auth.deliveryAddress')}</label>
+                <input id="delivery" className="input-field" {...registerField('delivery_address')} />
+              </div>
+            </>
+          )}
+
+          {selectedRole === 'officer' && (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="label-muted" htmlFor="officer_id">{t('auth.officerId')}</label>
+                  <input id="officer_id" className="input-field" {...registerField('officer_id')} />
+                </div>
+                <div>
+                  <label className="label-muted" htmlFor="dept">{t('auth.department')}</label>
+                  <input id="dept" className="input-field" {...registerField('department')} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="label-muted" htmlFor="district">{t('auth.district')}</label>
+                  <select id="district" className="input-field" {...registerField('district')}>
+                    <option value="">Select district</option>
+                    {SRI_LANKA_DISTRICTS.map((d) => <option key={d} value={d}>{t(`regions.${d}`, { defaultValue: d })}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="label-muted" htmlFor="designation">{t('auth.designation')}</label>
+                  <input id="designation" className="input-field" {...registerField('designation')} />
+                </div>
+              </div>
+            </>
+          )}
+
+          {selectedRole !== 'officer' && (
             <div>
               <label className="label-muted" htmlFor="lang">{t('auth.language')}</label>
-              <select
-                id="lang"
-                className="input-dark"
-                value={form.preferred_language}
-                onChange={(e) => {
-                  setForm((f) => ({ ...f, preferred_language: e.target.value }))
-                }}
-              >
-                {LANGS.map((l) => (
-                  <option key={l.code} value={l.code}>{l.label}</option>
-                ))}
+              <select id="lang" className="input-field" {...registerField('preferred_language')}>
+                {LANGS.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
               </select>
             </div>
-          </div>
+          )}
 
           {error && (
-            <p className="text-alert text-sm bg-alert/10 border border-alert/30 rounded-xl px-4 py-2.5">{error}</p>
+            <p className="text-clay text-sm bg-clay/10 border border-clay/30 rounded-xl px-4 py-2.5">{error}</p>
           )}
 
           <Button type="submit" loading={loading} className="w-full">
             {t('auth.signUp')}
           </Button>
         </form>
-
-        <p className="mt-6 text-sm text-textmuted text-center">
-          {t('auth.haveAccount')}{' '}
-          <Link to="/login" className="font-semibold text-emerald hover:text-mint transition">
-            {t('auth.signIn')}
-          </Link>
-        </p>
       </div>
     </div>
   )
