@@ -219,7 +219,10 @@
     "TREATMENT_APPLY_FUNGICIDE": "Apply fungicide containing chlorothalonil or mancozeb",
     "TREATMENT_ROTATE_CROPS": "Rotate crops to prevent soil-borne disease buildup",
     "TREATMENT_MONITOR_WEEKLY": "Monitor crop weekly for early signs of disease",
-    "TREATMENT_USE_RESISTANT_VARIETIES": "Consider planting disease-resistant varieties"
+    "TREATMENT_USE_RESISTANT_VARIETIES": "Consider planting disease-resistant varieties",
+    "TREATMENT_PRUNE_AFFECTED_LEAVES": "Isolate and prune heavily infected leaves, stems, or foliage showing white, dusty spots. Dispose in trash — do not compost, as spores can survive.",
+    "TREATMENT_APPLY_ORGANIC_FUNGICIDE": "Spray affected areas with neem oil, potassium bicarbonate, or sulfur-based fungicide. Home remedy: 1 tbsp baking soda + 1/2 tsp liquid soap in 1 gallon water. Cover top and bottom of leaves.",
+    "TREATMENT_IMPROVE_AIR_CIRCULATION_WATERING": "Move plant to a well-ventilated area with indirect light. Water at soil level, not overhead, to keep leaves dry."
   },
   "common": {
     "cancel": "Cancel",

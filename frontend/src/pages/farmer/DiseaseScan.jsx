@@ -131,7 +131,7 @@ export default function DiseaseScan() {
             <div>
               <p className="label-muted">{t('scan.treatment')}</p>
               <ol className="space-y-2">
-                {result.treatment_steps.map((step, i) => (
+                {(result.treatment_step_keys || result.treatment_steps).map((key, i) => (
                   <motion.li
                     key={i}
                     initial={{ opacity: 0, x: -12 }}
@@ -142,7 +142,7 @@ export default function DiseaseScan() {
                     <span className="w-5 h-5 rounded-full bg-paddy/15 text-paddy grid place-items-center text-[10px] font-bold shrink-0 mt-0.5">
                       {i + 1}
                     </span>
-                    {step}
+                    {t(`treatment.${key}`, key)}
                   </motion.li>
                 ))}
               </ol>
