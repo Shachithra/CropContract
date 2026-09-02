@@ -16,7 +16,7 @@
     "fulfilment": "Fulfilment"
   },
   "auth": {
-    "welcomeBack": "Welcome back",
+    "welcomeBack": "Welcome",
     "createAccount": "Create your account",
     "phone": "Phone number",
     "otp": "OTP code",
