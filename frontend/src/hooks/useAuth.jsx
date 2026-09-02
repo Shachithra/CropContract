@@ -39,10 +39,6 @@ export function AuthProvider({ children }) {
 
   const register = useCallback(async (api, body) => {
     const { data } = await api.post('/auth/register', body)
-    localStorage.setItem('cc_token', data.access_token)
-    localStorage.setItem('cc_user', JSON.stringify(data.user))
-    setUser(data.user)
-    window.dispatchEvent(new Event('cc_auth_ready'))
     return data.user
   }, [])
 
