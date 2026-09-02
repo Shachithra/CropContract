@@ -3,7 +3,7 @@ from datetime import date
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
-from app.database_stub import next_id, scans_db
+from app.database import get_db
 from app.routers.auth import get_current_user, require_role
 from app.services.disease_model import analyze_leaf
 
@@ -19,16 +19,15 @@ async def disease_scan(
     client_action_id: str | None = None,
     user: dict = Depends(require_role("farmer", "officer")),
 ):
+    db = get_db()
     image_bytes = await file.read()
     if not image_bytes:
         raise HTTPException(status_code=400, detail="Empty upload")
 
     result = analyze_leaf(image_bytes)
 
-    scan_id = next_id("scan")
-    scans_db[str(scan_id)] = {
-        "id": scan_id,
-        "farmer_id": user["id"],
+    scan = {
+        "farmer_id": user["_id"],
         "farmer_name": user["name"],
         "crop_type": crop_type or "unknown",
         "region": user["region"],
@@ -40,34 +39,42 @@ async def disease_scan(
         "flagged": result["severity"] == "high",
         "review_status": "pending" if result["severity"] == "high" else "none",
     }
+    
+    insert_result = await db.scans.insert_one(scan)
+    scan_id = str(insert_result.inserted_id)
+    
     return {"scan_id": scan_id, **result}
 
 
 @router.get("/scans/mine")
-def my_scans(user: dict = Depends(get_current_user)):
-    return sorted(
-        (s for s in scans_db.values() if s["farmer_id"] == user["id"]),
-        key=lambda s: s["id"],
-        reverse=True,
-    )
+async def my_scans(user: dict = Depends(get_current_user)):
+    db = get_db()
+    scans = await db.scans.find({"farmer_id": user["_id"]}).sort("_id", -1).to_list(1000)
+    return scans
 
 
 @router.get("/scans/flagged")
-def flagged_scans(user: dict = Depends(require_role("officer"))):
-    return sorted(
-        (s for s in scans_db.values() if s["flagged"]),
-        key=lambda s: (s["review_status"], -s["id"]),
-    )
+async def flagged_scans(user: dict = Depends(require_role("officer"))):
+    db = get_db()
+    scans = await db.scans.find({"flagged": True}).sort([("review_status", 1), ("_id", -1)]).to_list(1000)
+    return scans
 
 
 @router.post("/scans/{scan_id}/review")
-def review_scan(scan_id: int, action: str, user: dict = Depends(require_role("officer"))):
-    scan = scans_db.get(str(scan_id))
-    if not scan:
-        raise HTTPException(status_code=404, detail="Scan not found")
+async def review_scan(scan_id: str, action: str, user: dict = Depends(require_role("officer"))):
+    db = get_db()
     if action not in ("confirmed", "dismissed"):
         raise HTTPException(status_code=400, detail="action must be confirmed|dismissed")
-    scan["review_status"] = action
+    
+    result = await db.scans.update_one(
+        {"_id": scan_id},
+        {"$set": {"review_status": action}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Scan not found")
+    
+    scan = await db.scans.find_one({"_id": scan_id})
     return scan
 
 

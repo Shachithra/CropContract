@@ -1,58 +1,64 @@
-import { useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import { useEffect, useState } from 'react'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Button from '../../components/common/Button.jsx'
 import { homePathFor, useAuth } from '../../hooks/useAuth.jsx'
 
-const loginSchema = z.object({
-  phone: z.string().min(1, 'Phone number is required').regex(
-    /^(\+94|94|0)?[1-9]\d{8}$/,
-    'Enter a valid Sri Lankan phone number'
-  ),
-  password: z.string().min(1, 'Password is required'),
-})
-
-export default function OfficerLogin() {
-  const { t } = useTranslation()
-  const { user } = useAuth()
+export default function OTPVerify() {
+  const { user, verifyOtp } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const { phone, role } = location.state || {}
+  const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [verified, setVerified] = useState(false)
 
-  const {
-    register: registerField,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { phone: '', password: '' },
-  })
+  useEffect(() => {
+    if (verified && user) {
+      navigate(homePathFor(user.role), { replace: true })
+    }
+  }, [verified, user, navigate])
 
-  if (user) return <Navigate to={homePathFor(user.role)} replace />
+  if (user && !verified) return <Navigate to={homePathFor(user.role)} replace />
 
-  async function onSubmit(data) {
+  if (!phone || !role) {
+    return <Navigate to="/login" replace />
+  }
+
+  function handleOtpInput(index, value) {
+    if (value.length > 1) value = value.slice(-1)
+    if (value && !/^\d$/.test(value)) return
+    const newOtp = [...otp]
+    newOtp[index] = value
+    setOtp(newOtp)
+    if (value && index < 5) {
+      document.getElementById(`otp-${index + 1}`)?.focus()
+    }
+  }
+
+  function handleOtpKeyDown(index, e) {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      document.getElementById(`otp-${index - 1}`)?.focus()
+    }
+  }
+
+  async function handleVerify() {
+    const otpCode = otp.join('')
+    if (otpCode.length < 6) {
+      setError('Please enter the full 6-digit code')
+      return
+    }
+
     setError('')
     setLoading(true)
     try {
       const { default: api } = await import('../../lib/api.js')
-      const response = await api.post('/auth/login', {
-        phone: data.phone,
-        password: data.password,
-      })
-      // Navigate to OTP page with phone and role
-      navigate('/login/otp', {
-        state: {
-          phone: response.data.phone,
-          role: response.data.role,
-        },
-      })
+      await verifyOtp(api, phone, otpCode)
+      setVerified(true)
     } catch (err) {
       const detail = err.response?.data?.detail
-      setError(typeof detail === 'string' ? detail : 'Login failed — check your credentials')
+      setError(typeof detail === 'string' ? detail : 'Invalid OTP — please try again')
     } finally {
       setLoading(false)
     }
@@ -78,7 +84,7 @@ export default function OfficerLogin() {
         {/* Back button */}
         <div className="w-full flex justify-start mb-4">
           <button
-            onClick={() => navigate('/login')}
+            onClick={() => navigate(-1)}
             className="w-10 h-10 rounded-full bg-white border border-surface-border grid place-items-center hover:bg-paddy/5 transition"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-paddy">
@@ -106,45 +112,38 @@ export default function OfficerLogin() {
         <h1 className="font-display text-3xl font-bold tracking-wide text-paddy">CROPCONTRACT</h1>
         <p className="text-text-muted text-sm mt-1 text-center">Know Demand. Secure Contracts. Grow with Confidence.</p>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-4 mt-10">
-          <div>
-            <label className="label-muted" htmlFor="phone">PHONE NUMBER</label>
-            <input
-              id="phone"
-              type="tel"
-              placeholder="07X XXX XXXX"
-              className={`input-field ${errors.phone ? 'border-clay focus:border-clay focus:ring-clay/50' : ''}`}
-              {...registerField('phone')}
-            />
-            {errors.phone && <p className="text-clay text-xs mt-1">{errors.phone.message}</p>}
+        {/* OTP input */}
+        <div className="w-full mt-10">
+          <label className="label-muted">OTP</label>
+          <div className="flex justify-between gap-2">
+            {otp.map((digit, i) => (
+              <input
+                key={i}
+                id={`otp-${i}`}
+                type="text"
+                inputMode="numeric"
+                maxLength={1}
+                value={digit}
+                onChange={(e) => handleOtpInput(i, e.target.value)}
+                onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                className="input-field w-12 h-14 text-center text-xl font-bold"
+              />
+            ))}
           </div>
+        </div>
 
-          <div>
-            <label className="label-muted" htmlFor="password">PASSWORD</label>
-            <input
-              id="password"
-              type="password"
-              placeholder="Enter Your Password"
-              className={`input-field ${errors.password ? 'border-clay focus:border-clay focus:ring-clay/50' : ''}`}
-              {...registerField('password')}
-            />
-            {errors.password && <p className="text-clay text-xs mt-1">{errors.password.message}</p>}
-          </div>
+        {error && (
+          <p className="text-clay text-sm bg-clay/10 border border-clay/30 rounded-xl px-4 py-2.5 mt-4 w-full">
+            {error}
+          </p>
+        )}
 
-          {error && (
-            <p className="text-clay text-sm bg-clay/10 border border-clay/30 rounded-xl px-4 py-2.5">{error}</p>
-          )}
-
-          <Button type="submit" loading={loading} variant="turmeric" className="w-full">
-            Login
+        {/* Verify button */}
+        <div className="w-full mt-6">
+          <Button onClick={handleVerify} loading={loading} variant="turmeric" className="w-full">
+            Verify OTP
           </Button>
-        </form>
-
-        {/* Register link */}
-        <p className="mt-6 text-sm text-text-muted">
-          Register
-        </p>
+        </div>
       </div>
 
       {/* Home indicator */}

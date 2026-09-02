@@ -3,40 +3,48 @@ from datetime import datetime, timedelta, timezone
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from pydantic import BaseModel
 
 from app.config import settings
-from app.database_stub import hash_password, next_id, users_db, verify_password
-from app.schemas.user import ProfileUpdate, TokenResponse, UserLogin, UserOut, UserRegister
+from app.database import get_db
+from app.database_stub import hash_password, verify_password
+from app.schemas.user import OTPVerify, ProfileUpdate, TokenResponse, UserLogin, UserOut, UserRegister
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 bearer = HTTPBearer(auto_error=False)
 
+# Default OTP for demo
+DEFAULT_OTP = "123456"
+
+# Store OTPs temporarily (in production, use Redis)
+otp_store: dict[str, str] = {}
+
 
 def create_token(user: dict) -> str:
     payload = {
-        "sub": str(user["id"]),
+        "sub": str(user["_id"]),
         "role": user["role"],
         "exp": datetime.now(timezone.utc) + timedelta(minutes=settings.JWT_EXPIRE_MINUTES),
     }
     return jwt.encode(payload, settings.JWT_SECRET, algorithm="HS256")
 
 
-def get_current_user(creds: HTTPAuthorizationCredentials | None = Depends(bearer)) -> dict:
+async def get_current_user(creds: HTTPAuthorizationCredentials | None = Depends(bearer)) -> dict:
     if creds is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Not authenticated")
     try:
         payload = jwt.decode(creds.credentials, settings.JWT_SECRET, algorithms=["HS256"])
     except jwt.PyJWTError:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or expired token")
-    user = users_db.get(payload.get("sub", ""))
+    
+    db = get_db()
+    user = await db.users.find_one({"_id": payload.get("sub", "")})
     if not user:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "User not found")
     return user
 
 
 def require_role(*roles: str):
-    def checker(user: dict = Depends(get_current_user)) -> dict:
+    async def checker(user: dict = Depends(get_current_user)) -> dict:
         if user["role"] not in roles:
             raise HTTPException(status.HTTP_403_FORBIDDEN, f"Requires role: {'/'.join(roles)}")
         return user
@@ -44,14 +52,17 @@ def require_role(*roles: str):
 
 
 @router.post("/register", response_model=TokenResponse, status_code=201)
-def register(body: UserRegister):
+async def register(body: UserRegister):
+    db = get_db()
     email = body.email.lower()
-    if any(u["email"] == email for u in users_db.values()):
+    
+    # Check if email already exists
+    existing_user = await db.users.find_one({"email": email})
+    if existing_user:
         raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
-
-    uid = next_id("user")
-    users_db[str(uid)] = {
-        "id": uid,
+    
+    # Create user document
+    user_doc = {
         "name": body.name,
         "email": email,
         "role": body.role,
@@ -59,25 +70,90 @@ def register(body: UserRegister):
         "phone": body.phone,
         "preferred_language": body.preferred_language,
         "hashed_password": hash_password(body.password),
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }
-    user = users_db[str(uid)]
-    return TokenResponse(access_token=create_token(user), user=UserOut(**user))
+    
+    # Add role-specific fields
+    if body.role == "farmer":
+        user_doc["farm_location"] = body.farm_location
+        user_doc["crop_types"] = body.crop_types
+    elif body.role == "buyer":
+        user_doc["company_name"] = body.company_name
+        user_doc["company_location"] = body.company_location
+        user_doc["delivery_address"] = body.delivery_address
+    elif body.role == "officer":
+        user_doc["officer_id"] = body.officer_id
+        user_doc["department"] = body.department
+        user_doc["district"] = body.district
+        user_doc["designation"] = body.designation
+    
+    # Insert into MongoDB
+    result = await db.users.insert_one(user_doc)
+    user_doc["_id"] = str(result.inserted_id)
+    user_doc["id"] = str(result.inserted_id)
+    
+    return TokenResponse(access_token=create_token(user_doc), user=UserOut(**user_doc))
 
 
-@router.post("/login", response_model=TokenResponse)
-def login(body: UserLogin):
-    email = body.email.lower()
-    user = next((u for u in users_db.values() if u["email"] == email), None)
+@router.post("/login", response_model=dict)
+async def login(body: UserLogin):
+    db = get_db()
+    phone = body.phone.strip()
+    
+    # Find user by phone number
+    user = await db.users.find_one({"phone": phone})
     if not user or not verify_password(body.password, user["hashed_password"]):
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect email or password")
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect phone number or password")
+    
+    # Store OTP (in production, generate and send via SMS)
+    otp_store[phone] = DEFAULT_OTP
+    
+    return {
+        "message": "OTP sent to your phone",
+        "phone": phone,
+        "role": user["role"],
+    }
+
+
+@router.post("/verify-otp", response_model=TokenResponse)
+async def verify_otp(body: OTPVerify):
+    db = get_db()
+    phone = body.phone.strip()
+    
+    # Check OTP
+    stored_otp = otp_store.get(phone)
+    if not stored_otp or stored_otp != body.otp:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid OTP")
+    
+    # Remove used OTP
+    del otp_store[phone]
+    
+    # Find user by phone number
+    user = await db.users.find_one({"phone": phone})
+    if not user:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "User not found")
+    
+    user["id"] = str(user["_id"])
     return TokenResponse(access_token=create_token(user), user=UserOut(**user))
+
+
+@router.get("/me", response_model=UserOut)
+async def get_me(user: dict = Depends(get_current_user)):
+    user["id"] = str(user["_id"])
+    return UserOut(**user)
 
 
 @router.put("/profile", response_model=UserOut)
-def update_profile(body: ProfileUpdate, user: dict = Depends(get_current_user)):
+async def update_profile(body: ProfileUpdate, user: dict = Depends(get_current_user)):
+    db = get_db()
     updates = body.model_dump(exclude_unset=True)
-    for key, value in updates.items():
-        if value is not None:
-            user[key] = value
-    users_db[str(user["id"])] = user
-    return UserOut(**user)
+    
+    if updates:
+        await db.users.update_one(
+            {"_id": user["_id"]},
+            {"$set": updates}
+        )
+    
+    updated_user = await db.users.find_one({"_id": user["_id"]})
+    updated_user["id"] = str(updated_user["_id"])
+    return UserOut(**updated_user)

@@ -33,12 +33,24 @@ export function AuthProvider({ children }) {
     localStorage.setItem('cc_token', data.access_token)
     localStorage.setItem('cc_user', JSON.stringify(data.user))
     setUser(data.user)
-    window.dispatchEvent(new Event('cc_auth_ready'))
+    window.dispatchEvent(new Event('cc_user_updated'))
     return data.user
   }, [])
 
   const register = useCallback(async (api, body) => {
     const { data } = await api.post('/auth/register', body)
+    localStorage.setItem('cc_token', data.access_token)
+    localStorage.setItem('cc_user', JSON.stringify(data.user))
+    setUser(data.user)
+    window.dispatchEvent(new Event('cc_user_updated'))
+    return data.user
+  }, [])
+
+  const verifyOtp = useCallback(async (api, phone, otp) => {
+    const { data } = await api.post('/auth/verify-otp', { phone, otp })
+    localStorage.setItem('cc_token', data.access_token)
+    localStorage.setItem('cc_user', JSON.stringify(data.user))
+    setUser(data.user)
     return data.user
   }, [])
 
@@ -49,7 +61,7 @@ export function AuthProvider({ children }) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    <AuthContext.Provider value={{ user, login, register, verifyOtp, logout }}>
       {children}
     </AuthContext.Provider>
   )

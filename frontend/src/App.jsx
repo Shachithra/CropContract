@@ -6,6 +6,7 @@ import Login from './pages/shared/Login.jsx'
 import FarmerLogin from './pages/shared/FarmerLogin.jsx'
 import BuyerLogin from './pages/shared/BuyerLogin.jsx'
 import OfficerLogin from './pages/shared/OfficerLogin.jsx'
+import OTPVerify from './pages/shared/OTPVerify.jsx'
 import Register from './pages/shared/Register.jsx'
 import FarmerRegister from './pages/shared/FarmerRegister.jsx'
 import BuyerRegister from './pages/shared/BuyerRegister.jsx'
@@ -69,6 +70,7 @@ export default function App() {
         <Route path="/login/farmer" element={<FarmerLogin />} />
         <Route path="/login/buyer" element={<BuyerLogin />} />
         <Route path="/login/officer" element={<OfficerLogin />} />
+        <Route path="/login/otp" element={<OTPVerify />} />
         <Route path="/register" element={<Register />} />
         <Route path="/register/farmer" element={<FarmerRegister />} />
         <Route path="/register/buyer" element={<BuyerRegister />} />

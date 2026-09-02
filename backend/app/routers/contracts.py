@@ -2,46 +2,51 @@ from datetime import date, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.database_stub import commitments_db, contracts_db, next_id, users_db
+from app.database import get_db
 from app.routers.auth import get_current_user, require_role
 from app.schemas.contract import CommitmentCreate, CommitmentOut, ContractCreate, ContractOut
 
 router = APIRouter(tags=["contracts"])
 
 
-def _contract_out(c: dict) -> ContractOut:
-    buyer = users_db.get(str(c["buyer_id"]))
+async def _contract_out(c: dict) -> ContractOut:
+    db = get_db()
+    buyer = await db.users.find_one({"_id": c["buyer_id"]})
     return ContractOut(**{**c, "buyer_name": buyer["name"] if buyer else None})
 
 
 @router.get("/contracts", response_model=list[ContractOut])
-def list_contracts(
+async def list_contracts(
     region: str | None = None,
     crop_type: str | None = None,
     status_filter: str = "open",
     user: dict = Depends(get_current_user),
 ):
+    db = get_db()
+    query = {}
+    if region:
+        query["region"] = {"$regex": region, "$options": "i"}
+    if crop_type:
+        query["crop_type"] = {"$regex": crop_type, "$options": "i"}
+    if status_filter != "all":
+        query["status"] = status_filter
+    
+    contracts = await db.contracts.find(query).to_list(1000)
     out = []
-    for c in contracts_db.values():
-        if region and c["region"].lower() != region.lower():
-            continue
-        if crop_type and crop_type.lower() not in c["crop_type"].lower():
-            continue
-        if status_filter != "all" and c["status"] != status_filter:
-            continue
-        out.append(_contract_out(c))
+    for c in contracts:
+        out.append(await _contract_out(c))
     return sorted(out, key=lambda x: x.id)
 
 
 @router.post("/contracts", response_model=ContractOut, status_code=201)
-def create_contract(body: ContractCreate, user: dict = Depends(require_role("buyer"))):
+async def create_contract(body: ContractCreate, user: dict = Depends(require_role("buyer"))):
+    db = get_db()
     today = date.today()
     deadline = body.commit_deadline or (today + timedelta(days=14))
     delivery = body.delivery_date or (deadline + timedelta(days=45))
-    cid = next_id("contract")
+    
     contract = {
-        "id": cid,
-        "buyer_id": user["id"],
+        "buyer_id": user["_id"],
         "crop_type": body.crop_type,
         "grade": body.grade,
         "total_kg": body.total_kg,
@@ -52,26 +57,32 @@ def create_contract(body: ContractCreate, user: dict = Depends(require_role("buy
         "commit_deadline": deadline.isoformat(),
         "delivery_date": delivery.isoformat(),
         "status": "open",
+        "created_at": date.today().isoformat(),
     }
-    contracts_db[str(cid)] = contract
-    return _contract_out(contract)
+    
+    result = await db.contracts.insert_one(contract)
+    contract["_id"] = str(result.inserted_id)
+    
+    return await _contract_out(contract)
 
 
 @router.get("/contracts/{contract_id}", response_model=ContractOut)
-def get_contract(contract_id: int, user: dict = Depends(get_current_user)):
-    c = contracts_db.get(str(contract_id))
+async def get_contract(contract_id: str, user: dict = Depends(get_current_user)):
+    db = get_db()
+    c = await db.contracts.find_one({"_id": contract_id})
     if not c:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Contract not found")
-    return _contract_out(c)
+    return await _contract_out(c)
 
 
 @router.post("/contracts/{contract_id}/commit", response_model=CommitmentOut, status_code=201)
-def commit_to_contract(
-    contract_id: int,
+async def commit_to_contract(
+    contract_id: str,
     body: CommitmentCreate,
     user: dict = Depends(require_role("farmer")),
 ):
-    c = contracts_db.get(str(contract_id))
+    db = get_db()
+    c = await db.contracts.find_one({"_id": contract_id})
     if not c:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Contract not found")
     if c["status"] != "open":
@@ -82,49 +93,54 @@ def commit_to_contract(
 
     # Idempotency: same client_action_id -> return existing commitment
     if body.client_action_id:
-        existing = next(
-            (
-                m
-                for m in commitments_db.values()
-                if m.get("client_action_id") == body.client_action_id
-            ),
-            None,
-        )
+        existing = await db.commitments.find_one({"client_action_id": body.client_action_id})
         if existing:
             return CommitmentOut(
                 **{**existing, "farmer_name": user["name"]}
             )
 
-    cm_id = next_id("commitment")
     commitment = {
-        "id": cm_id,
         "contract_id": contract_id,
-        "farmer_id": user["id"],
+        "farmer_id": user["_id"],
         "quantity_kg": qty,
         "status": "active",
         "sync_status": "synced",
         "committed_at": date.today().isoformat(),
         "client_action_id": body.client_action_id,
     }
-    commitments_db[str(cm_id)] = commitment
+    
+    result = await db.commitments.insert_one(commitment)
+    commitment["_id"] = str(result.inserted_id)
 
-    c["committed_kg"] += qty
-    if c["committed_kg"] >= c["total_kg"]:
-        c["status"] = "fulfilled"
+    await db.contracts.update_one(
+        {"_id": contract_id},
+        {"$inc": {"committed_kg": qty}}
+    )
+    
+    if c["committed_kg"] + qty >= c["total_kg"]:
+        await db.contracts.update_one(
+            {"_id": contract_id},
+            {"$set": {"status": "fulfilled"}}
+        )
 
     return CommitmentOut(**{**commitment, "farmer_name": user["name"]})
 
 
 @router.get("/commitments/mine", response_model=list[CommitmentOut])
-def my_commitments(user: dict = Depends(get_current_user)):
+async def my_commitments(user: dict = Depends(get_current_user)):
+    db = get_db()
+    query = {}
+    if user["role"] == "farmer":
+        query["farmer_id"] = user["_id"]
+    else:
+        # For buyer, find commitments for their contracts
+        buyer_contracts = await db.contracts.find({"buyer_id": user["_id"]}).to_list(1000)
+        contract_ids = [str(c["_id"]) for c in buyer_contracts]
+        query["contract_id"] = {"$in": contract_ids}
+    
+    commitments = await db.commitments.find(query).to_list(1000)
     out = []
-    for m in commitments_db.values():
-        owner_key = "farmer_id" if user["role"] == "farmer" else "buyer_id"
-        contract = contracts_db.get(str(m["contract_id"]), {})
-        if owner_key == "buyer_id" and contract.get("buyer_id") != user["id"]:
-            continue
-        if m[owner_key] != user["id"]:
-            continue
-        farmer = users_db.get(str(m["farmer_id"]))
+    for m in commitments:
+        farmer = await db.users.find_one({"_id": m["farmer_id"]})
         out.append(CommitmentOut(**{**m, "farmer_name": farmer["name"] if farmer else None}))
     return sorted(out, key=lambda x: x.id)

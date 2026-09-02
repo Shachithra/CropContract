@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from app.database_stub import outbreaks_db
+from app.database import get_db
 from app.routers.auth import get_current_user
 from app.schemas.alert import OutbreakOut
 
@@ -8,8 +8,9 @@ router = APIRouter(tags=["outbreaks"])
 
 
 @router.get("/outbreaks/region/{region}", response_model=OutbreakOut)
-def get_outbreak(region: str, user: dict = Depends(get_current_user)):
-    outbreak = outbreaks_db.get(region)
+async def get_outbreak(region: str, user: dict = Depends(get_current_user)):
+    db = get_db()
+    outbreak = await db.outbreaks.find_one({"region": region})
     if not outbreak:
         return OutbreakOut(
             disease="None",

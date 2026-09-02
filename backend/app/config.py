@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     MODEL_PATH: str = "./app/ml/model.pt"
     LABELS_PATH: str = "./app/ml/labels.json"
     CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173"
+    MONGODB_URL: str = "mongodb://localhost:27017"
+    MONGODB_DB_NAME: str = "cropcontract"
 
     @property
     def cors_origin_list(self) -> list[str]:

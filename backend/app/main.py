@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.database_stub import seed
+from app.database import connect_db, close_db
 from app.routers import auth, contracts, scans, sync, alerts, outbreaks, deliveries
 
 logging.basicConfig(level=logging.INFO)
@@ -13,8 +13,11 @@ logging.basicConfig(level=logging.INFO)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    seed()
+    # Startup
+    await connect_db()
     yield
+    # Shutdown
+    await close_db()
 
 
 app = FastAPI(title=settings.APP_NAME, version="1.0.0", lifespan=lifespan)
