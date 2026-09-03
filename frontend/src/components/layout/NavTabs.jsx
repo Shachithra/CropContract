@@ -6,20 +6,23 @@ import { useAuth } from '../../hooks/useAuth.jsx'
 const tabsByRole = {
   farmer: [
     { to: '/farmer', icon: Home, label: 'nav.home' },
-    { to: '/marketplace', icon: Store, label: 'nav.marketplace' },
-    { to: '/farmer/contracts', icon: Leaf, label: 'nav.myContracts' },
+    { to: '/marketplace', icon: Store, label: 'nav.market' },
+    { to: '/farmer/contracts', icon: Leaf, label: 'nav.contracts' },
+    { to: '/farmer/alerts', icon: AlertTriangle, label: 'nav.alerts' },
     { to: '/profile', icon: User, label: 'nav.profile' },
   ],
   buyer: [
     { to: '/buyer', icon: LayoutDashboard, label: 'nav.dashboard' },
-    { to: '/marketplace', icon: Store, label: 'nav.marketplace' },
+    { to: '/marketplace', icon: Store, label: 'nav.market' },
     { to: '/buyer/post', icon: FilePlus2, label: 'nav.post' },
+    { to: '/buyer/fulfilment', icon: Leaf, label: 'nav.fulfilment' },
     { to: '/profile', icon: User, label: 'nav.profile' },
   ],
   officer: [
     { to: '/officer', icon: ClipboardCheck, label: 'nav.review' },
     { to: '/officer/outbreaks', icon: BarChart3, label: 'nav.outbreaks' },
     { to: '/officer/alert', icon: AlertTriangle, label: 'nav.issueAlert' },
+    { to: '/marketplace', icon: Store, label: 'nav.market' },
     { to: '/profile', icon: User, label: 'nav.profile' },
   ],
 }

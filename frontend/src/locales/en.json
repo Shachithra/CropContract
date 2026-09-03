@@ -4,7 +4,10 @@
   "nav": {
     "home": "Home",
     "marketplace": "Marketplace",
+    "market": "Market",
     "myContracts": "My Contracts",
+    "contracts": "Contracts",
+    "alerts": "Alerts",
     "scan": "Leaf Scan",
     "dashboard": "Dashboard",
     "post": "Post Contract",
