@@ -119,9 +119,9 @@ export default function Login() {
         <p className="mt-10 text-sm text-text-muted">
           <Link
             to="/register"
-            className="font-semibold text-paddy underline underline-offset-2 hover:text-turmeric transition"
+            className="font-semibold text-paddy underline underline-offset-4 decoration-1 hover:text-turmeric transition"
           >
-            Register
+            Register as
           </Link>
         </p>
       </div>

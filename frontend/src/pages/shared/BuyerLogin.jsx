@@ -131,9 +131,9 @@ export default function BuyerLogin() {
         <p className="mt-6 text-sm text-text-muted">
           <button
             onClick={() => navigate('/register')}
-            className="font-semibold text-paddy underline underline-offset-2 hover:text-turmeric transition"
+            className="font-semibold text-paddy underline underline-offset-4 decoration-1 hover:text-turmeric transition"
           >
-            Register
+            Register as
           </button>
         </p>
 
