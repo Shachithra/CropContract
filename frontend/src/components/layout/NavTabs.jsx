@@ -1,13 +1,13 @@
 import { NavLink, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Home, LayoutDashboard, Leaf, Store, FilePlus2, ClipboardCheck, AlertTriangle, BarChart3, User } from 'lucide-react'
+import { Home, LayoutDashboard, FileText, Store, FilePlus2, ClipboardCheck, AlertTriangle, BarChart3, User } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth.jsx'
 
 const tabsByRole = {
   farmer: [
     { to: '/farmer', icon: Home, label: 'nav.home' },
     { to: '/marketplace', icon: Store, label: 'nav.market' },
-    { to: '/farmer/contracts', icon: Leaf, label: 'nav.contracts' },
+    { to: '/farmer/contracts', icon: FileText, label: 'nav.contracts' },
     { to: '/farmer/alerts', icon: AlertTriangle, label: 'nav.alerts' },
     { to: '/profile', icon: User, label: 'nav.profile' },
   ],
@@ -15,7 +15,7 @@ const tabsByRole = {
     { to: '/buyer', icon: LayoutDashboard, label: 'nav.dashboard' },
     { to: '/marketplace', icon: Store, label: 'nav.market' },
     { to: '/buyer/post', icon: FilePlus2, label: 'nav.post' },
-    { to: '/buyer/fulfilment', icon: Leaf, label: 'nav.fulfilment' },
+    { to: '/buyer/fulfilment', icon: FileText, label: 'nav.fulfilment' },
     { to: '/profile', icon: User, label: 'nav.profile' },
   ],
   officer: [
