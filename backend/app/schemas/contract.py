@@ -15,8 +15,8 @@ class ContractCreate(BaseModel):
 
 
 class ContractOut(BaseModel):
-    id: int
-    buyer_id: int
+    id: str
+    buyer_id: str
     buyer_name: str | None = None
     crop_type: str
     grade: str
@@ -36,9 +36,9 @@ class CommitmentCreate(BaseModel):
 
 
 class CommitmentOut(BaseModel):
-    id: int
-    contract_id: int
-    farmer_id: int
+    id: str
+    contract_id: str
+    farmer_id: str
     farmer_name: str | None = None
     quantity_kg: int
     status: str

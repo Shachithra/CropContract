@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion } from 'framer-motion'
 import Button from '../../components/common/Button.jsx'
+import PasswordInput from '../../components/common/PasswordInput.jsx'
 import { homePathFor, useAuth } from '../../hooks/useAuth.jsx'
 import { SRI_LANKA_DISTRICTS } from '../../lib/sriLankaRegions.js'
 
@@ -165,22 +166,18 @@ export default function BuyerRegister() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="label-muted" htmlFor="password">Password</label>
-              <input
+              <PasswordInput
                 id="password"
-                type="password"
                 placeholder="Minimum 8 characters"
-                className={`input-field ${errors.password ? 'border-clay focus:border-clay focus:ring-clay/50' : ''}`}
                 {...registerField('password')}
               />
               {errors.password && <p className="text-clay text-xs mt-1">{errors.password.message}</p>}
             </div>
             <div>
               <label className="label-muted" htmlFor="confirmPassword">Confirm Password</label>
-              <input
+              <PasswordInput
                 id="confirmPassword"
-                type="password"
                 placeholder="Confirm Password"
-                className={`input-field ${errors.confirmPassword ? 'border-clay focus:border-clay focus:ring-clay/50' : ''}`}
                 {...registerField('confirmPassword')}
               />
               {errors.confirmPassword && <p className="text-clay text-xs mt-1">{errors.confirmPassword.message}</p>}

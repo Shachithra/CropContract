@@ -54,7 +54,7 @@ class UserOut(BaseModel):
     
     # Farmer fields
     farm_location: str | None = None
-    crop_types: str | None = None
+    crop_types: list[str] | str | None = None
     
     # Buyer fields
     company_name: str | None = None

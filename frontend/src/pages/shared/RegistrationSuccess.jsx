@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Button from '../../components/common/Button.jsx'
+import { useAuth } from '../../hooks/useAuth.jsx'
 
 export default function RegistrationSuccess() {
   const navigate = useNavigate()
+  const { logout } = useAuth()
 
   return (
     <div className="min-h-dvh flex flex-col items-center bg-cream">
@@ -39,7 +41,7 @@ export default function RegistrationSuccess() {
           className="w-full"
         >
           <Button
-            onClick={() => navigate('/login')}
+            onClick={() => { logout(); navigate('/login') }}
             variant="turmeric"
             className="w-full"
           >

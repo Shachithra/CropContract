@@ -8,11 +8,11 @@ class AlertCreate(BaseModel):
 
 
 class AlertOut(BaseModel):
-    id: int
+    id: str
     region: str
     disease: str
     message: str
-    issued_by: int
+    issued_by: str
     issued_by_name: str | None = None
     issued_at: str
 
@@ -29,14 +29,14 @@ class OutbreakOut(BaseModel):
 
 
 class DeliveryCreate(BaseModel):
-    commitment_id: int
+    commitment_id: str
     delivered_qty_kg: float
     quality_grade: str = "Grade A"
 
 
 class DeliveryOut(BaseModel):
-    id: int
-    commitment_id: int
+    id: str
+    commitment_id: str
     delivered_qty_kg: float
     quality_grade: str
     delivered_at: str

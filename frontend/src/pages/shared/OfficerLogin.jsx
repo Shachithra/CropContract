@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion } from 'framer-motion'
 import Button from '../../components/common/Button.jsx'
+import PasswordInput from '../../components/common/PasswordInput.jsx'
 import { homePathFor, useAuth } from '../../hooks/useAuth.jsx'
 
 const loginSchema = z.object({
@@ -122,11 +123,9 @@ export default function OfficerLogin() {
 
           <div>
             <label className="label-muted" htmlFor="password">PASSWORD</label>
-            <input
+            <PasswordInput
               id="password"
-              type="password"
               placeholder="Enter Your Password"
-              className={`input-field ${errors.password ? 'border-clay focus:border-clay focus:ring-clay/50' : ''}`}
               {...registerField('password')}
             />
             {errors.password && <p className="text-clay text-xs mt-1">{errors.password.message}</p>}

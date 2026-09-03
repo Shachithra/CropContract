@@ -15,9 +15,6 @@ bearer = HTTPBearer(auto_error=False)
 # Default OTP for demo
 DEFAULT_OTP = "123456"
 
-# Store OTPs temporarily (in production, use Redis)
-otp_store: dict[str, str] = {}
-
 
 def create_token(user: dict) -> str:
     payload = {
@@ -105,8 +102,12 @@ async def login(body: UserLogin):
     if not user or not verify_password(body.password, user["hashed_password"]):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect phone number or password")
     
-    # Store OTP (in production, generate and send via SMS)
-    otp_store[phone] = DEFAULT_OTP
+    # Store OTP in MongoDB (in production, generate and send via SMS)
+    await db.otps.update_one(
+        {"phone": phone},
+        {"$set": {"otp": DEFAULT_OTP, "created_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True,
+    )
     
     return {
         "message": "OTP sent to your phone",
@@ -120,13 +121,13 @@ async def verify_otp(body: OTPVerify):
     db = get_db()
     phone = body.phone.strip()
     
-    # Check OTP
-    stored_otp = otp_store.get(phone)
-    if not stored_otp or stored_otp != body.otp:
+    # Check OTP from MongoDB
+    otp_doc = await db.otps.find_one({"phone": phone})
+    if not otp_doc or otp_doc["otp"] != body.otp:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid OTP")
     
     # Remove used OTP
-    del otp_store[phone]
+    await db.otps.delete_one({"phone": phone})
     
     # Find user by phone number
     user = await db.users.find_one({"phone": phone})

@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import Button from '../../components/common/Button.jsx'
+import PasswordInput from '../../components/common/PasswordInput.jsx'
 import { homePathFor, useAuth } from '../../hooks/useAuth.jsx'
 import { SRI_LANKA_DISTRICTS } from '../../lib/sriLankaRegions.js'
 import { requestNotificationPermission } from '../../lib/notifications.js'
@@ -119,10 +120,8 @@ export default function RegisterForm() {
             </div>
             <div>
               <label className="label-muted" htmlFor="password">{t('auth.password')}</label>
-              <input
+              <PasswordInput
                 id="password"
-                type="password"
-                className={`input-field ${errors.password ? 'border-clay focus:border-clay focus:ring-clay/50' : ''}`}
                 {...registerField('password')}
               />
               {errors.password && <p className="text-clay text-xs mt-1">{errors.password.message}</p>}

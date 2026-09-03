@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Button from '../../components/common/Button.jsx'
@@ -12,15 +12,6 @@ export default function OTPVerify() {
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [verified, setVerified] = useState(false)
-
-  useEffect(() => {
-    if (verified && user) {
-      navigate(homePathFor(user.role), { replace: true })
-    }
-  }, [verified, user, navigate])
-
-  if (user && !verified) return <Navigate to={homePathFor(user.role)} replace />
 
   if (!phone || !role) {
     return <Navigate to="/login" replace />
@@ -55,7 +46,7 @@ export default function OTPVerify() {
     try {
       const { default: api } = await import('../../lib/api.js')
       await verifyOtp(api, phone, otpCode)
-      setVerified(true)
+      navigate(homePathFor(role), { replace: true })
     } catch (err) {
       const detail = err.response?.data?.detail
       setError(typeof detail === 'string' ? detail : 'Invalid OTP — please try again')
