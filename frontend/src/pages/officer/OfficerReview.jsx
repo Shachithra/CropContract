@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ShieldAlert, AlertTriangle, MapPin, ArrowLeft } from 'lucide-react'
+import { ShieldAlert, AlertTriangle } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Card from '../../components/common/Card.jsx'
 import FlaggedScanCard from '../../components/officer/FlaggedScanCard.jsx'
@@ -135,7 +135,7 @@ export default function OfficerReview() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
             >
-              <FlaggedScanCard scan={s} onReview={review} />
+              <FlaggedScanCard scan={s} onReview={review} compact />
             </motion.div>
           ))
         )}
@@ -143,18 +143,10 @@ export default function OfficerReview() {
 
       {/* View outbreaks link */}
       <Link to="/officer/outbreaks" className="block">
-        <button className="w-full rounded-xl px-4 py-3 font-display font-semibold text-sm text-paddy border border-paddy/30 hover:bg-paddy/5 active:scale-[0.98] transition">
+        <button className="btn-turmeric w-full !rounded-xl !py-3">
           {t('officer.viewRegionalOutbreaks')}
         </button>
       </Link>
-
-      {/* Back to start */}
-      <button
-        onClick={() => window.location.href = '/officer'}
-        className="text-sm font-semibold text-paddy underline underline-offset-2 hover:text-turmeric transition"
-      >
-        {t('common.backToStart')}
-      </button>
     </div>
   )
 }

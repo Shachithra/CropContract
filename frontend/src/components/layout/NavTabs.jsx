@@ -22,7 +22,6 @@ const tabsByRole = {
     { to: '/officer', icon: ClipboardCheck, label: 'nav.review' },
     { to: '/officer/outbreaks', icon: BarChart3, label: 'nav.outbreaks' },
     { to: '/officer/alert', icon: AlertTriangle, label: 'nav.issueAlert' },
-    { to: '/marketplace', icon: Store, label: 'nav.market' },
     { to: '/profile', icon: User, label: 'nav.profile' },
   ],
 }

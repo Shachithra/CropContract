@@ -130,7 +130,7 @@ export default function IssueAlert() {
           </div>
         </Card>
 
-        <Button type="submit" loading={loading} className="w-full">
+        <Button type="submit" loading={loading} variant="danger" className="w-full">
           <Send size={15} />
           Send Alert to Region
         </Button>
