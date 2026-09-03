@@ -191,12 +191,11 @@
     "newContract": "නව ගිවිසුම් යෝජනාව"
   },
   "journey": {
-    "contracted": "ගිවිසුම්ගත",
     "committed": "දායක",
     "growing": "වගා වෙමින්",
-    "ready": "අස්වැන්නට සූදානම්",
-    "harvested": "අස්වනු නෙළා",
-    "delivered": "භාරදී ගෙවා ඇත"
+    "ready": "සූදානම්",
+    "delivered": "භාරදී",
+    "paid": "ගෙවා ඇත"
   },
   "scan": {
     "title": "AI කොළ රෝග සෝදිස්තිය",
@@ -280,7 +279,7 @@
   "officer": {
     "tagline": "අනුකූලතාව, සිතියම්ගත කිරීම සහ ගොවි සුභසාධනය සහාය වන්න",
     "regionalOverview": "ප්‍රාදේශීය දළ විసඳුම",
-    "agreementist": " එකඟතාවාදියා",
+    "agreementist": "කෘෂිකර්ම විශේෂඥයා",
     "flaggedScans": "සමාලෝචනය සඳහා සලකුණු කළ සෝදිස්ති",
     "flaggedCount": "සලකුණු කළ සෝදිස්ති",
     "activeAlerts": "ක්‍රියාකාරී අනතුරු ඇඟවීම්",

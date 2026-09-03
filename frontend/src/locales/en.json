@@ -4,7 +4,10 @@
   "nav": {
     "home": "Home",
     "marketplace": "Marketplace",
+    "market": "Market",
     "myContracts": "My Contracts",
+    "contracts": "Contracts",
+    "alerts": "Alerts",
     "scan": "Leaf Scan",
     "dashboard": "Dashboard",
     "post": "Post Contract",
@@ -191,12 +194,11 @@
     "newContract": "NEW CONTRACT OFFER"
   },
   "journey": {
-    "contracted": "Contracted",
     "committed": "Committed",
     "growing": "Growing",
-    "ready": "Ready to harvest",
-    "harvested": "Harvested",
-    "delivered": "Delivered & paid"
+    "ready": "Ready",
+    "delivered": "Delivered",
+    "paid": "Paid"
   },
   "scan": {
     "title": "AI Leaf Disease Scan",
@@ -280,7 +282,7 @@
   "officer": {
     "tagline": "Support compliance, mapping and farmer prosperity",
     "regionalOverview": "Regional overview",
-    "agreementist": "Agreementist",
+    "agreementist": "Agronomist",
     "flaggedScans": "Flagged scans for review",
     "flaggedCount": "Flagged Scans",
     "activeAlerts": "Active Alerts",

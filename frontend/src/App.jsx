@@ -20,6 +20,7 @@ const Profile = lazy(() => import('./pages/shared/Profile.jsx'))
 const FarmerHome = lazy(() => import('./pages/farmer/FarmerHome.jsx'))
 const DiseaseScan = lazy(() => import('./pages/farmer/DiseaseScan.jsx'))
 const MyContracts = lazy(() => import('./pages/farmer/MyContracts.jsx'))
+const FarmerAlerts = lazy(() => import('./pages/farmer/FarmerAlerts.jsx'))
 const ContractDetail = lazy(() => import('./pages/farmer/ContractDetail.jsx'))
 
 const BuyerDashboard = lazy(() => import('./pages/buyer/BuyerDashboard.jsx'))
@@ -83,6 +84,7 @@ export default function App() {
             <Route path="/farmer" element={<FarmerHome />} />
             <Route path="/farmer/scan" element={<DiseaseScan />} />
             <Route path="/farmer/contracts" element={<MyContracts />} />
+            <Route path="/farmer/alerts" element={<FarmerAlerts />} />
           </Route>
 
           {/* Buyer */}
