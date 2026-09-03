@@ -9,6 +9,7 @@ import Button from '../../components/common/Button.jsx'
 import PasswordInput from '../../components/common/PasswordInput.jsx'
 import { homePathFor, useAuth } from '../../hooks/useAuth.jsx'
 import { SRI_LANKA_DISTRICTS } from '../../lib/sriLankaRegions.js'
+import LanguageToggle from '../../components/layout/LanguageToggle.jsx'
 
 const officerSchema = z.object({
   officer_name: z.string().min(2, 'Officer name must be at least 2 characters'),
@@ -77,7 +78,7 @@ export default function OfficerRegister() {
       navigate('/register/success', { replace: true })
     } catch (err) {
       const detail = err.response?.data?.detail
-      setError(typeof detail === 'string' ? detail : 'Registration failed — check your details')
+      setError(typeof detail === 'string' ? detail : t('auth.registrationFailed'))
     } finally {
       setLoading(false)
     }
@@ -115,19 +116,24 @@ export default function OfficerRegister() {
         </motion.div>
 
         {/* Title */}
-        <h1 className="font-display text-3xl font-bold tracking-wide text-paddy">CROPCONTRACT</h1>
-        <p className="text-text-muted text-sm mt-1 text-center">Support compliance, mapping and farmer prosperity</p>
+        <h1 className="font-display text-3xl font-bold tracking-wide text-paddy">{t('appName')}</h1>
+        <p className="text-text-muted text-sm mt-1 text-center">{t('officer.tagline')}</p>
+
+        {/* Language toggle */}
+        <div className="mt-4">
+          <LanguageToggle />
+        </div>
 
         {/* Form header */}
-        <h2 className="font-display text-xl font-bold text-paddy mt-8 mb-6 self-start">Agriculture Officer Registration</h2>
+        <h2 className="font-display text-xl font-bold text-paddy mt-8 mb-6 self-start">{t('auth.officerRegistration')}</h2>
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-4">
           <div>
-            <label className="label-muted" htmlFor="officer_name">Officer Name</label>
+            <label className="label-muted" htmlFor="officer_name">{t('auth.officerName')}</label>
             <input
               id="officer_name"
-              placeholder="e.g., Lanka Organics Ltd"
+              placeholder="e.g., Kumar Perera"
               className={`input-field ${errors.officer_name ? 'border-clay focus:border-clay focus:ring-clay/50' : ''}`}
               {...registerField('officer_name')}
             />
@@ -135,7 +141,7 @@ export default function OfficerRegister() {
           </div>
 
           <div>
-            <label className="label-muted" htmlFor="officer_id">Officer ID</label>
+            <label className="label-muted" htmlFor="officer_id">{t('auth.officerId')}</label>
             <input
               id="officer_id"
               placeholder="e.g., AG/OF/2026/894"
@@ -146,7 +152,7 @@ export default function OfficerRegister() {
           </div>
 
           <div>
-            <label className="label-muted" htmlFor="email">Email Address</label>
+            <label className="label-muted" htmlFor="email">{t('auth.emailAddress')}</label>
             <input
               id="email"
               type="email"
@@ -158,7 +164,7 @@ export default function OfficerRegister() {
           </div>
 
           <div>
-            <label className="label-muted" htmlFor="phone">Phone Number</label>
+            <label className="label-muted" htmlFor="phone">{t('auth.phoneNumber')}</label>
             <input
               id="phone"
               type="tel"
@@ -171,7 +177,7 @@ export default function OfficerRegister() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="label-muted" htmlFor="password">Password</label>
+              <label className="label-muted" htmlFor="password">{t('auth.password')}</label>
               <PasswordInput
                 id="password"
                 placeholder="Minimum 8 characters"
@@ -180,10 +186,10 @@ export default function OfficerRegister() {
               {errors.password && <p className="text-clay text-xs mt-1">{errors.password.message}</p>}
             </div>
             <div>
-              <label className="label-muted" htmlFor="confirmPassword">Confirm Password</label>
+              <label className="label-muted" htmlFor="confirmPassword">{t('auth.confirmPassword')}</label>
               <PasswordInput
                 id="confirmPassword"
-                placeholder="Confirm Password"
+                placeholder={t('auth.confirmPassword')}
                 {...registerField('confirmPassword')}
               />
               {errors.confirmPassword && <p className="text-clay text-xs mt-1">{errors.confirmPassword.message}</p>}
@@ -191,7 +197,7 @@ export default function OfficerRegister() {
           </div>
 
           <div>
-            <label className="label-muted" htmlFor="department">Department</label>
+            <label className="label-muted" htmlFor="department">{t('auth.department')}</label>
             <input
               id="department"
               placeholder="e.g., Agrarian Development Dept"
@@ -202,22 +208,22 @@ export default function OfficerRegister() {
           </div>
 
           <div>
-            <label className="label-muted" htmlFor="district">District / Region</label>
+            <label className="label-muted" htmlFor="district">{t('auth.district')}</label>
             <select
               id="district"
               className={`input-field ${errors.district ? 'border-clay focus:border-clay focus:ring-clay/50' : ''}`}
               {...registerField('district')}
             >
-              <option value="">Select</option>
+              <option value="">{t('auth.select')}</option>
               {SRI_LANKA_DISTRICTS.map((d) => (
-                <option key={d} value={d}>{d}</option>
+                <option key={d} value={d}>{t('regions.' + d, d)}</option>
               ))}
             </select>
             {errors.district && <p className="text-clay text-xs mt-1">{errors.district.message}</p>}
           </div>
 
           <div>
-            <label className="label-muted" htmlFor="designation">Designation</label>
+            <label className="label-muted" htmlFor="designation">{t('auth.designation')}</label>
             <input
               id="designation"
               placeholder="e.g., Regional Field Officer"
@@ -232,15 +238,15 @@ export default function OfficerRegister() {
           )}
 
           <Button type="submit" loading={loading} variant="turmeric" className="w-full">
-            Submit
+            {t('auth.submit')}
           </Button>
         </form>
 
         {/* Sign in link */}
         <p className="mt-6 text-sm text-text-muted">
-          Already have an account?{' '}
+          {t('auth.alreadyHaveAccount')}{' '}
           <Link to="/login" className="font-semibold text-paddy underline underline-offset-2 hover:text-turmeric transition">
-            Sign in
+            {t('auth.signIn')}
           </Link>
         </p>
       </div>

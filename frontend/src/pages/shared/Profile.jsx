@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth.jsx'
 import { showToast } from '../../components/common/Toast.jsx'
 import { SRI_LANKA_DISTRICTS } from '../../lib/sriLankaRegions.js'
 import { ALL_CROPS } from '../../lib/sriLankaCrops.js'
+import { compressImage } from '../../lib/imageCompress.js'
 import { motion, AnimatePresence } from 'framer-motion'
 import api from '../../lib/api.js'
 
@@ -44,24 +45,29 @@ export default function Profile() {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
 
-  function handlePictureChange(e) {
+  async function handlePictureChange(e) {
     const file = e.target.files?.[0]
     if (!file) return
-    if (file.size > 2 * 1024 * 1024) {
-      showToast('Image must be under 2MB', 'error')
+    if (file.size > 5 * 1024 * 1024) {
+      showToast(t('common.imageTooLarge'), 'error')
       return
     }
-    const reader = new FileReader()
-    reader.onload = async () => {
-      try {
-        await api.put('/auth/profile', { profile_picture: reader.result })
-        showToast('Profile picture updated', 'success')
-        window.location.reload()
-      } catch {
-        showToast(t('common.error'), 'error')
+    try {
+      const compressed = await compressImage(file, { maxDim: 512, quality: 0.8 })
+      const reader = new FileReader()
+      reader.onload = async () => {
+        try {
+          await api.put('/auth/profile', { profile_picture: reader.result })
+          showToast(t('common.profilePictureUpdated'), 'success')
+          window.location.reload()
+        } catch {
+          showToast(t('common.error'), 'error')
+        }
       }
+      reader.readAsDataURL(compressed)
+    } catch {
+      showToast(t('common.error'), 'error')
     }
-    reader.readAsDataURL(file)
   }
 
   async function handleSave() {
@@ -386,9 +392,9 @@ export default function Profile() {
                     value={form.region}
                     onChange={(e) => updateField('region', e.target.value)}
                   >
-                    <option value="">Select</option>
+                    <option value="">{t('auth.select')}</option>
                     {SRI_LANKA_DISTRICTS.map((r) => (
-                      <option key={r} value={r}>{r}</option>
+                      <option key={r} value={r}>{t('regions.' + r, r)}</option>
                     ))}
                   </select>
                 </div>
@@ -411,7 +417,7 @@ export default function Profile() {
                         value={form.crop_types}
                         onChange={(e) => updateField('crop_types', e.target.value)}
                       >
-                        <option value="">Select</option>
+                        <option value="">{t('auth.select')}</option>
                         {ALL_CROPS.map((c) => (
                           <option key={c} value={c}>{c}</option>
                         ))}
@@ -468,9 +474,9 @@ export default function Profile() {
                         value={form.district}
                         onChange={(e) => updateField('district', e.target.value)}
                       >
-                        <option value="">Select</option>
+                        <option value="">{t('auth.select')}</option>
                         {SRI_LANKA_DISTRICTS.map((d) => (
-                          <option key={d} value={d}>{d}</option>
+                          <option key={d} value={d}>{t('regions.' + d, d)}</option>
                         ))}
                       </select>
                     </div>

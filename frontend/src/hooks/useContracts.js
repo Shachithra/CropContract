@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import api from '../lib/api.js'
 import { isOnline } from '../lib/sync.js'
 import { cacheGet, cacheSet, queueAction } from '../lib/db.js'
+import { MOCK_CONTRACTS, MOCK_COMMITMENTS } from '../lib/mockData.js'
 
 export function useContracts() {
   return useQuery({
@@ -9,15 +10,16 @@ export function useContracts() {
     queryFn: async () => {
       try {
         const { data } = await api.get('/contracts')
-        await cacheSet('contracts', data)
-        return data
-      } catch (err) {
-        if (!isOnline()) {
-          const cached = await cacheGet('contracts')
-          if (cached) return cached
+        if (data?.length > 0) {
+          try { await cacheSet('contracts', data) } catch { /* idb unavailable */ }
+          return data
         }
-        throw err
-      }
+      } catch { /* offline / timeout */ }
+      try {
+        const cached = await cacheGet('contracts')
+        if (cached?.length > 0) return cached
+      } catch { /* idb unavailable */ }
+      return MOCK_CONTRACTS
     },
   })
 }
@@ -26,9 +28,18 @@ export function useMyCommitments(enabled = true) {
   return useQuery({
     queryKey: ['commitments'],
     queryFn: async () => {
-      const { data } = await api.get('/commitments/mine')
-      await cacheSet('commitments', data)
-      return data
+      try {
+        const { data } = await api.get('/commitments/mine')
+        if (data?.length > 0) {
+          try { await cacheSet('commitments', data) } catch { /* idb unavailable */ }
+          return data
+        }
+      } catch { /* offline / timeout */ }
+      try {
+        const cached = await cacheGet('commitments')
+        if (cached?.length > 0) return cached
+      } catch { /* idb unavailable */ }
+      return MOCK_COMMITMENTS
     },
     enabled,
   })

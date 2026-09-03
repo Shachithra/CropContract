@@ -72,7 +72,12 @@
     "logIn": "Log In",
     "newFarmerRegister": "New farmer? Register",
     "enter6DigitCode": "Enter 6-digit code",
-    "registrationSuccess": "You have successfully registered."
+    "registrationSuccess": "You have successfully registered.",
+    "select": "Select",
+    "companyLocation": "Company Location",
+    "deliveryAddress2": "Delivery Address 2 (Optional)",
+    "officerName": "Officer Name",
+    "registrationFailed": "Registration failed — check your details"
   },
   "roles": {
     "farmer": "Farmer",
@@ -227,9 +232,13 @@
     "automaticallyCaptures": "Automatically Captures the Crop",
     "takeClearPhoto": "Take a clear photo of the affected leaf.",
     "holdSteady": "Hold steady, fill the frame with the leaf, avoid shadows.",
-    "captureButton": "Capture"
+    "captureButton": "Capture",
+    "openCamera": "Open Camera",
+    "uploadPhoto": "Upload from gallery",
+    "cameraUnavailable": "Couldn't access camera. Check permissions or upload a photo instead."
   },
   "buyer": {
+    "tagline": "Secure premium sourcing networks",
     "myContracts": "My posted contracts",
     "totalContracts": "Contracts",
     "openNow": "Open now",
@@ -269,6 +278,7 @@
     "deliveredSoFarLabel": "Delivered so far"
   },
   "officer": {
+    "tagline": "Support compliance, mapping and farmer prosperity",
     "regionalOverview": "Regional overview",
     "agreementist": "Agreementist",
     "flaggedScans": "Flagged scans for review",

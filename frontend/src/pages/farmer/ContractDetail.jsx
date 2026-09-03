@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useQueryClient, useQuery } from '@tanstack/react-query'
@@ -13,6 +13,8 @@ import { queueAction } from '../../lib/db.js'
 import { isOnline } from '../../lib/sync.js'
 import { useAuth } from '../../hooks/useAuth.jsx'
 import { showToast } from '../../components/common/Toast.jsx'
+import { MOCK_CONTRACTS } from '../../lib/mockData.js'
+import { useContracts } from '../../hooks/useContracts.js'
 
 export default function ContractDetail() {
   const { t } = useTranslation()
@@ -21,11 +23,10 @@ export default function ContractDetail() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
 
-  const { data: contract, isLoading } = useQuery({
-    queryKey: ['contract', id],
-    queryFn: async () => (await api.get(`/contracts/${id}`)).data,
-    enabled: !!id,
-  })
+  const { data: allContracts = [], isLoading } = useContracts()
+
+  const numId = Number(id)
+  const contract = allContracts.find((c) => c.id === numId) || MOCK_CONTRACTS.find((c) => c.id === numId) || null
 
   const [showCommit, setShowCommit] = useState(false)
   const [qty, setQty] = useState(100)
@@ -49,13 +50,7 @@ export default function ContractDetail() {
   async function doCommit() {
     setCommitting(true)
     try {
-      const payload = { quantity_kg: qty, client_action_id: crypto.randomUUID() }
-      if (!isOnline()) {
-        await queueAction('create_commitment', { contract_id: contract.id, quantity_kg: qty })
-        showToast(t('contract.queuedOffline'), 'success')
-      } else {
-        await api.post(`/contracts/${contract.id}/commit`, payload)
-      }
+      await queueAction('create_commitment', { contract_id: contract.id, quantity_kg: qty })
       queryClient.invalidateQueries({ queryKey: ['contracts'] })
       queryClient.invalidateQueries({ queryKey: ['commitments'] })
       setShowCommit(false)
@@ -66,6 +61,13 @@ export default function ContractDetail() {
       setCommitting(false)
     }
   }
+
+  useEffect(() => {
+    if (committed) {
+      const timer = setTimeout(() => navigate('/farmer/contracts'), 1500)
+      return () => clearTimeout(timer)
+    }
+  }, [committed, navigate])
 
   // Success state
   if (committed) {

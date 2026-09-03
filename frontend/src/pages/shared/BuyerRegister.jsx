@@ -9,6 +9,7 @@ import Button from '../../components/common/Button.jsx'
 import PasswordInput from '../../components/common/PasswordInput.jsx'
 import { homePathFor, useAuth } from '../../hooks/useAuth.jsx'
 import { SRI_LANKA_DISTRICTS } from '../../lib/sriLankaRegions.js'
+import LanguageToggle from '../../components/layout/LanguageToggle.jsx'
 
 const LANGS = [
   { code: 'en', label: 'English' },
@@ -84,7 +85,7 @@ export default function BuyerRegister() {
       navigate('/register/success', { replace: true })
     } catch (err) {
       const detail = err.response?.data?.detail
-      setError(typeof detail === 'string' ? detail : 'Registration failed — check your details')
+      setError(typeof detail === 'string' ? detail : t('auth.registrationFailed'))
     } finally {
       setLoading(false)
     }
@@ -122,16 +123,21 @@ export default function BuyerRegister() {
         </motion.div>
 
         {/* Title */}
-        <h1 className="font-display text-3xl font-bold tracking-wide text-paddy">CROPCONTRACT</h1>
-        <p className="text-text-muted text-sm mt-1 text-center">Secure premium sourcing networks</p>
+        <h1 className="font-display text-3xl font-bold tracking-wide text-paddy">{t('appName')}</h1>
+        <p className="text-text-muted text-sm mt-1 text-center">{t('buyer.tagline')}</p>
+
+        {/* Language toggle */}
+        <div className="mt-4">
+          <LanguageToggle />
+        </div>
 
         {/* Form header */}
-        <h2 className="font-display text-xl font-bold text-paddy mt-8 mb-6 self-start">Buyer Registration</h2>
+        <h2 className="font-display text-xl font-bold text-paddy mt-8 mb-6 self-start">{t('auth.buyerRegistration')}</h2>
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-4">
           <div>
-            <label className="label-muted" htmlFor="company_name">Company Name</label>
+            <label className="label-muted" htmlFor="company_name">{t('auth.companyName')}</label>
             <input
               id="company_name"
               placeholder="e.g., Lanka Organics Ltd"
@@ -142,7 +148,7 @@ export default function BuyerRegister() {
           </div>
 
           <div>
-            <label className="label-muted" htmlFor="email">Email Address</label>
+            <label className="label-muted" htmlFor="email">{t('auth.emailAddress')}</label>
             <input
               id="email"
               type="email"
@@ -154,7 +160,7 @@ export default function BuyerRegister() {
           </div>
 
           <div>
-            <label className="label-muted" htmlFor="phone">Phone Number</label>
+            <label className="label-muted" htmlFor="phone">{t('auth.phoneNumber')}</label>
             <input
               id="phone"
               type="tel"
@@ -167,7 +173,7 @@ export default function BuyerRegister() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="label-muted" htmlFor="password">Password</label>
+              <label className="label-muted" htmlFor="password">{t('auth.password')}</label>
               <PasswordInput
                 id="password"
                 placeholder="Minimum 8 characters"
@@ -176,10 +182,10 @@ export default function BuyerRegister() {
               {errors.password && <p className="text-clay text-xs mt-1">{errors.password.message}</p>}
             </div>
             <div>
-              <label className="label-muted" htmlFor="confirmPassword">Confirm Password</label>
+              <label className="label-muted" htmlFor="confirmPassword">{t('auth.confirmPassword')}</label>
               <PasswordInput
                 id="confirmPassword"
-                placeholder="Confirm Password"
+                placeholder={t('auth.confirmPassword')}
                 {...registerField('confirmPassword')}
               />
               {errors.confirmPassword && <p className="text-clay text-xs mt-1">{errors.confirmPassword.message}</p>}
@@ -187,7 +193,7 @@ export default function BuyerRegister() {
           </div>
 
           <div>
-            <label className="label-muted" htmlFor="company_location">Company Location</label>
+            <label className="label-muted" htmlFor="company_location">{t('auth.companyLocation')}</label>
             <input
               id="company_location"
               placeholder="e.g., Mihintale Road, Anuradhapura"
@@ -198,22 +204,22 @@ export default function BuyerRegister() {
           </div>
 
           <div>
-            <label className="label-muted" htmlFor="region">Region</label>
+            <label className="label-muted" htmlFor="region">{t('auth.region')}</label>
             <select
               id="region"
               className={`input-field ${errors.region ? 'border-clay focus:border-clay focus:ring-clay/50' : ''}`}
               {...registerField('region')}
             >
-              <option value="">Select</option>
+              <option value="">{t('auth.select')}</option>
               {SRI_LANKA_DISTRICTS.map((r) => (
-                <option key={r} value={r}>{r}</option>
+                <option key={r} value={r}>{t('regions.' + r, r)}</option>
               ))}
             </select>
             {errors.region && <p className="text-clay text-xs mt-1">{errors.region.message}</p>}
           </div>
 
           <div>
-            <label className="label-muted" htmlFor="delivery_address">Delivery Address</label>
+            <label className="label-muted" htmlFor="delivery_address">{t('auth.deliveryAddress')}</label>
             <input
               id="delivery_address"
               placeholder="e.g., Baseline Road, Colombo 09"
@@ -224,7 +230,7 @@ export default function BuyerRegister() {
           </div>
 
           <div>
-            <label className="label-muted" htmlFor="delivery_address_2">Delivery Address 2 (Optional)</label>
+            <label className="label-muted" htmlFor="delivery_address_2">{t('auth.deliveryAddress2')}</label>
             <input
               id="delivery_address_2"
               placeholder="e.g., Nugegoda Road, Colombo 07"
@@ -234,7 +240,7 @@ export default function BuyerRegister() {
           </div>
 
           <div>
-            <label className="label-muted" htmlFor="lang">Preferred Language</label>
+            <label className="label-muted" htmlFor="lang">{t('auth.language')}</label>
             <select id="lang" className="input-field" {...registerField('preferred_language')}>
               {LANGS.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
             </select>
@@ -245,15 +251,15 @@ export default function BuyerRegister() {
           )}
 
           <Button type="submit" loading={loading} variant="turmeric" className="w-full">
-            Submit
+            {t('auth.submit')}
           </Button>
         </form>
 
         {/* Sign in link */}
         <p className="mt-6 text-sm text-text-muted">
-          Already have an account?{' '}
+          {t('auth.alreadyHaveAccount')}{' '}
           <Link to="/login" className="font-semibold text-paddy underline underline-offset-2 hover:text-turmeric transition">
-            Sign in
+            {t('auth.signIn')}
           </Link>
         </p>
       </div>

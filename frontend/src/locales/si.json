@@ -72,7 +72,12 @@
     "logIn": "ඇතුල් වන්න",
     "newFarmerRegister": "නව ගොවියෙක්ද? ලියාපදිංචි වන්න",
     "enter6DigitCode": "අංක 6 කේතය ඇතුලත් කරන්න",
-    "registrationSuccess": "ඔබ සාර්ථකව ලියාපදිංචි වී ඇත."
+    "registrationSuccess": "ඔබ සාර්ථකව ලියාපදිංචි වී ඇත.",
+    "select": "තෝරන්න",
+    "companyLocation": "සමාගම් ස්ථානය",
+    "deliveryAddress2": "භාරදීමේ ලිපිනය 2 (විකල්ප)",
+    "officerName": "නිලධාරී නම",
+    "registrationFailed": "ලියාපදිංචිය අසාර්ථකයි — ඔබගේ විස්තර පරීක්ෂා කරන්න"
   },
   "roles": {
     "farmer": "ගොවියා",
@@ -227,9 +232,13 @@
     "automaticallyCaptures": "බෝගය ස්වයංක්‍රීයව ගනී",
     "takeClearPhoto": "බලපෑමට ලක්වූ කොළයේ පැහැදිලි ඡායාරූපයක් ගන්න.",
     "holdSteady": "ස්ථිරව තබා, කොළය රාමුව පුරවන්න, සෙවණැලි වළකින්න.",
-    "captureButton": "ගන්න"
+    "captureButton": "ගන්න",
+    "openCamera": "කැමරාව විවෘත කරන්න",
+    "uploadPhoto": "ගැලරියෙන් ඡායාරූපයක් උඩුගත කරන්න",
+    "cameraUnavailable": "කැමරාව වෙත ප්‍රවේශ විය නොහැක. අවසරයන් පරීක්ෂා කරන්න හෝ ඡායාරූපයක් උඩුගත කරන්න."
   },
   "buyer": {
+    "tagline": "වාරිම ජාල සුරක්ෂිත කරන්න",
     "myContracts": "මම පළ කළ ගිවිසුම්",
     "totalContracts": "ගිවිසුම්",
     "openNow": "දැන් විවෘත",
@@ -269,6 +278,7 @@
     "deliveredSoFarLabel": "දැනට භාරදී ඇත"
   },
   "officer": {
+    "tagline": "අනුකූලතාව, සිතියම්ගත කිරීම සහ ගොවි සුභසාධනය සහාය වන්න",
     "regionalOverview": "ප්‍රාදේශීය දළ විసඳුම",
     "agreementist": " එකඟතාවාදියා",
     "flaggedScans": "සමාලෝචනය සඳහා සලකුණු කළ සෝදිස්ති",

@@ -8,20 +8,33 @@ import Card from '../../components/common/Card.jsx'
 import Chip from '../../components/common/Chip.jsx'
 import api from '../../lib/api.js'
 import { useQuery } from '@tanstack/react-query'
+import { MOCK_CONTRACTS, MOCK_BUYER_COMMITMENTS } from '../../lib/mockData.js'
 
 export default function BuyerDashboard() {
   const { t } = useTranslation()
 
   const { data: contracts = [] } = useQuery({
     queryKey: ['contracts', 'all'],
-    queryFn: async () => (await api.get('/contracts?status_filter=all')).data,
+    queryFn: async () => {
+      try {
+        const { data } = await api.get('/contracts?status_filter=all')
+        if (data?.length > 0) return data
+      } catch { /* offline */ }
+      return MOCK_CONTRACTS
+    },
   })
 
   const mine = useMemo(() => contracts.filter((c) => c.buyer_id), [contracts])
 
   const { data: commitments = [] } = useQuery({
     queryKey: ['buyer-commitments'],
-    queryFn: async () => (await api.get('/commitments/mine')).data,
+    queryFn: async () => {
+      try {
+        const { data } = await api.get('/commitments/mine')
+        if (data?.length > 0) return data
+      } catch { /* offline */ }
+      return MOCK_BUYER_COMMITMENTS
+    },
   })
 
   const stats = useMemo(() => {

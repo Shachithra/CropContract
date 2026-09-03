@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ScanLine, ArrowRight, MapPin, ChevronRight } from 'lucide-react'
+import { ScanLine, ArrowRight, MapPin, ChevronRight, Camera } from 'lucide-react'
 import { motion } from 'framer-motion'
 import GrowthThread from '../../components/farmer/GrowthThread.jsx'
 import AlertBanner from '../../components/farmer/AlertBanner.jsx'
@@ -104,9 +104,14 @@ export default function FarmerHome() {
             <ScanLine size={24} className="text-paddy" />
           </div>
           <p className="text-text-muted text-sm">{t('common.empty')}</p>
-          <Link to="/marketplace" className="btn-turmeric inline-flex">
-            {t('contract.openContracts')} <ArrowRight size={15} />
-          </Link>
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            <Link to="/marketplace" className="btn-turmeric inline-flex items-center gap-2">
+              {t('contract.openContracts')} <ArrowRight size={15} />
+            </Link>
+            <Link to="/farmer/scan" className="btn-outline inline-flex items-center gap-2">
+              <Camera size={15} /> {t('scan.openCamera')}
+            </Link>
+          </div>
         </Card>
       )}
 

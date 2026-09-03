@@ -12,6 +12,7 @@ import { homePathFor, useAuth } from '../../hooks/useAuth.jsx'
 import { SRI_LANKA_DISTRICTS } from '../../lib/sriLankaRegions.js'
 import { ALL_CROPS } from '../../lib/sriLankaCrops.js'
 import { requestNotificationPermission } from '../../lib/notifications.js'
+import LanguageToggle from '../../components/layout/LanguageToggle.jsx'
 
 const LANGS = [
   { code: 'en', label: 'English' },
@@ -85,7 +86,7 @@ export default function FarmerRegister() {
       navigate('/register/success', { replace: true })
     } catch (err) {
       const detail = err.response?.data?.detail
-      setError(typeof detail === 'string' ? detail : 'Registration failed — check your details')
+      setError(typeof detail === 'string' ? detail : t('auth.registrationFailed'))
     } finally {
       setLoading(false)
     }
@@ -123,16 +124,21 @@ export default function FarmerRegister() {
         </motion.div>
 
         {/* Title */}
-        <h1 className="font-display text-3xl font-bold tracking-wide text-paddy">CROPCONTRACT</h1>
-        <p className="text-text-muted text-sm mt-1 text-center">Estabilize secure verification for contract offers</p>
+        <h1 className="font-display text-3xl font-bold tracking-wide text-paddy">{t('appName')}</h1>
+        <p className="text-text-muted text-sm mt-1 text-center">{t('tagline')}</p>
+
+        {/* Language toggle */}
+        <div className="mt-4">
+          <LanguageToggle />
+        </div>
 
         {/* Form header */}
-        <h2 className="font-display text-xl font-bold text-paddy mt-8 mb-6 self-start">Farmer Registration</h2>
+        <h2 className="font-display text-xl font-bold text-paddy mt-8 mb-6 self-start">{t('auth.farmerRegistration')}</h2>
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-4">
           <div>
-            <label className="label-muted" htmlFor="name">Full Name</label>
+            <label className="label-muted" htmlFor="name">{t('auth.fullName')}</label>
             <input
               id="name"
               placeholder="e.g., Harsha Bandara"
@@ -143,7 +149,7 @@ export default function FarmerRegister() {
           </div>
 
           <div>
-            <label className="label-muted" htmlFor="email">Email Address</label>
+            <label className="label-muted" htmlFor="email">{t('auth.emailAddress')}</label>
             <input
               id="email"
               type="email"
@@ -155,7 +161,7 @@ export default function FarmerRegister() {
           </div>
 
           <div>
-            <label className="label-muted" htmlFor="phone">Phone Number</label>
+            <label className="label-muted" htmlFor="phone">{t('auth.phoneNumber')}</label>
             <input
               id="phone"
               type="tel"
@@ -168,7 +174,7 @@ export default function FarmerRegister() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="label-muted" htmlFor="password">Password</label>
+              <label className="label-muted" htmlFor="password">{t('auth.password')}</label>
               <PasswordInput
                 id="password"
                 placeholder="Minimum 8 characters"
@@ -177,10 +183,10 @@ export default function FarmerRegister() {
               {errors.password && <p className="text-clay text-xs mt-1">{errors.password.message}</p>}
             </div>
             <div>
-              <label className="label-muted" htmlFor="confirmPassword">Confirm Password</label>
+              <label className="label-muted" htmlFor="confirmPassword">{t('auth.confirmPassword')}</label>
               <PasswordInput
                 id="confirmPassword"
-                placeholder="Confirm Password"
+                placeholder={t('auth.confirmPassword')}
                 {...registerField('confirmPassword')}
               />
               {errors.confirmPassword && <p className="text-clay text-xs mt-1">{errors.confirmPassword.message}</p>}
@@ -188,7 +194,7 @@ export default function FarmerRegister() {
           </div>
 
           <div>
-            <label className="label-muted" htmlFor="farm_location">Farm Location</label>
+            <label className="label-muted" htmlFor="farm_location">{t('auth.farmLocation')}</label>
             <input
               id="farm_location"
               placeholder="e.g., Mihintale Road, Anuradhapura"
@@ -199,28 +205,28 @@ export default function FarmerRegister() {
           </div>
 
           <div>
-            <label className="label-muted" htmlFor="region">Region</label>
+            <label className="label-muted" htmlFor="region">{t('auth.region')}</label>
             <select
               id="region"
               className={`input-field ${errors.region ? 'border-clay focus:border-clay focus:ring-clay/50' : ''}`}
               {...registerField('region')}
             >
-              <option value="">Select</option>
+              <option value="">{t('auth.select')}</option>
               {SRI_LANKA_DISTRICTS.map((r) => (
-                <option key={r} value={r}>{r}</option>
+                <option key={r} value={r}>{t('regions.' + r, r)}</option>
               ))}
             </select>
             {errors.region && <p className="text-clay text-xs mt-1">{errors.region.message}</p>}
           </div>
 
           <div>
-            <label className="label-muted" htmlFor="crop_types">Crop Types</label>
+            <label className="label-muted" htmlFor="crop_types">{t('auth.cropTypes')}</label>
             <select
               id="crop_types"
               className={`input-field ${errors.crop_types ? 'border-clay focus:border-clay focus:ring-clay/50' : ''}`}
               {...registerField('crop_types')}
             >
-              <option value="">Select</option>
+              <option value="">{t('auth.select')}</option>
               {ALL_CROPS.map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
@@ -229,7 +235,7 @@ export default function FarmerRegister() {
           </div>
 
           <div>
-            <label className="label-muted" htmlFor="lang">Preferred Language</label>
+            <label className="label-muted" htmlFor="lang">{t('auth.language')}</label>
             <select id="lang" className="input-field" {...registerField('preferred_language')}>
               {LANGS.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
             </select>
@@ -240,15 +246,15 @@ export default function FarmerRegister() {
           )}
 
           <Button type="submit" loading={loading} variant="turmeric" className="w-full">
-            Submit
+            {t('auth.submit')}
           </Button>
         </form>
 
         {/* Sign in link */}
         <p className="mt-6 text-sm text-text-muted">
-          Already have an account?{' '}
+          {t('auth.alreadyHaveAccount')}{' '}
           <Link to="/login" className="font-semibold text-paddy underline underline-offset-2 hover:text-turmeric transition">
-            Sign in
+            {t('auth.signIn')}
           </Link>
         </p>
       </div>
