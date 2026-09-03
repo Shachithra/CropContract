@@ -2,7 +2,7 @@ from datetime import date, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.database import get_db
+from app.database import get_db, to_oid
 from app.routers.auth import get_current_user, require_role
 from app.schemas.contract import CommitmentCreate, CommitmentOut, ContractCreate, ContractOut
 
@@ -11,7 +11,7 @@ router = APIRouter(tags=["contracts"])
 
 async def _contract_out(c: dict) -> ContractOut:
     db = get_db()
-    buyer = await db.users.find_one({"_id": c["buyer_id"]})
+    buyer = await db.users.find_one({"_id": to_oid(c["buyer_id"])})
     return ContractOut(**{**c, "buyer_name": buyer["name"] if buyer else None})
 
 
@@ -69,7 +69,7 @@ async def create_contract(body: ContractCreate, user: dict = Depends(require_rol
 @router.get("/contracts/{contract_id}", response_model=ContractOut)
 async def get_contract(contract_id: str, user: dict = Depends(get_current_user)):
     db = get_db()
-    c = await db.contracts.find_one({"_id": contract_id})
+    c = await db.contracts.find_one({"_id": to_oid(contract_id)})
     if not c:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Contract not found")
     return await _contract_out(c)
@@ -82,7 +82,7 @@ async def commit_to_contract(
     user: dict = Depends(require_role("farmer")),
 ):
     db = get_db()
-    c = await db.contracts.find_one({"_id": contract_id})
+    c = await db.contracts.find_one({"_id": to_oid(contract_id)})
     if not c:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Contract not found")
     if c["status"] != "open":
@@ -113,13 +113,13 @@ async def commit_to_contract(
     commitment["_id"] = str(result.inserted_id)
 
     await db.contracts.update_one(
-        {"_id": contract_id},
+        {"_id": to_oid(contract_id)},
         {"$inc": {"committed_kg": qty}}
     )
     
     if c["committed_kg"] + qty >= c["total_kg"]:
         await db.contracts.update_one(
-            {"_id": contract_id},
+            {"_id": to_oid(contract_id)},
             {"$set": {"status": "fulfilled"}}
         )
 

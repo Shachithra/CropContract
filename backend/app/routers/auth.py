@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.config import settings
-from app.database import get_db
+from app.database import get_db, to_oid
 from app.database_stub import hash_password, verify_password
 from app.schemas.user import OTPVerify, ProfileUpdate, TokenResponse, UserLogin, UserOut, UserRegister
 
@@ -34,7 +34,7 @@ async def get_current_user(creds: HTTPAuthorizationCredentials | None = Depends(
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or expired token")
     
     db = get_db()
-    user = await db.users.find_one({"_id": payload.get("sub", "")})
+    user = await db.users.find_one({"_id": to_oid(payload.get("sub", ""))})
     if not user:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "User not found")
     return user

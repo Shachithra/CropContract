@@ -3,7 +3,7 @@ from datetime import date
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
-from app.database import get_db
+from app.database import get_db, to_oid
 from app.routers.auth import get_current_user, require_role
 from app.services.disease_model import analyze_leaf
 
@@ -67,14 +67,14 @@ async def review_scan(scan_id: str, action: str, user: dict = Depends(require_ro
         raise HTTPException(status_code=400, detail="action must be confirmed|dismissed")
     
     result = await db.scans.update_one(
-        {"_id": scan_id},
+        {"_id": to_oid(scan_id)},
         {"$set": {"review_status": action}}
     )
     
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Scan not found")
     
-    scan = await db.scans.find_one({"_id": scan_id})
+    scan = await db.scans.find_one({"_id": to_oid(scan_id)})
     return scan
 
 

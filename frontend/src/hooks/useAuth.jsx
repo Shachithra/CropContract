@@ -51,6 +51,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('cc_token', data.access_token)
     localStorage.setItem('cc_user', JSON.stringify(data.user))
     setUser(data.user)
+    window.dispatchEvent(new Event('cc_user_updated'))
     return data.user
   }, [])
 

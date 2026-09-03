@@ -1,18 +1,18 @@
 import { useState } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Button from '../../components/common/Button.jsx'
 import { homePathFor, useAuth } from '../../hooks/useAuth.jsx'
 
 export default function OTPVerify() {
   const { user, verifyOtp } = useAuth()
-  const navigate = useNavigate()
   const location = useLocation()
   const { phone, role } = location.state || {}
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  if (user) return <Navigate to={homePathFor(user.role)} replace />
   if (!phone || !role) {
     return <Navigate to="/login" replace />
   }
@@ -46,7 +46,6 @@ export default function OTPVerify() {
     try {
       const { default: api } = await import('../../lib/api.js')
       await verifyOtp(api, phone, otpCode)
-      navigate(homePathFor(role), { replace: true })
     } catch (err) {
       const detail = err.response?.data?.detail
       setError(typeof detail === 'string' ? detail : 'Invalid OTP — please try again')
@@ -75,7 +74,7 @@ export default function OTPVerify() {
         {/* Back button */}
         <div className="w-full flex justify-start mb-4">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => window.history.back()}
             className="w-10 h-10 rounded-full bg-white border border-surface-border grid place-items-center hover:bg-paddy/5 transition"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-paddy">

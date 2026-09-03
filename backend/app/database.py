@@ -2,10 +2,18 @@
 
 from datetime import date, timedelta
 
+from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import IndexModel, ASCENDING
 
 from app.config import settings
+
+
+def to_oid(value) -> ObjectId:
+    """Convert a string or ObjectId to ObjectId. Raises ValueError on bad input."""
+    if isinstance(value, ObjectId):
+        return value
+    return ObjectId(value)
 
 client: AsyncIOMotorClient = None
 db = None

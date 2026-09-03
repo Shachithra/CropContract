@@ -11,7 +11,7 @@ from datetime import date
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from app.database import get_db
+from app.database import get_db, to_oid
 from app.routers.auth import get_current_user
 from app.routers.scans import new_action_id  # noqa: F401  (re-export convenience)
 from app.services.disease_model import analyze_leaf
@@ -62,7 +62,7 @@ async def sync(body: SyncRequest, user: dict = Depends(get_current_user)):
                     continue
 
                 cid = str(action.payload["contract_id"])
-                contract = await db.contracts.find_one({"_id": cid})
+                contract = await db.contracts.find_one({"_id": to_oid(cid)})
                 if not contract or contract["status"] != "open":
                     raise ValueError("Contract unavailable")
                 remaining = contract["total_kg"] - contract["committed_kg"]
@@ -89,13 +89,13 @@ async def sync(body: SyncRequest, user: dict = Depends(get_current_user)):
                 mid = str(result.inserted_id)
                 
                 await db.contracts.update_one(
-                    {"_id": cid},
+                    {"_id": to_oid(cid)},
                     {"$inc": {"committed_kg": qty}}
                 )
                 
                 if contract["committed_kg"] + qty >= contract["total_kg"]:
                     await db.contracts.update_one(
-                        {"_id": cid},
+                        {"_id": to_oid(cid)},
                         {"$set": {"status": "fulfilled"}}
                     )
                 
