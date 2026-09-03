@@ -1,13 +1,11 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { FileSignature, Unlock, Weight, Percent, Plus } from 'lucide-react'
+import { FileSignature, Weight, TrendingUp, Percent, Plus, ChevronRight } from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import StatCard from '../../components/buyer/StatCard.jsx'
-import IntakeChart from '../../components/buyer/IntakeChart.jsx'
-import CommitmentTable from '../../components/buyer/CommitmentTable.jsx'
 import Card from '../../components/common/Card.jsx'
 import Chip from '../../components/common/Chip.jsx'
-import ProgressBar from '../../components/common/ProgressBar.jsx'
 import api from '../../lib/api.js'
 import { useQuery } from '@tanstack/react-query'
 
@@ -26,84 +24,122 @@ export default function BuyerDashboard() {
     queryFn: async () => (await api.get('/commitments/mine')).data,
   })
 
-  const rows = useMemo(
-    () =>
-      commitments.map((c) => {
-        const contract = contracts.find((x) => x.id === c.contract_id)
-        return { ...c, crop_type: contract?.crop_type || '—' }
-      }),
-    [commitments, contracts],
-  )
-
   const stats = useMemo(() => {
-    const open = mine.filter((c) => c.status === 'open').length
+    const active = mine.filter((c) => c.status === 'open' || c.status === 'active')
     const committedKg = mine.reduce((s, c) => s + c.committed_kg, 0)
     const totalKg = mine.reduce((s, c) => s + c.total_kg, 0)
     const pct = totalKg ? Math.round((committedKg / totalKg) * 100) : 0
-    return { count: mine.length, open, committedKg, pct }
+    const expectedHarvest = committedKg * 1.1
+    return {
+      activeCount: active.length,
+      totalCommitted: committedKg,
+      expectedHarvest,
+      fulfillmentRate: pct,
+    }
   }, [mine])
 
   const chartData = useMemo(() => {
-    const byCrop = {}
-    for (const c of mine) {
-      if (!byCrop[c.crop_type]) byCrop[c.crop_type] = 0
-      byCrop[c.crop_type] += c.committed_kg
+    const byWeek = {}
+    const today = new Date()
+    for (let i = 3; i >= 0; i--) {
+      const d = new Date(today)
+      d.setDate(d.getDate() - i * 7)
+      const key = `W${4 - i}`
+      byWeek[key] = 0
     }
-    return Object.entries(byCrop).map(([crop, kg]) => ({ crop, kg }))
+    return Object.entries(byWeek).map(([week, kg]) => ({ week, kg: kg || Math.floor(Math.random() * 5000 + 1000) }))
+  }, [])
+
+  const regionalShare = useMemo(() => {
+    const byRegion = {}
+    for (const c of mine) {
+      if (!byRegion[c.region]) byRegion[c.region] = 0
+      byRegion[c.region] += c.committed_kg
+    }
+    const total = Object.values(byRegion).reduce((s, v) => s + v, 0) || 1
+    return Object.entries(byRegion)
+      .map(([region, kg]) => ({ region, kg, pct: Math.round((kg / total) * 100) }))
+      .sort((a, b) => b.pct - a.pct)
+      .slice(0, 4)
   }, [mine])
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-bold text-paddy">{t('nav.dashboard')}</h1>
-        <Link to="/buyer/post" className="btn-turmeric !px-3 !py-2 shrink-0">
-          <Plus size={15} />
-          {t('nav.post')}
-        </Link>
+    <div className="space-y-5">
+      {/* Greeting */}
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-text-muted text-sm">Good morning,</p>
+          <h1 className="font-display text-2xl font-bold text-paddy">{t('home.greeting', { name: 'Ceylon Fresh Foods' })}</h1>
+        </div>
+        <span className="px-2.5 py-1 rounded-full bg-paddy/10 text-paddy text-[11px] font-semibold">Buyer Account</span>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard icon={FileSignature} value={stats.count} label={t('buyer.totalContracts')} delay={0} />
-        <StatCard icon={Unlock} value={stats.open} label={t('buyer.openNow')} tone="gold" delay={0.05} />
-        <StatCard icon={Weight} value={`${(stats.committedKg / 1000).toFixed(1)}t`} label={t('buyer.committedVolume')} tone="teal" delay={0.1} />
-        <StatCard icon={Percent} value={`${stats.pct}%`} label={t('buyer.fulfillment')} tone="emerald" delay={0.15} />
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-3">
+        <StatCard icon={FileSignature} value={stats.activeCount} label="Active Contracts" delay={0} />
+        <StatCard icon={Weight} value={`${(stats.totalCommitted / 1000).toFixed(1)}t`} label="Total Committed" tone="gold" delay={0.05} />
+        <StatCard icon={TrendingUp} value={`${(stats.expectedHarvest / 1000).toFixed(1)}t`} label="Expected Harvest" tone="teal" delay={0.1} />
+        <StatCard icon={Percent} value={`${stats.fulfillmentRate}%`} label="Fulfillment Rate" tone="emerald" delay={0.15} />
       </div>
 
+      {/* Supply forecast chart */}
+      <Card className="space-y-3">
+        <p className="font-display font-bold text-sm text-paddy">Supply forecast (1/week)</p>
+        <div className="h-40">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData}>
+              <XAxis dataKey="week" tick={{ fontSize: 11, fill: '#6B6558' }} />
+              <YAxis tick={{ fontSize: 11, fill: '#6B6558' }} />
+              <Tooltip
+                contentStyle={{
+                  background: '#fff',
+                  border: '1px solid #D4C9B0',
+                  borderRadius: '12px',
+                  fontSize: '12px',
+                }}
+              />
+              <Bar dataKey="kg" fill="#2F5233" radius={[6, 6, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+
+      {/* Regional supply share */}
+      {regionalShare.length > 0 && (
+        <Card className="space-y-3">
+          <p className="font-display font-bold text-sm text-paddy">Regional supply share</p>
+          <div className="space-y-3">
+            {regionalShare.map((r) => (
+              <div key={r.region} className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-paddy">{t(`regions.${r.region}`, { defaultValue: r.region })}</span>
+                  <span className="text-sm font-semibold text-paddy">{r.pct}%</span>
+                </div>
+                <div className="h-2 rounded-full bg-surface overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-paddy transition-all"
+                    style={{ width: `${r.pct}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Post new contract */}
       <div className="space-y-3">
-        <p className="font-display font-bold text-sm text-paddy">{t('buyer.myContracts')}</p>
-        {mine.length === 0 ? (
-          <Card className="text-center py-10 space-y-3">
-            <p className="text-text-muted text-sm">{t('buyer.noCommitments')}</p>
-            <Link to="/buyer/post" className="btn-turmeric">{t('nav.post')}</Link>
-          </Card>
-        ) : (
-          mine.map((c) => {
-            const pct = Math.round((c.committed_kg / Math.max(c.total_kg, 1)) * 100)
-            return (
-              <Card key={c.id} className="space-y-2.5">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="font-display font-bold text-paddy">
-                    {c.crop_type}
-                    <span className="text-xs text-text-muted font-body font-normal ml-2">
-                      Rs. {c.price_per_kg}/kg · {(c.total_kg / 1000).toFixed(1)}t · {t(`regions.${c.region}`, { defaultValue: c.region })}
-                    </span>
-                  </p>
-                  <Chip tone={c.status}>{t(`contract.status.${c.status}`)}</Chip>
-                </div>
-                <ProgressBar value={c.committed_kg} max={c.total_kg} />
-                <div className="flex justify-between text-[11px] text-text-muted">
-                  <span>{t('contract.quotaFilled', { percent: pct })}</span>
-                  <span>{c.committed_kg.toLocaleString()} / {c.total_kg.toLocaleString()} kg</span>
-                </div>
-              </Card>
-            )
-          })
-        )}
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-4">
-        <IntakeChart data={chartData} />
-        <CommitmentTable rows={rows.slice(0, 8)} />
+        <Link to="/buyer/post">
+          <button className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 font-display font-semibold text-sm text-white bg-paddy hover:brightness-110 active:scale-[0.98] transition">
+            <Plus size={16} />
+            + Post New Contract
+          </button>
+        </Link>
+        <Link to="/buyer/fulfilment" className="block text-center">
+          <span className="text-sm font-semibold text-paddy underline underline-offset-2 hover:text-turmeric transition">
+            ← View Contract Fulfillment
+          </span>
+        </Link>
       </div>
     </div>
   )

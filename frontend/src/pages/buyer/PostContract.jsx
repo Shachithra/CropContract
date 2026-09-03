@@ -5,6 +5,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ArrowLeft, CheckCircle2, Loader2 } from 'lucide-react'
 import Button from '../../components/common/Button.jsx'
 import Card from '../../components/common/Card.jsx'
 import api from '../../lib/api.js'
@@ -19,6 +21,8 @@ const contractSchema = z.object({
   price_per_kg: z.coerce.number().positive('Must be a positive number'),
   region: z.string().min(1, 'Select a region'),
   commit_deadline: z.string().optional(),
+  delivery_date: z.string().optional(),
+  notes: z.string().optional(),
 })
 
 export default function PostContract() {
@@ -28,6 +32,7 @@ export default function PostContract() {
   const [step, setStep] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [published, setPublished] = useState(false)
 
   const {
     register,
@@ -43,6 +48,8 @@ export default function PostContract() {
       price_per_kg: '',
       region: 'Colombo',
       commit_deadline: '',
+      delivery_date: '',
+      notes: '',
     },
   })
 
@@ -60,10 +67,11 @@ export default function PostContract() {
         region: data.region,
       }
       if (data.commit_deadline) body.commit_deadline = data.commit_deadline
+      if (data.delivery_date) body.delivery_date = data.delivery_date
+      if (data.notes) body.notes = data.notes
       await api.post('/contracts', body)
       queryClient.invalidateQueries({ queryKey: ['contracts'] })
-      showToast(t('contract.posted'), 'success')
-      navigate('/buyer')
+      setPublished(true)
     } catch {
       setError(t('common.error'))
     } finally {
@@ -71,93 +79,209 @@ export default function PostContract() {
     }
   }
 
+  // Published success state
+  if (published) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center px-6 text-center space-y-6">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="w-20 h-20 rounded-full bg-teal/20 grid place-items-center"
+        >
+          <CheckCircle2 size={40} className="text-teal" />
+        </motion.div>
+
+        <div>
+          <h2 className="font-display text-xl font-bold text-paddy">Contract published</h2>
+          <p className="text-sm text-text-muted mt-2">
+            Farmers in {formValues.region} can now view and commit to this contract.
+          </p>
+        </div>
+
+        <Button onClick={() => navigate('/buyer')} className="w-full max-w-xs">
+          View Contracts
+        </Button>
+      </div>
+    )
+  }
+
+  // Publishing loading state
+  if (loading) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center px-6 text-center space-y-6">
+        <div className="w-16 h-16 rounded-full border-4 border-surface border-t-turmeric animate-spin" />
+        <div>
+          <h2 className="font-display text-xl font-bold text-paddy">Publishing...</h2>
+          <p className="text-sm text-text-muted mt-2">
+            Pushing this contract to farmers in {formValues.region}.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-lg mx-auto space-y-4">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-paddy">{t('contract.postTitle')}</h1>
-        <p className="text-text-muted text-sm mt-0.5">{t('contract.postSubtitle')}</p>
-      </div>
-
-      {/* Progress */}
-      <div className="flex items-center gap-2 text-xs text-text-muted">
-        <span className={`font-semibold ${step === 0 ? 'text-paddy' : ''}`}>{t('common.step', { current: 1, total: 2 })}</span>
-        <div className="flex-1 h-1 rounded-full bg-surface overflow-hidden">
-          <div className={`h-full rounded-full bg-turmeric transition-all ${step === 0 ? 'w-1/2' : 'w-full'}`} />
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <button onClick={() => step === 1 ? setStep(0) : navigate(-1)} className="text-text-muted hover:text-paddy">
+          <ArrowLeft size={20} />
+        </button>
+        <div>
+          <h1 className="font-display text-2xl font-bold text-paddy">{t('contract.postTitle')}</h1>
         </div>
-        <span className={`font-semibold ${step === 1 ? 'text-paddy' : ''}`}>{t('common.step', { current: 2, total: 2 })}</span>
       </div>
 
-      {step === 0 ? (
-        <div className="card-surface p-5 space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="label-muted" htmlFor="crop">{t('contract.cropType')}</label>
-              <select id="crop" className={`input-field ${errors.crop_type ? 'border-clay' : ''}`} {...register('crop_type')}>
-                {ALL_CROPS.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-              {errors.crop_type && <p className="text-clay text-xs mt-1">{errors.crop_type.message}</p>}
-            </div>
-            <div>
-              <label className="label-muted" htmlFor="grade">{t('contract.grade')}</label>
-              <select id="grade" className="input-field" {...register('grade')}>
-                {CROP_GRADES.map((g) => <option key={g} value={g}>{g}</option>)}
-              </select>
-            </div>
-          </div>
+      {/* Progress bar */}
+      <div className="h-1 rounded-full bg-surface overflow-hidden">
+        <motion.div
+          initial={{ width: '50%' }}
+          animate={{ width: step === 0 ? '50%' : '100%' }}
+          className="h-full rounded-full bg-paddy"
+        />
+      </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="label-muted" htmlFor="total">{t('contract.totalKg')}</label>
-              <input id="total" type="number" min={1} className={`input-field ${errors.total_kg ? 'border-clay' : ''}`} placeholder="2000" {...register('total_kg')} />
-              {errors.total_kg && <p className="text-clay text-xs mt-1">{errors.total_kg.message}</p>}
+      <AnimatePresence mode="wait">
+        {step === 0 ? (
+          <motion.div
+            key="step0"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="card-surface p-5 space-y-4"
+          >
+            {/* Crop Type & Grade */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="label-muted" htmlFor="crop">CROP TYPE</label>
+                <select id="crop" className={`input-field ${errors.crop_type ? 'border-clay' : ''}`} {...register('crop_type')}>
+                  {ALL_CROPS.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="label-muted" htmlFor="grade">GRADE</label>
+                <select id="grade" className="input-field" {...register('grade')}>
+                  {CROP_GRADES.map((g) => <option key={g} value={g}>{g}</option>)}
+                </select>
+              </div>
             </div>
-            <div>
-              <label className="label-muted" htmlFor="price">{t('contract.pricePerKg')}</label>
-              <input id="price" type="number" step="0.01" min={0.01} className={`input-field ${errors.price_per_kg ? 'border-clay' : ''}`} placeholder="185.00" {...register('price_per_kg')} />
-              {errors.price_per_kg && <p className="text-clay text-xs mt-1">{errors.price_per_kg.message}</p>}
-            </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-3">
+            {/* Quantity & Price */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="label-muted" htmlFor="total">REQUIRED QUANTITY IN KG</label>
+                <input id="total" type="number" min={1} className={`input-field ${errors.total_kg ? 'border-clay' : ''}`} placeholder="e.g. 3000" {...register('total_kg')} />
+                {errors.total_kg && <p className="text-clay text-xs mt-1">{errors.total_kg.message}</p>}
+              </div>
+              <div>
+                <label className="label-muted" htmlFor="price">PRICE PER KG (Rs.)</label>
+                <input id="price" type="number" step="0.01" min={0.01} className={`input-field ${errors.price_per_kg ? 'border-clay' : ''}`} placeholder="e.g. 210" {...register('price_per_kg')} />
+                {errors.price_per_kg && <p className="text-clay text-xs mt-1">{errors.price_per_kg.message}</p>}
+              </div>
+            </div>
+
+            {/* Region */}
             <div>
-              <label className="label-muted" htmlFor="region">{t('auth.region')}</label>
+              <label className="label-muted" htmlFor="region">REGION</label>
               <select id="region" className="input-field" {...register('region')}>
                 {SRI_LANKA_DISTRICTS.map((r) => (
                   <option key={r} value={r}>{t(`regions.${r}`, { defaultValue: r })}</option>
                 ))}
               </select>
             </div>
+
+            {/* Dates */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="label-muted" htmlFor="deadline">COMMITMENT DEADLINE</label>
+                <input id="deadline" type="date" className="input-field" {...register('commit_deadline')} />
+              </div>
+              <div>
+                <label className="label-muted" htmlFor="delivery">DELIVERY DATE</label>
+                <input id="delivery" type="date" className="input-field" {...register('delivery_date')} />
+              </div>
+            </div>
+
+            {/* Notes */}
             <div>
-              <label className="label-muted" htmlFor="deadline">{t('contract.deadline', { date: '' }).replace(/:.*$/, '')}</label>
-              <input id="deadline" type="date" className="input-field" {...register('commit_deadline')} />
+              <label className="label-muted" htmlFor="notes">ADDITIONAL SPECIFICATIONS</label>
+              <textarea
+                id="notes"
+                rows={3}
+                className="input-field"
+                placeholder="Optional notes"
+                {...register('notes')}
+              />
             </div>
-          </div>
 
-          <Button onClick={() => setStep(1)} className="w-full">{t('common.next')}</Button>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          <Card className="space-y-3">
-            <div className="flex items-center justify-between">
-              <p className="font-display font-bold text-lg text-paddy">{formValues.crop_type}</p>
-              <span className="chip bg-paddy/10 text-paddy border border-paddy/30">{formValues.grade}</span>
+            <Button onClick={() => setStep(1)} className="w-full">
+              Next: Terms & Dates
+            </Button>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="step1"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="space-y-3"
+          >
+            {/* Preview card */}
+            <Card className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] text-text-muted uppercase tracking-wider font-semibold">NEW CONTRACT OFFER</p>
+              </div>
+              <div className="flex items-center justify-between">
+                <p className="font-display text-xl font-bold text-paddy">{formValues.crop_type} -</p>
+                <span className="chip bg-paddy/10 text-paddy border border-paddy/30">{formValues.grade}</span>
+              </div>
+
+              <div className="space-y-0">
+                <div className="flex items-center justify-between py-3 border-b border-surface-border/60">
+                  <span className="text-sm text-text-muted">Required quantity</span>
+                  <span className="text-sm font-semibold text-paddy">{parseInt(formValues.total_kg || 0).toLocaleString()} kg</span>
+                </div>
+                <div className="flex items-center justify-between py-3 border-b border-surface-border/60">
+                  <span className="text-sm text-text-muted">Price</span>
+                  <span className="text-sm font-semibold text-paddy">Rs. {formValues.price_per_kg} / kg</span>
+                </div>
+                <div className="flex items-center justify-between py-3 border-b border-surface-border/60">
+                  <span className="text-sm text-text-muted">Region</span>
+                  <span className="text-sm font-semibold text-paddy">{t(`regions.${formValues.region}`, { defaultValue: formValues.region })}</span>
+                </div>
+                <div className="flex items-center justify-between py-3 border-b border-surface-border/60">
+                  <span className="text-sm text-text-muted">Commit by</span>
+                  <span className="text-sm font-semibold text-turmeric">{formValues.commit_deadline || '—'}</span>
+                </div>
+                <div className="flex items-center justify-between py-3">
+                  <span className="text-sm text-text-muted">Delivery date</span>
+                  <span className="text-sm font-semibold text-paddy">{formValues.delivery_date || '—'}</span>
+                </div>
+              </div>
+            </Card>
+
+            {error && <p className="text-clay text-sm bg-clay/10 border border-clay/30 rounded-xl px-4 py-2.5">{error}</p>}
+
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => setStep(0)} className="flex-1">
+                Back
+              </Button>
+              <Button onClick={handleSubmit(onSubmit)} loading={loading} className="flex-1">
+                Publish Contract
+              </Button>
             </div>
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div><p className="label-muted">{t('contract.totalKg')}</p><p className="font-medium text-paddy">{parseInt(formValues.total_kg || 0).toLocaleString()} kg</p></div>
-              <div><p className="label-muted">{t('contract.pricePerKg')}</p><p className="font-medium text-paddy">Rs. {formValues.price_per_kg}</p></div>
-              <div><p className="label-muted">{t('auth.region')}</p><p className="font-medium text-paddy">{t(`regions.${formValues.region}`, { defaultValue: formValues.region })}</p></div>
-              <div><p className="label-muted">{t('contract.deadline', { date: '' }).replace(/:.*$/, '')}</p><p className="font-medium text-paddy">{formValues.commit_deadline || '—'}</p></div>
-            </div>
-          </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-          {error && <p className="text-clay text-sm bg-clay/10 border border-clay/30 rounded-xl px-4 py-2.5">{error}</p>}
-
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={() => setStep(0)} className="flex-1">{t('common.back')}</Button>
-            <Button onClick={handleSubmit(onSubmit)} loading={loading} className="flex-1">{t('common.publish')}</Button>
-          </div>
-        </div>
-      )}
+      {/* Back to dashboard link */}
+      <button
+        onClick={() => navigate('/buyer')}
+        className="text-sm font-semibold text-paddy underline underline-offset-2 hover:text-turmeric transition"
+      >
+        ← Back to Dashboard
+      </button>
     </div>
   )
 }

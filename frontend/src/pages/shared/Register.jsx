@@ -51,6 +51,14 @@ export default function Register() {
     <div className="min-h-dvh flex flex-col items-center bg-cream">
       {/* Main content */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8">
+        {/* Language toggle */}
+        <div className="absolute top-4 right-4">
+          <div className="flex items-center gap-1 bg-white rounded-lg border border-surface-border p-0.5">
+            <button className="px-2 py-1 text-[11px] font-semibold rounded-md bg-paddy text-white">EN</button>
+            <button className="px-2 py-1 text-[11px] font-semibold rounded-md text-text-muted">SI</button>
+          </div>
+        </div>
+
         {/* Logo */}
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
@@ -86,17 +94,12 @@ export default function Register() {
         <h1 className="font-display text-3xl font-bold tracking-wide text-paddy">
           CROPCONTRACT
         </h1>
-        <p className="text-text-muted text-sm mt-2 text-center max-w-xs">
-          Know Demand. Secure Contracts. Grow with Confidence.
+        <p className="text-text-muted text-sm mt-4 text-center max-w-xs">
+          Choose your profile to begin
         </p>
 
-        {/* Register As */}
-        <h2 className="font-display text-xl font-bold text-paddy mt-10 mb-5 self-start">
-          Register As
-        </h2>
-
         {/* Role cards */}
-        <div className="w-full space-y-3">
+        <div className="w-full space-y-3 mt-6">
           {ROLES.map(({ value, icon: Icon, label, description, iconBg }, i) => (
             <motion.button
               key={value}
@@ -113,16 +116,45 @@ export default function Register() {
               <div className={`w-12 h-12 rounded-xl ${iconBg} grid place-items-center shrink-0`}>
                 <Icon size={24} className="text-white" />
               </div>
-              <div>
+              <div className="flex-1">
                 <p className="font-display font-bold text-paddy text-sm">{label}</p>
                 <p className="text-xs text-text-muted mt-0.5 leading-relaxed">{description}</p>
               </div>
+              {preselectedRole === value && (
+                <div className="w-6 h-6 rounded-full bg-paddy grid place-items-center shrink-0">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+              )}
             </motion.button>
           ))}
         </div>
 
+        {/* Continue button */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="w-full mt-8"
+        >
+          <button
+            onClick={() => {
+              if (preselectedRole) handleRoleClick(preselectedRole)
+            }}
+            className={`w-full rounded-xl px-4 py-3 font-display font-semibold text-sm text-white transition ${
+              preselectedRole
+                ? 'bg-turmeric hover:brightness-110 active:scale-[0.98]'
+                : 'bg-turmeric/50 cursor-not-allowed'
+            }`}
+            disabled={!preselectedRole}
+          >
+            Continue
+          </button>
+        </motion.div>
+
         {/* Sign in link */}
-        <p className="mt-10 text-sm text-text-muted">
+        <p className="mt-6 text-sm text-text-muted">
           Already have an account?{' '}
           <Link
             to="/login"

@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { TrendingUp, TrendingDown, ArrowLeft } from 'lucide-react'
 import Card from '../../components/common/Card.jsx'
 import RiskBadge from '../../components/officer/RiskBadge.jsx'
-import OutbreakTrendChart from '../../components/officer/OutbreakTrendChart.jsx'
 import { useQuery } from '@tanstack/react-query'
 import api from '../../lib/api.js'
 import { SRI_LANKA_DISTRICTS } from '../../lib/sriLankaRegions.js'
@@ -27,11 +27,15 @@ export default function RegionalOutbreaks() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-paddy">{t('officer.regionalOutbreaks')}</h1>
-        <p className="text-text-muted text-sm mt-0.5">{t('officer.outbreakWatch')}</p>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-paddy">{t('officer.regionalOutbreaks')}</h1>
+        </div>
+        <span className="px-2.5 py-1 rounded-full bg-paddy/10 text-paddy text-[11px] font-semibold">Week 04</span>
       </div>
 
+      {/* Region list */}
       {isLoading ? (
         <p className="text-text-muted text-sm py-10 text-center">{t('common.loading')}</p>
       ) : regions.length === 0 ? (
@@ -52,16 +56,46 @@ export default function RegionalOutbreaks() {
                   <div>
                     <p className="font-display font-bold text-paddy">{t(`regions.${r.region}`, { defaultValue: r.region })}</p>
                     <p className="text-xs text-text-muted mt-0.5">
-                      {r.case_count} {t('officer.cases')} · {r.disease}
+                      {r.case_count} cases · {r.disease}
                     </p>
                   </div>
-                  <RiskBadge level={r.risk_level} />
+                  <div className="flex items-center gap-2">
+                    {r.trend === 'up' ? (
+                      <span className="flex items-center gap-0.5 text-clay text-xs font-semibold">
+                        <TrendingUp size={14} /> {r.trend_pct}%
+                      </span>
+                    ) : r.trend === 'down' ? (
+                      <span className="flex items-center gap-0.5 text-teal text-xs font-semibold">
+                        <TrendingDown size={14} /> {r.trend_pct}%
+                      </span>
+                    ) : null}
+                    <RiskBadge level={r.risk_level} />
+                  </div>
                 </Card>
               </Link>
             </motion.div>
           ))}
         </div>
       )}
+
+      {/* Risk legend */}
+      <Card className="space-y-3">
+        <p className="font-display font-bold text-sm text-paddy">Risk legend</p>
+        <div className="flex flex-wrap gap-2">
+          <RiskBadge level="low" />
+          <RiskBadge level="moderate" />
+          <RiskBadge level="high" />
+          <RiskBadge level="critical" />
+        </div>
+      </Card>
+
+      {/* Back to dashboard */}
+      <button
+        onClick={() => window.location.href = '/officer'}
+        className="text-sm font-semibold text-paddy underline underline-offset-2 hover:text-turmeric transition"
+      >
+        ← Back to Dashboard
+      </button>
     </div>
   )
 }

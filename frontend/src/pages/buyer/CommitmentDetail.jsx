@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Link, useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, CheckCircle2, Calendar } from 'lucide-react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -53,7 +53,11 @@ export default function CommitmentDetail() {
   }
 
   if (isLoading) {
-    return <p className="text-text-muted text-sm py-10 text-center">{t('common.loading')}</p>
+    return (
+      <div className="flex items-center justify-center py-24">
+        <div className="w-8 h-8 border-3 border-paddy/20 border-t-paddy rounded-full animate-spin" />
+      </div>
+    )
   }
 
   if (!commitment || !contract) {
@@ -67,49 +71,48 @@ export default function CommitmentDetail() {
 
   return (
     <div className="space-y-4 max-w-lg mx-auto">
+      {/* Back */}
       <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-text-muted hover:text-paddy">
         <ArrowLeft size={16} /> {t('common.back')}
       </button>
 
+      {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h1 className="font-display text-2xl font-bold text-paddy">{contract.crop_type}</h1>
-          <p className="text-sm text-text-muted mt-0.5">
-            Commitment #{commitment.id} · {commitment.farmer_name || 'Farmer'}
-          </p>
+          <h1 className="font-display text-2xl font-bold text-paddy">{commitment.farmer_name || 'Farmer'}</h1>
         </div>
-        <Chip tone={commitment.status}>{t(`contract.status.${commitment.status}`)}</Chip>
+        <Chip tone="growing">Growing</Chip>
       </div>
 
-      <Card className="grid grid-cols-2 gap-4 text-sm">
-        <div>
-          <p className="label-muted">{t('contract.quantity')}</p>
-          <p className="font-display font-bold text-paddy text-lg">{commitment.quantity_kg.toLocaleString()} kg</p>
+      {/* Details */}
+      <Card className="space-y-0">
+        <div className="flex items-center justify-between py-3 border-b border-surface-border/60">
+          <span className="text-sm text-text-muted">Committed quantity</span>
+          <span className="text-sm font-semibold text-paddy">{commitment.quantity_kg} kg</span>
         </div>
-        <div>
-          <p className="label-muted">{t('contract.pricePerKg')}</p>
-          <p className="font-display font-bold text-paddy text-lg">Rs. {contract.price_per_kg}</p>
+        <div className="flex items-center justify-between py-3 border-b border-surface-border/60">
+          <span className="text-sm text-text-muted">Crop journey</span>
+          <span className="text-sm font-semibold text-paddy">Growing</span>
         </div>
-        <div>
-          <p className="label-muted">Payout estimate</p>
-          <p className="font-display font-bold text-turmeric text-lg">
-            Rs. {(commitment.quantity_kg * contract.price_per_kg).toLocaleString()}
-          </p>
+        <div className="flex items-center justify-between py-3 border-b border-surface-border/60">
+          <span className="text-sm text-text-muted">Expected delivery</span>
+          <span className="text-sm font-semibold text-paddy flex items-center gap-1">
+            <Calendar size={13} /> {contract.delivery_date || '—'}
+          </span>
         </div>
-        <div>
-          <p className="label-muted">{t('buyer.date')}</p>
-          <p className="font-medium text-paddy flex items-center gap-1">
-            <Calendar size={13} /> {commitment.committed_at}
-          </p>
+        <div className="flex items-center justify-between py-3">
+          <span className="text-sm text-text-muted">Delivered so far</span>
+          <span className="text-sm font-semibold text-paddy">{commitment.delivered_qty_kg || 0} kg</span>
         </div>
       </Card>
 
+      {/* Confirm delivery form */}
       {commitment.status === 'active' && (
-        <Card className="space-y-3">
-          <p className="font-display font-bold text-sm text-paddy">{t('buyer.deliveryConfirm')}</p>
-          <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-4">
+          {/* Delivery confirmation */}
+          <Card className="space-y-4">
             <div>
-              <label className="label-muted" htmlFor="delivered_qty">{t('contract.quantity')}</label>
+              <label className="label-muted" htmlFor="delivered_qty">QUANTITY RECEIVED IN KG</label>
               <input
                 id="delivered_qty"
                 type="number"
@@ -121,7 +124,7 @@ export default function CommitmentDetail() {
               />
             </div>
             <div>
-              <label className="label-muted" htmlFor="quality">{t('buyer.qualityGrade')}</label>
+              <label className="label-muted" htmlFor="quality">QUALITY GRADE ON ARRIVAL</label>
               <select
                 id="quality"
                 className="input-field"
@@ -131,11 +134,12 @@ export default function CommitmentDetail() {
                 {CROP_GRADES.map((g) => <option key={g} value={g}>{g}</option>)}
               </select>
             </div>
-          </div>
+          </Card>
+
           <Button onClick={confirmDelivery} loading={confirming} className="w-full">
-            <CheckCircle2 size={16} /> {t('buyer.deliveryConfirm')}
+            Confirm & Update Fulfillment
           </Button>
-        </Card>
+        </div>
       )}
 
       {commitment.status !== 'active' && (
@@ -148,6 +152,14 @@ export default function CommitmentDetail() {
           </p>
         </Card>
       )}
+
+      {/* Back to fulfillment */}
+      <button
+        onClick={() => navigate('/buyer/fulfilment')}
+        className="text-sm font-semibold text-paddy underline underline-offset-2 hover:text-turmeric transition"
+      >
+        ← Back to Fulfillment
+      </button>
     </div>
   )
 }

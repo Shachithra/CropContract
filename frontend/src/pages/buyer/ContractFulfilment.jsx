@@ -1,15 +1,16 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { ChevronRight } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { ArrowLeft, ChevronRight } from 'lucide-react'
 import Card from '../../components/common/Card.jsx'
 import Chip from '../../components/common/Chip.jsx'
-import ProgressBar from '../../components/common/ProgressBar.jsx'
 import api from '../../lib/api.js'
 
 export default function ContractFulfilment() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
 
   const { data: contracts = [] } = useQuery({
     queryKey: ['contracts', 'all'],
@@ -22,64 +23,124 @@ export default function ContractFulfilment() {
   })
 
   const mine = useMemo(() => contracts.filter((c) => c.buyer_id), [contracts])
+  const first = mine[0]
 
-  return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-paddy">{t('nav.fulfilment')}</h1>
-        <p className="text-text-muted text-sm mt-0.5">{t('buyer.fulfilment')}</p>
-      </div>
+  const firstCommitments = useMemo(
+    () => commitments.filter((c) => first && c.contract_id === first.id),
+    [commitments, first],
+  )
 
-      {mine.length === 0 ? (
+  if (!first) {
+    return (
+      <div className="space-y-4">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-paddy">{t('nav.fulfilment')}</h1>
+          <p className="text-text-muted text-sm mt-0.5">{t('buyer.fulfilment')}</p>
+        </div>
         <Card className="text-center py-12">
           <p className="text-text-muted text-sm">{t('buyer.noCommitments')}</p>
         </Card>
-      ) : (
-        <div className="space-y-3">
-          {mine.map((c) => {
-            const pct = Math.round((c.committed_kg / Math.max(c.total_kg, 1)) * 100)
-            const contractCommitments = commitments.filter((cm) => cm.contract_id === c.id)
-            return (
-              <Card key={c.id} className="space-y-3">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="font-display font-bold text-paddy">
-                    {c.crop_type}
-                    <span className="text-xs text-text-muted font-body font-normal ml-2">
-                      {t(`regions.${c.region}`, { defaultValue: c.region })}
-                    </span>
-                  </p>
-                  <Chip tone={c.status}>{t(`contract.status.${c.status}`)}</Chip>
-                </div>
+      </div>
+    )
+  }
 
-                <ProgressBar value={c.committed_kg} max={c.total_kg} />
-                <div className="flex justify-between text-[11px] text-text-muted">
-                  <span>{t('contract.quotaFilled', { percent: pct })}</span>
-                  <span>{c.committed_kg.toLocaleString()} / {c.total_kg.toLocaleString()} kg</span>
-                </div>
+  const pct = Math.round((first.committed_kg / Math.max(first.total_kg, 1)) * 100)
+  const deliveredKg = firstCommitments.reduce((s, c) => s + (c.delivered_qty_kg || 0), 0)
+  const circumference = 2 * Math.PI * 42
+  const dashoffset = circumference - (pct / 100) * circumference
 
-                {contractCommitments.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-xs font-semibold text-paddy">{t('buyer.commitmentsTable')}</p>
-                    {contractCommitments.map((cm) => (
-                      <Link
-                        key={cm.id}
-                        to={`/buyer/commitment/${cm.id}`}
-                        className="flex items-center justify-between bg-cream rounded-xl px-3 py-2 text-xs hover:bg-surface transition"
-                      >
-                        <span className="font-medium text-paddy">{cm.farmer_name || 'Farmer'} · {cm.quantity_kg} kg</span>
-                        <span className="flex items-center gap-1 text-text-muted">
-                          {cm.committed_at}
-                          <ChevronRight size={12} />
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </Card>
-            )
-          })}
+  return (
+    <div className="space-y-4 max-w-lg mx-auto">
+      {/* Back */}
+      <button onClick={() => window.history.back()} className="flex items-center gap-1 text-sm text-text-muted hover:text-paddy">
+        <ArrowLeft size={16} /> {t('common.back')}
+      </button>
+
+      {/* Progress ring header */}
+      <Card className="flex items-center gap-6">
+        <div className="relative w-28 h-28 shrink-0">
+          <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="#E8E0CC" strokeWidth="6" />
+            <motion.circle
+              cx="50" cy="50" r="42"
+              fill="none" stroke="#2F5233" strokeWidth="6" strokeLinecap="round"
+              strokeDasharray={circumference}
+              initial={{ strokeDashoffset: circumference }}
+              animate={{ strokeDashoffset: dashoffset }}
+              transition={{ duration: 1, ease: 'easeOut' }}
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="font-display text-2xl font-bold text-paddy">{pct}%</span>
+            <span className="text-[10px] text-text-muted uppercase tracking-wider">FULFILLED</span>
+          </div>
         </div>
-      )}
+
+        <div className="grid grid-cols-2 gap-4 flex-1">
+          <div>
+            <p className="text-[10px] text-text-muted uppercase tracking-wider">Committed</p>
+            <p className="font-display font-bold text-lg text-paddy">{first.committed_kg.toLocaleString()} kg</p>
+          </div>
+          <div>
+            <p className="text-[10px] text-text-muted uppercase tracking-wider">Delivered</p>
+            <p className="font-display font-bold text-lg text-paddy">{deliveredKg.toLocaleString()} kg</p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Contract details */}
+      <Card className="space-y-0">
+        <div className="flex items-center justify-between py-3 border-b border-surface-border/60">
+          <span className="text-sm text-text-muted">Required Quantity</span>
+          <span className="text-sm font-semibold text-paddy">{first.total_kg?.toLocaleString()} kg</span>
+        </div>
+        <div className="flex items-center justify-between py-3 border-b border-surface-border/60">
+          <span className="text-sm text-text-muted">Delivered So Far</span>
+          <span className="text-sm font-semibold text-paddy">{deliveredKg.toLocaleString()} kg</span>
+        </div>
+        <div className="flex items-center justify-between py-3">
+          <span className="text-sm text-text-muted">Payment Status</span>
+          <span className="text-sm font-semibold text-paddy">Partial - Rs. {(deliveredKg * first.price_per_kg).toLocaleString()} paid</span>
+        </div>
+      </Card>
+
+      {/* Farmer commitments */}
+      <div className="space-y-3">
+        <p className="font-display font-bold text-sm text-paddy">FARMER COMMITMENTS</p>
+        {firstCommitments.length === 0 ? (
+          <Card className="text-center py-8">
+            <p className="text-text-muted text-sm">No commitments yet</p>
+          </Card>
+        ) : (
+          <div className="space-y-2">
+            {firstCommitments.map((c) => (
+              <Link
+                key={c.id}
+                to={`/buyer/commitment/${c.id}`}
+              >
+                <Card hoverable className="flex items-center justify-between">
+                  <div>
+                    <p className="font-display font-bold text-sm text-paddy">{c.farmer_name || 'Farmer'}</p>
+                    <p className="text-xs text-text-muted">Commitment: {c.quantity_kg} kg</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Chip tone={c.status || 'growing'}>{c.status === 'active' ? 'Growing' : c.status || 'Growing'}</Chip>
+                    <ChevronRight size={14} className="text-text-muted" />
+                  </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Back to dashboard */}
+      <button
+        onClick={() => navigate('/buyer')}
+        className="text-sm font-semibold text-paddy underline underline-offset-2 hover:text-turmeric transition"
+      >
+        ← Back to Dashboard
+      </button>
     </div>
   )
 }

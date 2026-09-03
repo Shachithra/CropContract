@@ -1,11 +1,12 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { FileSignature, Weight, Banknote, ScanLine, ShieldCheck, AlertTriangle, ArrowRight } from 'lucide-react'
-import StatCard from '../../components/buyer/StatCard.jsx'
+import { ScanLine, ArrowRight, MapPin, ChevronRight } from 'lucide-react'
+import { motion } from 'framer-motion'
 import GrowthThread from '../../components/farmer/GrowthThread.jsx'
 import AlertBanner from '../../components/farmer/AlertBanner.jsx'
 import Card from '../../components/common/Card.jsx'
+import Chip from '../../components/common/Chip.jsx'
 import { useContracts, useMyCommitments } from '../../hooks/useContracts.js'
 import { useAuth } from '../../hooks/useAuth.jsx'
 import { useQuery } from '@tanstack/react-query'
@@ -28,81 +29,128 @@ export default function FarmerHome() {
     staleTime: 60_000,
   })
 
-  const stats = useMemo(() => {
-    const active = commitments.filter((c) => c.status === 'active')
-    const kg = active.reduce((sum, c) => sum + c.quantity_kg, 0)
-    const byId = Object.fromEntries(contracts.map((c) => [c.id, c]))
-    const earnings = active.reduce(
-      (sum, c) => sum + c.quantity_kg * (byId[c.contract_id]?.price_per_kg || 0),
-      0,
-    )
-    return { count: active.length, kg, earnings }
-  }, [commitments, contracts])
-
-  const risk = useMemo(() => {
-    const highNearby = commitments.length >= 2 ? 'moderate' : 'low'
-    return highNearby
-  }, [commitments])
-
-  const latest = commitments[0]
   const latestAlert = alerts[0]
 
+  const activeCommitments = useMemo(
+    () => commitments.filter((c) => c.status === 'active' || c.status === 'pending-sync'),
+    [commitments],
+  )
+
+  const latest = activeCommitments[0]
+  const latestContract = latest ? contracts.find((x) => x.id === latest.contract_id) : null
+
+  const openContracts = useMemo(
+    () => contracts.filter((c) => c.status === 'open').slice(0, 4),
+    [contracts],
+  )
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="font-display text-2xl font-bold text-paddy">{t('home.greeting', { name: user?.name?.split(' ')[0] })}</h1>
-          <p className="text-text-muted text-sm mt-0.5">{t('home.subtitle')}</p>
-        </div>
-        <Link to="/farmer/scan" className="btn-turmeric !px-3 !py-2 shrink-0">
-          <ScanLine size={15} />
-          {t('nav.scan')}
-        </Link>
+    <div className="space-y-5">
+      {/* Greeting */}
+      <div>
+        <h1 className="font-display text-2xl font-bold text-paddy">
+          {t('home.greeting', { name: user?.name?.split(' ')[0] || 'Farmer' })}
+        </h1>
+        {user?.region && (
+          <p className="text-text-muted text-sm mt-0.5 flex items-center gap-1">
+            <MapPin size={13} />
+            {t(`regions.${user.region}`, { defaultValue: user.region })}
+          </p>
+        )}
       </div>
 
+      {/* Regional alert */}
       {latestAlert && <AlertBanner alert={latestAlert} />}
 
-      <div
-        className={`flex items-center gap-2.5 rounded-2xl border px-4 py-3 text-sm ${
-          risk === 'moderate'
-            ? 'border-turmeric/40 bg-turmeric/10 text-turmeric'
-            : 'border-teal/30 bg-teal/10 text-teal'
-        }`}
-      >
-        {risk === 'moderate' ? <AlertTriangle size={17} /> : <ShieldCheck size={17} />}
-        <span className="font-medium">
-          {risk === 'moderate'
-            ? t('home.riskModerate')
-            : t('home.riskLow')}
-        </span>
-      </div>
+      {/* Active contract card */}
+      {latest && latestContract ? (
+        <Card className="space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <p className="font-display font-bold text-paddy">
+                {latestContract.crop_type} - {latestContract.grade || 'Grade A'}
+              </p>
+              <p className="text-xs text-text-muted mt-0.5">
+                Contract with {latestContract.buyer_name || 'Buyer'}
+              </p>
+            </div>
+            <Chip tone="growing">Growing</Chip>
+          </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard icon={FileSignature} value={stats.count} label={t('home.activeContracts')} delay={0} />
-        <StatCard icon={Weight} value={`${stats.kg.toLocaleString()} kg`} label={t('home.committedKg')} tone="teal" delay={0.05} />
-        <StatCard
-          icon={Banknote}
-          value={`Rs. ${stats.earnings.toLocaleString()}`}
-          label={t('home.estEarnings')}
-          tone="gold"
-          delay={0.1}
-        />
-        <Link to="/farmer/scan">
-          <StatCard icon={ScanLine} value="—" label={t('home.scansDone')} tone="red" delay={0.15} />
-        </Link>
-      </div>
+          <GrowthThread
+            title={t('home.cropJourney')}
+            progress={Math.min(latest.id % 5, 3)}
+          />
 
-      {latest ? (
-        <Card className="space-y-1">
-          <GrowthThread title={t('home.cropJourney')} progress={Math.min(latest.id % 5, 3)} />
+          <div className="flex gap-3 pt-2">
+            <Link
+              to="/farmer/scan"
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 font-display font-semibold text-sm text-white bg-turmeric hover:brightness-110 active:scale-[0.98] transition"
+            >
+              <ScanLine size={16} />
+              {t('nav.scan')}
+            </Link>
+            <Link
+              to="/marketplace"
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 font-display font-semibold text-sm text-paddy border border-paddy/30 hover:bg-paddy/5 active:scale-[0.98] transition"
+            >
+              {t('contract.findContracts')}
+            </Link>
+          </div>
         </Card>
       ) : (
-        <Card className="text-center py-10 space-y-3">
+        <Card className="text-center py-8 space-y-3">
+          <div className="w-14 h-14 rounded-full bg-paddy/10 grid place-items-center mx-auto">
+            <ScanLine size={24} className="text-paddy" />
+          </div>
           <p className="text-text-muted text-sm">{t('common.empty')}</p>
-          <Link to="/marketplace" className="btn-turmeric">
+          <Link to="/marketplace" className="btn-turmeric inline-flex">
             {t('contract.openContracts')} <ArrowRight size={15} />
           </Link>
         </Card>
+      )}
+
+      {/* Open contracts near you */}
+      {openContracts.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="font-display font-bold text-sm text-paddy">
+              {t('contract.openContracts')}
+            </p>
+            <Link to="/marketplace" className="text-xs font-semibold text-turmeric flex items-center gap-1">
+              {t('common.seeAll')} <ChevronRight size={14} />
+            </Link>
+          </div>
+
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4">
+            {openContracts.map((c, i) => (
+              <motion.div
+                key={c.id}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.08 }}
+                className="min-w-[200px] flex-1"
+              >
+                <Link to={`/marketplace/${c.id}`}>
+                  <Card hoverable className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Chip tone="open">{c.crop_type}</Chip>
+                    </div>
+                    <p className="text-[11px] text-text-muted">
+                      {t(`regions.${c.region}`, { defaultValue: c.region })}
+                    </p>
+                    <p className="text-[11px] text-text-muted">
+                      Commit in {c.commit_deadline ? `${Math.max(0, Math.ceil((new Date(c.commit_deadline) - new Date()) / 86400000))} days` : '—'}
+                    </p>
+                    <p className="font-display font-bold text-sm text-paddy">
+                      Rs. {c.price_per_kg}/kg
+                    </p>
+                  </Card>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   )
