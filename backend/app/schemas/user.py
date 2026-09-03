@@ -25,7 +25,8 @@ class UserRegister(BaseModel):
     company_name: str | None = None
     company_location: str | None = None
     delivery_address: str | None = None
-    
+    delivery_address_2: str | None = None
+
     # Officer fields
     officer_id: str | None = None
     department: str | None = None
@@ -60,6 +61,7 @@ class UserOut(BaseModel):
     company_name: str | None = None
     company_location: str | None = None
     delivery_address: str | None = None
+    delivery_address_2: str | None = None
     
     # Officer fields
     officer_id: str | None = None
@@ -90,7 +92,8 @@ class ProfileUpdate(BaseModel):
     company_name: str | None = None
     company_location: str | None = None
     delivery_address: str | None = None
-
+    delivery_address_2: str | None = None
+    
     # Officer fields
     department: str | None = None
     district: str | None = None

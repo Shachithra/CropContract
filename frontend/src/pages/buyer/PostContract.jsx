@@ -223,7 +223,7 @@ export default function PostContract() {
               />
             </div>
 
-            <Button onClick={() => setStep(1)} className="w-full">
+            <Button onClick={() => setStep(1)} variant="turmeric" className="w-full">
               Next: Terms & Dates
             </Button>
           </motion.div>

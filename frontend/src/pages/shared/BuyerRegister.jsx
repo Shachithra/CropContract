@@ -55,6 +55,7 @@ export default function BuyerRegister() {
       company_location: '',
       region: 'Colombo',
       delivery_address: '',
+      delivery_address_2: '',
       preferred_language: 'en',
     },
   })
@@ -76,6 +77,7 @@ export default function BuyerRegister() {
         company_name: data.company_name,
         company_location: data.company_location,
         delivery_address: data.delivery_address,
+        delivery_address_2: data.delivery_address_2,
         preferred_language: data.preferred_language,
       }
       const u = await register(api, body)
@@ -219,6 +221,16 @@ export default function BuyerRegister() {
               {...registerField('delivery_address')}
             />
             {errors.delivery_address && <p className="text-clay text-xs mt-1">{errors.delivery_address.message}</p>}
+          </div>
+
+          <div>
+            <label className="label-muted" htmlFor="delivery_address_2">Delivery Address 2 (Optional)</label>
+            <input
+              id="delivery_address_2"
+              placeholder="e.g., Nugegoda Road, Colombo 07"
+              className="input-field"
+              {...registerField('delivery_address_2')}
+            />
           </div>
 
           <div>

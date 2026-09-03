@@ -78,6 +78,7 @@ async def register(body: UserRegister):
         user_doc["company_name"] = body.company_name
         user_doc["company_location"] = body.company_location
         user_doc["delivery_address"] = body.delivery_address
+        user_doc["delivery_address_2"] = body.delivery_address_2
     elif body.role == "officer":
         user_doc["officer_id"] = body.officer_id
         user_doc["department"] = body.department
