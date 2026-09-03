@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 
-const STAGES = ['contracted', 'committed', 'growing', 'ready', 'delivered']
+const STAGES = ['committed', 'growing', 'ready', 'delivered', 'paid']
 
 export default function GrowthThread({ progress = 0, title }) {
   const { t } = useTranslation()

@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
-import { AlertTriangle, ChevronRight } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 export default function AlertBanner({ alert, onDismiss }) {
@@ -17,11 +16,10 @@ export default function AlertBanner({ alert, onDismiss }) {
       <div className="flex items-start gap-3">
         <AlertTriangle size={18} className="text-clay shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">
-          <p className="font-display font-bold text-sm text-clay">{t('alert.newAlert')}</p>
-          <p className="text-xs text-paddy/80 mt-0.5 line-clamp-2">{alert.message}</p>
-          <p className="text-[11px] text-text-muted mt-1">
-            {alert.disease} · {t(`regions.${alert.region}`, { defaultValue: alert.region })}
+          <p className="font-display font-bold text-sm text-clay">
+            {t('home.regionalAlert')} · {alert.disease}
           </p>
+          <p className="text-xs text-paddy/80 mt-0.5 line-clamp-2">{alert.message}</p>
         </div>
         {onDismiss && (
           <button onClick={onDismiss} className="text-text-muted hover:text-paddy text-xs shrink-0">

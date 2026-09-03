@@ -189,12 +189,11 @@
     "newContract": "NEW CONTRACT OFFER"
   },
   "journey": {
-    "contracted": "Contracted",
     "committed": "Committed",
     "growing": "Growing",
-    "ready": "Ready to harvest",
-    "harvested": "Harvested",
-    "delivered": "Delivered & paid"
+    "ready": "Ready",
+    "delivered": "Delivered",
+    "paid": "Paid"
   },
   "scan": {
     "title": "AI Leaf Disease Scan",

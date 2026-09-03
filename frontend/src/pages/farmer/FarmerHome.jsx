@@ -48,15 +48,10 @@ export default function FarmerHome() {
     <div className="space-y-5">
       {/* Greeting */}
       <div>
+        <p className="text-text-muted text-sm">{t('home.goodMorning')}</p>
         <h1 className="font-display text-2xl font-bold text-paddy">
-          {t('home.greeting', { name: user?.name?.split(' ')[0] || 'Farmer' })}
+          {user?.name || 'Farmer'}
         </h1>
-        {user?.region && (
-          <p className="text-text-muted text-sm mt-0.5 flex items-center gap-1">
-            <MapPin size={13} />
-            {t(`regions.${user.region}`, { defaultValue: user.region })}
-          </p>
-        )}
       </div>
 
       {/* Regional alert */}
@@ -68,7 +63,7 @@ export default function FarmerHome() {
           <div className="flex items-center justify-between gap-2">
             <div>
               <p className="font-display font-bold text-paddy">
-                {latestContract.crop_type} - {latestContract.grade || t('home.gradeA')}
+                {latestContract.crop_type}
               </p>
               <p className="text-xs text-text-muted mt-0.5">
                 {t('home.contractWith', { buyer: latestContract.buyer_name || t('buyer.farmer') })}
@@ -78,7 +73,6 @@ export default function FarmerHome() {
           </div>
 
           <GrowthThread
-            title={t('home.cropJourney')}
             progress={Math.min(latest.id % 5, 3)}
           />
 
