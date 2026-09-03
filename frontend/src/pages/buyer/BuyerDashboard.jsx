@@ -130,15 +130,15 @@ export default function BuyerDashboard() {
       {/* Post new contract */}
       <div className="space-y-3">
         <Link to="/buyer/post">
-          <button className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 font-display font-semibold text-sm text-white bg-paddy hover:brightness-110 active:scale-[0.98] transition">
+          <button className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 font-display font-semibold text-sm text-paddy bg-turmeric hover:brightness-110 active:scale-[0.98] transition">
             <Plus size={16} />
-            + Post New Contract
+            Post New Contract
           </button>
         </Link>
-        <Link to="/buyer/fulfilment" className="block text-center">
-          <span className="text-sm font-semibold text-paddy underline underline-offset-2 hover:text-turmeric transition">
-            ← View Contract Fulfillment
-          </span>
+        <Link to="/buyer/fulfilment" className="block">
+          <button className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 font-display font-semibold text-sm text-paddy border-2 border-paddy hover:bg-paddy/5 active:scale-[0.98] transition">
+            View Contract Fulfillment
+          </button>
         </Link>
       </div>
     </div>
