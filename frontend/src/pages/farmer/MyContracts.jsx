@@ -5,14 +5,15 @@ import { AnimatePresence, motion } from 'framer-motion'
 import Card from '../../components/common/Card.jsx'
 import Chip from '../../components/common/Chip.jsx'
 import GrowthThread from '../../components/farmer/GrowthThread.jsx'
-import { useContracts, useMyCommitments } from '../../hooks/useContracts.js'
+import { MOCK_CONTRACTS, MOCK_COMMITMENTS } from '../../lib/mockData.js'
 
 const TABS = ['Active', 'Upcoming', 'Completed']
 
 export default function MyContracts() {
   const { t } = useTranslation()
-  const { data: commitments = [], isLoading } = useMyCommitments()
-  const { data: contracts = [] } = useContracts()
+  const commitments = MOCK_COMMITMENTS
+  const contracts = MOCK_CONTRACTS
+  const isLoading = false
   const [activeTab, setActiveTab] = useState('Active')
   const [openId, setOpenId] = useState(null)
 

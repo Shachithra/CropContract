@@ -117,6 +117,7 @@
   },
   "contract": {
     "openContracts": "Open contracts",
+    "findContracts": "Find contracts",
     "perKg": "/kg",
     "quotaFilled": "{{percent}}% quota filled",
     "deadline": "Commit by {{date}}",

@@ -1,40 +1,21 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Search, MapPin, Calendar, SlidersHorizontal } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Card from '../../components/common/Card.jsx'
-import Chip from '../../components/common/Chip.jsx'
-import Button from '../../components/common/Button.jsx'
-import AlertBanner from '../../components/farmer/AlertBanner.jsx'
-import { useContracts } from '../../hooks/useContracts.js'
-import { useAuth } from '../../hooks/useAuth.jsx'
-import { useQuery } from '@tanstack/react-query'
-import api from '../../lib/api.js'
+import { MOCK_CONTRACTS } from '../../lib/mockData.js'
 import { SRI_LANKA_DISTRICTS } from '../../lib/sriLankaRegions.js'
 
 const FILTER_TABS = ['All crops', 'Region', 'Price', 'Delivery date']
 
 export default function Marketplace() {
   const { t } = useTranslation()
-  const { user } = useAuth()
-  const { data: contracts = [], isLoading } = useContracts()
+  const contracts = MOCK_CONTRACTS
+  const isLoading = false
   const [search, setSearch] = useState('')
   const [activeFilter, setActiveFilter] = useState('All crops')
   const [selectedRegion, setSelectedRegion] = useState('')
-
-  const { data: alerts = [] } = useQuery({
-    queryKey: ['alerts', user?.region],
-    queryFn: async () => {
-      if (!user?.region) return []
-      const { data } = await api.get(`/alerts/region/${encodeURIComponent(user.region)}`)
-      return data
-    },
-    enabled: !!user?.region,
-    staleTime: 60_000,
-  })
-
-  const latestAlert = alerts[0]
 
   const filtered = useMemo(() => {
     let result = contracts.filter((c) => c.status === 'open')
@@ -59,9 +40,6 @@ export default function Marketplace() {
   return (
     <div className="space-y-4">
       <h1 className="font-display text-2xl font-bold text-paddy">{t('nav.marketplace')}</h1>
-
-      {/* Regional alert */}
-      {latestAlert && <AlertBanner alert={latestAlert} />}
 
       {/* Search bar */}
       <div className="relative">

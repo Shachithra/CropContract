@@ -1,35 +1,19 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ScanLine, ArrowRight, MapPin, ChevronRight, Camera } from 'lucide-react'
+import { ScanLine, ArrowRight, ChevronRight, Camera } from 'lucide-react'
 import { motion } from 'framer-motion'
 import GrowthThread from '../../components/farmer/GrowthThread.jsx'
-import AlertBanner from '../../components/farmer/AlertBanner.jsx'
 import Card from '../../components/common/Card.jsx'
 import Chip from '../../components/common/Chip.jsx'
-import { useContracts, useMyCommitments } from '../../hooks/useContracts.js'
+import { MOCK_CONTRACTS, MOCK_COMMITMENTS } from '../../lib/mockData.js'
 import { useAuth } from '../../hooks/useAuth.jsx'
-import { useQuery } from '@tanstack/react-query'
-import api from '../../lib/api.js'
 
 export default function FarmerHome() {
   const { t } = useTranslation()
   const { user } = useAuth()
-  const { data: commitments = [] } = useMyCommitments()
-  const { data: contracts = [] } = useContracts()
-
-  const { data: alerts = [] } = useQuery({
-    queryKey: ['alerts', user?.region],
-    queryFn: async () => {
-      if (!user?.region) return []
-      const { data } = await api.get(`/alerts/region/${encodeURIComponent(user.region)}`)
-      return data
-    },
-    enabled: !!user?.region,
-    staleTime: 60_000,
-  })
-
-  const latestAlert = alerts[0]
+  const commitments = MOCK_COMMITMENTS
+  const contracts = MOCK_CONTRACTS
 
   const activeCommitments = useMemo(
     () => commitments.filter((c) => c.status === 'active' || c.status === 'pending-sync'),
@@ -53,9 +37,6 @@ export default function FarmerHome() {
           {user?.name || 'Farmer'}
         </h1>
       </div>
-
-      {/* Regional alert */}
-      {latestAlert && <AlertBanner alert={latestAlert} />}
 
       {/* Active contract card */}
       {latest && latestContract ? (
