@@ -16,15 +16,15 @@ export default function OverCommitRecovery({ error, onReduce, onViewSimilar }) {
     >
       <div className="max-w-lg mx-auto bg-white border border-surface-border rounded-2xl shadow-raised p-5 space-y-4">
         <div>
-          <p className="font-display font-bold text-paddy">This contract filled up while you were offline</p>
+          <p className="font-display font-bold text-paddy">{t('contract.queuedOffline')}</p>
           <p className="text-sm text-text-muted mt-1">{error.detail}</p>
         </div>
         <div className="flex gap-3">
           <Button onClick={onReduce} className="flex-1">
-            Reduce to {error.remaining_kg} kg
+            {t('contract.remaining', { kg: error.remaining_kg })}
           </Button>
           <Button variant="outline" onClick={onViewSimilar} className="flex-1">
-            View similar contracts
+            {t('contract.openContracts')}
           </Button>
         </div>
       </div>

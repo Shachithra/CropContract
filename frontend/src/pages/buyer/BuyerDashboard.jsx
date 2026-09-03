@@ -68,23 +68,23 @@ export default function BuyerDashboard() {
       {/* Greeting */}
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-text-muted text-sm">Good morning,</p>
+          <p className="text-text-muted text-sm">{t('common.goodMorning')}</p>
           <h1 className="font-display text-2xl font-bold text-paddy">{t('home.greeting', { name: 'Ceylon Fresh Foods' })}</h1>
         </div>
-        <span className="px-2.5 py-1 rounded-full bg-paddy/10 text-paddy text-[11px] font-semibold">Buyer Account</span>
+        <span className="px-2.5 py-1 rounded-full bg-paddy/10 text-paddy text-[11px] font-semibold">{t('common.account')}</span>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3">
-        <StatCard icon={FileSignature} value={stats.activeCount} label="Active Contracts" delay={0} />
-        <StatCard icon={Weight} value={`${(stats.totalCommitted / 1000).toFixed(1)}t`} label="Total Committed" tone="gold" delay={0.05} />
-        <StatCard icon={TrendingUp} value={`${(stats.expectedHarvest / 1000).toFixed(1)}t`} label="Expected Harvest" tone="teal" delay={0.1} />
-        <StatCard icon={Percent} value={`${stats.fulfillmentRate}%`} label="Fulfillment Rate" tone="emerald" delay={0.15} />
+        <StatCard icon={FileSignature} value={stats.activeCount} label={t('buyer.activeContracts')} delay={0} />
+        <StatCard icon={Weight} value={`${(stats.totalCommitted / 1000).toFixed(1)}t`} label={t('buyer.totalCommitted')} tone="gold" delay={0.05} />
+        <StatCard icon={TrendingUp} value={`${(stats.expectedHarvest / 1000).toFixed(1)}t`} label={t('buyer.expectedHarvest')} tone="teal" delay={0.1} />
+        <StatCard icon={Percent} value={`${stats.fulfillmentRate}%`} label={t('buyer.fulfillmentRate')} tone="emerald" delay={0.15} />
       </div>
 
       {/* Supply forecast chart */}
       <Card className="space-y-3">
-        <p className="font-display font-bold text-sm text-paddy">Supply forecast (1/week)</p>
+        <p className="font-display font-bold text-sm text-paddy">{t('common.weeklyForecast')}</p>
         <div className="h-40">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData}>
@@ -107,7 +107,7 @@ export default function BuyerDashboard() {
       {/* Regional supply share */}
       {regionalShare.length > 0 && (
         <Card className="space-y-3">
-          <p className="font-display font-bold text-sm text-paddy">Regional supply share</p>
+          <p className="font-display font-bold text-sm text-paddy">{t('common.regionalSupply')}</p>
           <div className="space-y-3">
             {regionalShare.map((r) => (
               <div key={r.region} className="space-y-1.5">
@@ -132,12 +132,12 @@ export default function BuyerDashboard() {
         <Link to="/buyer/post">
           <button className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 font-display font-semibold text-sm text-paddy bg-turmeric hover:brightness-110 active:scale-[0.98] transition">
             <Plus size={16} />
-            Post New Contract
+            {t('buyer.postNewContract')}
           </button>
         </Link>
         <Link to="/buyer/fulfilment" className="block">
           <button className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 font-display font-semibold text-sm text-paddy border-2 border-paddy hover:bg-paddy/5 active:scale-[0.98] transition">
-            View Contract Fulfillment
+            {t('buyer.viewContractFulfilment')}
           </button>
         </Link>
       </div>

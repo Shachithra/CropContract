@@ -91,13 +91,13 @@ export default function BuyerLogin() {
         </motion.div>
 
         {/* Title */}
-        <h1 className="font-display text-3xl font-bold tracking-wide text-paddy">CROPCONTRACT</h1>
-        <p className="text-text-muted text-sm mt-1 text-center">Know Demand. Secure Contracts. Grow with Confidence.</p>
+        <h1 className="font-display text-3xl font-bold tracking-wide text-paddy">{t('appName')}</h1>
+        <p className="text-text-muted text-sm mt-1 text-center">{t('tagline')}</p>
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-4 mt-10">
           <div>
-            <label className="label-muted" htmlFor="phone">PHONE NUMBER</label>
+            <label className="label-muted" htmlFor="phone">{t('auth.phoneNumber')}</label>
             <input
               id="phone"
               type="tel"
@@ -109,10 +109,10 @@ export default function BuyerLogin() {
           </div>
 
           <div>
-            <label className="label-muted" htmlFor="password">PASSWORD</label>
+            <label className="label-muted" htmlFor="password">{t('auth.passwordLabel')}</label>
             <PasswordInput
               id="password"
-              placeholder="Enter Your Password"
+              placeholder={t('auth.enterPassword')}
               {...registerField('password')}
             />
             {errors.password && <p className="text-clay text-xs mt-1">{errors.password.message}</p>}
@@ -123,7 +123,7 @@ export default function BuyerLogin() {
           )}
 
           <Button type="submit" loading={loading} variant="turmeric" className="w-full">
-            Get OTP
+            {t('auth.getOtp')}
           </Button>
         </form>
 
@@ -133,12 +133,12 @@ export default function BuyerLogin() {
             onClick={() => navigate('/register')}
             className="font-semibold text-paddy underline underline-offset-4 decoration-1 hover:text-turmeric transition"
           >
-            Register as
+            {t('auth.registerAs')}
           </button>
         </p>
 
         <p className="mt-auto pt-8 text-[11px] text-text-muted/60 text-center">
-          You can login in while offline. Your details sync once you're back online.
+          {t('auth.offlineLogin')}
         </p>
       </div>
     </div>

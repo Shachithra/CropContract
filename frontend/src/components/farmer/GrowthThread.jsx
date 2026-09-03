@@ -1,8 +1,10 @@
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 
 const STAGES = ['contracted', 'committed', 'growing', 'ready', 'delivered']
 
 export default function GrowthThread({ progress = 0, title }) {
+  const { t } = useTranslation()
   return (
     <div className="space-y-2">
       {title && <p className="font-display font-bold text-sm text-paddy">{title}</p>}
@@ -35,7 +37,7 @@ export default function GrowthThread({ progress = 0, title }) {
       <div className="flex justify-between text-[9px] text-text-muted font-medium">
         {STAGES.map((s, i) => (
           <span key={s} className={i <= progress ? 'text-paddy font-semibold' : ''}>
-            {s.charAt(0).toUpperCase() + s.slice(1)}
+            {t(`journey.${s}`, { defaultValue: s.charAt(0).toUpperCase() + s.slice(1) })}
           </span>
         ))}
       </div>

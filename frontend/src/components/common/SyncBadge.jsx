@@ -1,14 +1,16 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { WifiOff, Loader2, CheckCircle2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export default function SyncBadge({ online, syncing, pending }) {
+  const { t } = useTranslation()
   const state = !online ? 'offline' : syncing ? 'syncing' : pending > 0 ? 'pending' : 'synced'
 
   const config = {
-    offline: { icon: WifiOff, label: 'Offline', bg: 'bg-surface-border/60 text-text-muted' },
-    syncing: { icon: Loader2, label: 'Syncing…', bg: 'bg-turmeric/15 text-turmeric' },
-    pending: { icon: null, label: `${pending} pending`, bg: 'bg-turmeric/15 text-turmeric' },
-    synced: { icon: CheckCircle2, label: 'Synced', bg: 'bg-teal/15 text-teal' },
+    offline: { icon: WifiOff, label: t('common.offlineOffline'), bg: 'bg-surface-border/60 text-text-muted' },
+    syncing: { icon: Loader2, label: t('common.syncing'), bg: 'bg-turmeric/15 text-turmeric' },
+    pending: { icon: null, label: t('common.pending', { count: pending }), bg: 'bg-turmeric/15 text-turmeric' },
+    synced: { icon: CheckCircle2, label: t('common.synced'), bg: 'bg-teal/15 text-teal' },
   }
 
   const { icon: Icon, label, bg } = config[state]

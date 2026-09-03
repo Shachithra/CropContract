@@ -59,11 +59,11 @@ export default function ScanCamera({ onCapture, preview }) {
           </div>
           <div className="text-center">
             <p className="font-display font-semibold text-sm text-paddy">{t('scan.capture')}</p>
-            <p className="text-xs text-text-muted mt-0.5">Take a photo or choose from gallery</p>
+            <p className="text-xs text-text-muted mt-0.5">{t('scan.takeClearPhoto')}</p>
           </div>
           <div className="flex gap-2 text-[11px] text-text-muted">
-            <span className="flex items-center gap-1"><Camera size={12} /> Camera</span>
-            <span className="flex items-center gap-1"><Image size={12} /> Gallery</span>
+            <span className="flex items-center gap-1"><Camera size={12} /> {t('scan.captureButton')}</span>
+            <span className="flex items-center gap-1"><Image size={12} /> {t('scan.history')}</span>
           </div>
         </button>
       )}

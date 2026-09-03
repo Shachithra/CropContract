@@ -68,13 +68,13 @@ export default function FarmerHome() {
           <div className="flex items-center justify-between gap-2">
             <div>
               <p className="font-display font-bold text-paddy">
-                {latestContract.crop_type} - {latestContract.grade || 'Grade A'}
+                {latestContract.crop_type} - {latestContract.grade || t('home.gradeA')}
               </p>
               <p className="text-xs text-text-muted mt-0.5">
-                Contract with {latestContract.buyer_name || 'Buyer'}
+                {t('home.contractWith', { buyer: latestContract.buyer_name || t('buyer.farmer') })}
               </p>
             </div>
-            <Chip tone="growing">Growing</Chip>
+            <Chip tone="growing">{t('home.growing')}</Chip>
           </div>
 
           <GrowthThread
@@ -140,7 +140,7 @@ export default function FarmerHome() {
                       {t(`regions.${c.region}`, { defaultValue: c.region })}
                     </p>
                     <p className="text-[11px] text-text-muted">
-                      Commit in {c.commit_deadline ? `${Math.max(0, Math.ceil((new Date(c.commit_deadline) - new Date()) / 86400000))} days` : '—'}
+                      {t('common.commitIn', { days: c.commit_deadline ? Math.max(0, Math.ceil((new Date(c.commit_deadline) - new Date()) / 86400000)) : '—' })}
                     </p>
                     <p className="font-display font-bold text-sm text-paddy">
                       Rs. {c.price_per_kg}/kg

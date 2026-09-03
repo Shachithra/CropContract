@@ -4,27 +4,28 @@ import { useTranslation } from 'react-i18next'
 import { Sprout, Building2, ShieldCheck } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { homePathFor, useAuth } from '../../hooks/useAuth.jsx'
+import LanguageToggle from '../../components/layout/LanguageToggle.jsx'
 
 const ROLES = [
   {
     value: 'farmer',
     icon: Sprout,
-    label: 'Farmer / Grower',
-    description: 'Secure guaranteed pricing, log yields, and manage crop contracts.',
+    labelKey: 'roles.farmer',
+    descKey: 'roleDesc.farmer',
     iconBg: 'bg-paddy',
   },
   {
     value: 'buyer',
     icon: Building2,
-    label: 'Buyer / Agri-Business',
-    description: 'Source certified quality produce, issue contracts, and track supply.',
+    labelKey: 'roles.buyer',
+    descKey: 'roleDesc.buyer',
     iconBg: 'bg-turmeric',
   },
   {
     value: 'officer',
     icon: ShieldCheck,
-    label: 'Agricultural Officer',
-    description: 'Validate crop health scans, issue local risk alerts, and support growers.',
+    labelKey: 'roles.officer',
+    descKey: 'roleDesc.officer',
     iconBg: 'bg-paddy',
   },
 ]
@@ -53,10 +54,7 @@ export default function Register() {
       <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8">
         {/* Language toggle */}
         <div className="absolute top-4 right-4">
-          <div className="flex items-center gap-1 bg-white rounded-lg border border-surface-border p-0.5">
-            <button className="px-2 py-1 text-[11px] font-semibold rounded-md bg-paddy text-white">EN</button>
-            <button className="px-2 py-1 text-[11px] font-semibold rounded-md text-text-muted">SI</button>
-          </div>
+          <LanguageToggle />
         </div>
 
         {/* Logo */}
@@ -92,15 +90,15 @@ export default function Register() {
 
         {/* Title */}
         <h1 className="font-display text-3xl font-bold tracking-wide text-paddy">
-          CROPCONTRACT
+          {t('appName')}
         </h1>
         <p className="text-text-muted text-sm mt-4 text-center max-w-xs">
-          Choose your profile to begin
+          {t('auth.chooseProfile')}
         </p>
 
         {/* Role cards */}
         <div className="w-full space-y-3 mt-6">
-          {ROLES.map(({ value, icon: Icon, label, description, iconBg }, i) => (
+          {ROLES.map(({ value, icon: Icon, labelKey, descKey, iconBg }, i) => (
             <motion.button
               key={value}
               initial={{ opacity: 0, y: 20 }}
@@ -117,8 +115,8 @@ export default function Register() {
                 <Icon size={24} className="text-white" />
               </div>
               <div className="flex-1">
-                <p className="font-display font-bold text-paddy text-sm">{label}</p>
-                <p className="text-xs text-text-muted mt-0.5 leading-relaxed">{description}</p>
+                <p className="font-display font-bold text-paddy text-sm">{t(labelKey)}</p>
+                <p className="text-xs text-text-muted mt-0.5 leading-relaxed">{t(descKey)}</p>
               </div>
               {preselectedRole === value && (
                 <div className="w-6 h-6 rounded-full bg-paddy grid place-items-center shrink-0">
@@ -149,18 +147,18 @@ export default function Register() {
             }`}
             disabled={!preselectedRole}
           >
-            Continue
+            {t('auth.continue')}
           </button>
         </motion.div>
 
         {/* Sign in link */}
         <p className="mt-6 text-sm text-text-muted">
-          Already have an account?{' '}
+          {t('auth.alreadyHaveAccount')}{' '}
           <Link
             to="/login"
             className="font-semibold text-paddy underline underline-offset-2 hover:text-turmeric transition"
           >
-            Sign in
+            {t('auth.signIn')}
           </Link>
         </p>
       </div>

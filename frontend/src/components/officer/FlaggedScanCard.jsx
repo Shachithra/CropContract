@@ -1,7 +1,9 @@
 import Card from '../common/Card.jsx'
 import Chip from '../common/Chip.jsx'
+import { useTranslation } from 'react-i18next'
 
 export default function FlaggedScanCard({ scan, onReview }) {
+  const { t } = useTranslation()
   return (
     <Card className="space-y-3">
       <div className="flex items-start justify-between gap-2">
@@ -19,10 +21,10 @@ export default function FlaggedScanCard({ scan, onReview }) {
       {scan.review_status === 'pending' ? (
         <div className="flex gap-2">
           <button onClick={() => onReview(scan.id, 'confirmed')} className="btn-primary flex-1 !py-2 text-xs">
-            Confirm
+            {t('officer.confirm')}
           </button>
           <button onClick={() => onReview(scan.id, 'dismissed')} className="btn-outline flex-1 !py-2 text-xs">
-            Dismiss
+            {t('officer.dismiss')}
           </button>
         </div>
       ) : (

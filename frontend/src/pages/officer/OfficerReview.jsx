@@ -67,21 +67,21 @@ export default function OfficerReview() {
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-text-muted text-sm">Regional overview</p>
+          <p className="text-text-muted text-sm">{t('officer.regionalOverview')}</p>
           <h1 className="font-display text-2xl font-bold text-paddy">Officer {t('home.greeting', { name: 'W. Fernando' })}</h1>
         </div>
-        <span className="px-2.5 py-1 rounded-full bg-teal/15 text-teal text-[11px] font-semibold">Agreementist</span>
+        <span className="px-2.5 py-1 rounded-full bg-teal/15 text-teal text-[11px] font-semibold">{t('officer.agreementist')}</span>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3">
         <Card className="text-center py-4">
           <p className="font-display text-3xl font-bold text-paddy">{scans.length}</p>
-          <p className="text-xs text-text-muted mt-1">Flagged Scans</p>
+          <p className="text-xs text-text-muted mt-1">{t('officer.flaggedCount')}</p>
         </Card>
         <Card className="text-center py-4">
           <p className="font-display text-3xl font-bold text-turmeric">{alerts.length}</p>
-          <p className="text-xs text-text-muted mt-1">Active Alerts</p>
+          <p className="text-xs text-text-muted mt-1">{t('officer.activeAlerts')}</p>
         </Card>
       </div>
 
@@ -89,7 +89,7 @@ export default function OfficerReview() {
       {highRiskRegions.length > 0 && (
         <Card className="space-y-3">
           <p className="font-display font-bold text-sm text-paddy flex items-center gap-2">
-            <AlertTriangle size={15} className="text-clay" /> High-risk regions
+            <AlertTriangle size={15} className="text-clay" /> {t('officer.highRiskRegions')}
           </p>
           <div className="space-y-3">
             {highRiskRegions.map((r) => (
@@ -121,7 +121,7 @@ export default function OfficerReview() {
 
       {/* Recently flagged */}
       <div className="space-y-3">
-        <p className="font-display font-bold text-sm text-paddy">Recently flagged</p>
+        <p className="font-display font-bold text-sm text-paddy">{t('officer.recentlyFlagged')}</p>
         {recentFlagged.length === 0 ? (
           <Card className="text-center py-8">
             <ShieldAlert size={28} className="mx-auto mb-2 text-paddy/30" />
@@ -144,7 +144,7 @@ export default function OfficerReview() {
       {/* View outbreaks link */}
       <Link to="/officer/outbreaks" className="block">
         <button className="w-full rounded-xl px-4 py-3 font-display font-semibold text-sm text-paddy border border-paddy/30 hover:bg-paddy/5 active:scale-[0.98] transition">
-          View Regional Outbreaks
+          {t('officer.viewRegionalOutbreaks')}
         </button>
       </Link>
 
@@ -153,7 +153,7 @@ export default function OfficerReview() {
         onClick={() => window.location.href = '/officer'}
         className="text-sm font-semibold text-paddy underline underline-offset-2 hover:text-turmeric transition"
       >
-        ← Back to Start
+        {t('common.backToStart')}
       </button>
     </div>
   )

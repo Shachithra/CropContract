@@ -4,27 +4,28 @@ import { useTranslation } from 'react-i18next'
 import { Sprout, Building2, ShieldCheck } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { homePathFor, useAuth } from '../../hooks/useAuth.jsx'
+import LanguageToggle from '../../components/layout/LanguageToggle.jsx'
 
 const ROLES = [
   {
     value: 'farmer',
     icon: Sprout,
-    label: 'Farmer / Grower',
-    description: 'Secure guaranteed pricing, log yields, and manage crop contracts.',
+    labelKey: 'roles.farmer',
+    descKey: 'roleDesc.farmer',
     iconBg: 'bg-paddy',
   },
   {
     value: 'buyer',
     icon: Building2,
-    label: 'Buyer / Agri-Business',
-    description: 'Source certified quality produce, issue contracts, and track supply.',
+    labelKey: 'roles.buyer',
+    descKey: 'roleDesc.buyer',
     iconBg: 'bg-turmeric',
   },
   {
     value: 'officer',
     icon: ShieldCheck,
-    label: 'Agricultural Officer',
-    description: 'Validate crop health scans, issue local risk alerts, and support growers.',
+    labelKey: 'roles.officer',
+    descKey: 'roleDesc.officer',
     iconBg: 'bg-paddy',
   },
 ]
@@ -47,6 +48,9 @@ export default function Login() {
 
   return (
     <div className="min-h-dvh flex flex-col items-center bg-cream">
+      <div className="w-full flex justify-end p-4">
+        <LanguageToggle />
+      </div>
       {/* Main content */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8">
         {/* Logo */}
@@ -82,20 +86,20 @@ export default function Login() {
 
         {/* Title */}
         <h1 className="font-display text-3xl font-bold tracking-wide text-paddy">
-          CROPCONTRACT
+          {t('appName')}
         </h1>
         <p className="text-text-muted text-sm mt-2 text-center max-w-xs">
-          Know Demand. Secure Contracts. Grow with Confidence.
+          {t('tagline')}
         </p>
 
         {/* Login as */}
         <h2 className="font-display text-xl font-bold text-paddy mt-10 mb-5 self-start">
-          Login as
+          {t('auth.loginAs')}
         </h2>
 
         {/* Role cards */}
         <div className="w-full space-y-3">
-          {ROLES.map(({ value, icon: Icon, label, description, iconBg }, i) => (
+          {ROLES.map(({ value, icon: Icon, labelKey, descKey, iconBg }, i) => (
             <motion.button
               key={value}
               initial={{ opacity: 0, y: 20 }}
@@ -108,8 +112,8 @@ export default function Login() {
                 <Icon size={24} className="text-white" />
               </div>
               <div>
-                <p className="font-display font-bold text-paddy text-sm">{label}</p>
-                <p className="text-xs text-text-muted mt-0.5 leading-relaxed">{description}</p>
+                <p className="font-display font-bold text-paddy text-sm">{t(labelKey)}</p>
+                <p className="text-xs text-text-muted mt-0.5 leading-relaxed">{t(descKey)}</p>
               </div>
             </motion.button>
           ))}
@@ -121,7 +125,7 @@ export default function Login() {
             to="/register"
             className="font-semibold text-paddy underline underline-offset-4 decoration-1 hover:text-turmeric transition"
           >
-            Register as
+            {t('auth.registerAs')}
           </Link>
         </p>
       </div>
