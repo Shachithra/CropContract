@@ -11,8 +11,13 @@ router = APIRouter(tags=["contracts"])
 
 async def _contract_out(c: dict) -> ContractOut:
     db = get_db()
-    buyer = await db.users.find_one({"_id": to_oid(c["buyer_id"])})
-    return ContractOut(**{**c, "buyer_name": buyer["name"] if buyer else None})
+    buyer_id = str(c["buyer_id"])
+    buyer = await db.users.find_one({"_id": to_oid(buyer_id)})
+    data = {k: v for k, v in c.items() if k != "_id"}
+    data["id"] = str(c["_id"])
+    data["buyer_id"] = buyer_id
+    data["buyer_name"] = buyer["name"] if buyer else None
+    return ContractOut(**data)
 
 
 @router.get("/contracts", response_model=list[ContractOut])
@@ -46,7 +51,7 @@ async def create_contract(body: ContractCreate, user: dict = Depends(require_rol
     delivery = body.delivery_date or (deadline + timedelta(days=45))
     
     contract = {
-        "buyer_id": user["_id"],
+        "buyer_id": str(user["_id"]),
         "crop_type": body.crop_type,
         "grade": body.grade,
         "total_kg": body.total_kg,
@@ -95,13 +100,14 @@ async def commit_to_contract(
     if body.client_action_id:
         existing = await db.commitments.find_one({"client_action_id": body.client_action_id})
         if existing:
-            return CommitmentOut(
-                **{**existing, "farmer_name": user["name"]}
-            )
+            data = {k: v for k, v in existing.items() if k != "_id"}
+            data["id"] = str(existing["_id"])
+            data["farmer_name"] = user["name"]
+            return CommitmentOut(**data)
 
     commitment = {
         "contract_id": contract_id,
-        "farmer_id": user["_id"],
+        "farmer_id": str(user["_id"]),
         "quantity_kg": qty,
         "status": "active",
         "sync_status": "synced",
@@ -123,7 +129,7 @@ async def commit_to_contract(
             {"$set": {"status": "fulfilled"}}
         )
 
-    return CommitmentOut(**{**commitment, "farmer_name": user["name"]})
+    return CommitmentOut(**{**{k: v for k, v in commitment.items() if k != "_id"}, "id": str(commitment["_id"]), "farmer_name": user["name"]})
 
 
 @router.get("/commitments/mine", response_model=list[CommitmentOut])
@@ -141,6 +147,9 @@ async def my_commitments(user: dict = Depends(get_current_user)):
     commitments = await db.commitments.find(query).to_list(1000)
     out = []
     for m in commitments:
-        farmer = await db.users.find_one({"_id": m["farmer_id"]})
-        out.append(CommitmentOut(**{**m, "farmer_name": farmer["name"] if farmer else None}))
+        farmer = await db.users.find_one({"_id": to_oid(m["farmer_id"])})
+        data = {k: v for k, v in m.items() if k != "_id"}
+        data["id"] = str(m["_id"])
+        data["farmer_name"] = farmer["name"] if farmer else None
+        out.append(CommitmentOut(**data))
     return sorted(out, key=lambda x: x.id)

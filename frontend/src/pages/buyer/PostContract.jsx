@@ -72,8 +72,16 @@ export default function PostContract() {
       await api.post('/contracts', body)
       queryClient.invalidateQueries({ queryKey: ['contracts'] })
       setPublished(true)
-    } catch {
-      setError(t('common.error'))
+    } catch (err) {
+      console.error('Contract publish error:', err.response?.data || err.message)
+      const data = err.response?.data
+      let msg = t('common.error')
+      if (typeof data?.detail === 'string') {
+        msg = data.detail
+      } else if (Array.isArray(data?.detail)) {
+        msg = data.detail.map((d) => d.msg).join('; ')
+      }
+      setError(msg)
     } finally {
       setLoading(false)
     }

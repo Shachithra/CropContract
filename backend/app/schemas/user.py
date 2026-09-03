@@ -79,3 +79,24 @@ class ProfileUpdate(BaseModel):
     phone: str | None = None
     region: str | None = None
     preferred_language: str | None = None
+    email: str | None = None
+    profile_picture: str | None = None
+
+    # Farmer fields
+    farm_location: str | None = None
+    crop_types: str | None = None
+
+    # Buyer fields
+    company_name: str | None = None
+    company_location: str | None = None
+    delivery_address: str | None = None
+
+    # Officer fields
+    department: str | None = None
+    district: str | None = None
+    designation: str | None = None
+
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str = Field(min_length=6)

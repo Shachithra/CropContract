@@ -7,7 +7,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from app.config import settings
 from app.database import get_db, to_oid
 from app.database_stub import hash_password, verify_password
-from app.schemas.user import OTPVerify, ProfileUpdate, TokenResponse, UserLogin, UserOut, UserRegister
+from app.schemas.user import OTPVerify, PasswordChange, ProfileUpdate, TokenResponse, UserLogin, UserOut, UserRegister
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 bearer = HTTPBearer(auto_error=False)
@@ -158,3 +158,16 @@ async def update_profile(body: ProfileUpdate, user: dict = Depends(get_current_u
     updated_user = await db.users.find_one({"_id": user["_id"]})
     updated_user["id"] = str(updated_user["_id"])
     return UserOut(**updated_user)
+
+
+@router.post("/change-password")
+async def change_password(body: PasswordChange, user: dict = Depends(get_current_user)):
+    db = get_db()
+    if not verify_password(body.current_password, user["hashed_password"]):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Current password is incorrect")
+    
+    await db.users.update_one(
+        {"_id": user["_id"]},
+        {"$set": {"hashed_password": hash_password(body.new_password)}}
+    )
+    return {"message": "Password updated successfully"}

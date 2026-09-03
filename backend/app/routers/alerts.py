@@ -16,15 +16,15 @@ async def create_alert(body: AlertCreate, user: dict = Depends(require_role("off
         "region": body.region,
         "disease": body.disease,
         "message": body.message,
-        "issued_by": user["_id"],
+        "issued_by": str(user["_id"]),
         "issued_by_name": user["name"],
         "issued_at": date.today().isoformat(),
     }
     
     result = await db.alerts.insert_one(alert)
-    alert["_id"] = str(result.inserted_id)
+    alert["id"] = str(result.inserted_id)
     
-    return AlertOut(**alert)
+    return AlertOut(**{k: v for k, v in alert.items() if k != "_id"})
 
 
 @router.get("/alerts/region/{region}", response_model=list[AlertOut])
@@ -33,4 +33,4 @@ async def get_alerts(region: str):
     alerts = await db.alerts.find(
         {"region": {"$regex": f"^{region}$", "$options": "i"}}
     ).sort("_id", -1).to_list(1000)
-    return [AlertOut(**a) for a in alerts]
+    return [AlertOut(**{**{k: v for k, v in a.items() if k != "_id"}, "id": str(a["_id"])}) for a in alerts]

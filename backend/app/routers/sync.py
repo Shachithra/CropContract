@@ -78,7 +78,7 @@ async def sync(body: SyncRequest, user: dict = Depends(get_current_user)):
 
                 commitment = {
                     "contract_id": cid,
-                    "farmer_id": user["_id"],
+                    "farmer_id": str(user["_id"]),
                     "quantity_kg": qty,
                     "status": "active",
                     "sync_status": "synced",
@@ -113,7 +113,7 @@ async def sync(body: SyncRequest, user: dict = Depends(get_current_user)):
                 result = analyze_leaf(image_bytes)
                 
                 scan = {
-                    "farmer_id": user["_id"],
+                    "farmer_id": str(user["_id"]),
                     "farmer_name": user["name"],
                     "crop_type": action.payload.get("crop_type", "unknown"),
                     "region": user["region"],

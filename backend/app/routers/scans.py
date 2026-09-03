@@ -27,7 +27,7 @@ async def disease_scan(
     result = analyze_leaf(image_bytes)
 
     scan = {
-        "farmer_id": user["_id"],
+        "farmer_id": str(user["_id"]),
         "farmer_name": user["name"],
         "crop_type": crop_type or "unknown",
         "region": user["region"],

@@ -61,8 +61,24 @@ export function AuthProvider({ children }) {
     setUser(null)
   }, [])
 
+  const updateProfile = useCallback(async (api, body) => {
+    const { data } = await api.put('/auth/profile', body)
+    localStorage.setItem('cc_user', JSON.stringify(data))
+    setUser(data)
+    window.dispatchEvent(new Event('cc_user_updated'))
+    return data
+  }, [])
+
+  const changePassword = useCallback(async (api, currentPassword, newPassword) => {
+    const { data } = await api.post('/auth/change-password', {
+      current_password: currentPassword,
+      new_password: newPassword,
+    })
+    return data
+  }, [])
+
   return (
-    <AuthContext.Provider value={{ user, login, register, verifyOtp, logout }}>
+    <AuthContext.Provider value={{ user, login, register, verifyOtp, logout, updateProfile, changePassword }}>
       {children}
     </AuthContext.Provider>
   )

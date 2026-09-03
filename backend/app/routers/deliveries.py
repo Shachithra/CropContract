@@ -30,11 +30,11 @@ async def create_delivery(body: DeliveryCreate, user: dict = Depends(require_rol
     }
     
     result = await db.deliveries.insert_one(delivery)
-    delivery["_id"] = str(result.inserted_id)
+    delivery["id"] = str(result.inserted_id)
 
     await db.commitments.update_one(
         {"_id": to_oid(body.commitment_id)},
         {"$set": {"status": "delivered"}}
     )
     
-    return DeliveryOut(**delivery)
+    return DeliveryOut(**{k: v for k, v in delivery.items() if k != "_id"})
