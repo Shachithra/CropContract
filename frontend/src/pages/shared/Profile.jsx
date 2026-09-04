@@ -15,6 +15,7 @@ export default function Profile() {
 
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [pendingPicture, setPendingPicture] = useState(undefined)
   const [form, setForm] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -55,16 +56,8 @@ export default function Profile() {
     try {
       const compressed = await compressImage(file, { maxDim: 512, quality: 0.8 })
       const reader = new FileReader()
-      reader.onload = async () => {
-        try {
-          const { data } = await api.put('/auth/profile', { profile_picture: reader.result })
-          localStorage.setItem('cc_user', JSON.stringify(data))
-          window.dispatchEvent(new Event('cc_user_updated'))
-          showToast(t('common.profilePictureUpdated'), 'success')
-          window.location.reload()
-        } catch {
-          showToast(t('common.error'), 'error')
-        }
+      reader.onload = () => {
+        setPendingPicture(reader.result)
       }
       reader.readAsDataURL(compressed)
     } catch {
@@ -72,41 +65,32 @@ export default function Profile() {
     }
   }
 
-  async function removePicture() {
-    try {
-      const { data } = await api.put('/auth/profile', { profile_picture: null })
-      localStorage.setItem('cc_user', JSON.stringify(data))
-      window.dispatchEvent(new Event('cc_user_updated'))
-      showToast(t('common.profilePictureUpdated'), 'success')
-      window.location.reload()
-    } catch {
-      showToast(t('common.error'), 'error')
-    }
+  function removePicture() {
+    setPendingPicture(null)
   }
 
   async function handleSave() {
     if (!form.name || form.name.length < 2) {
-      showToast('Name must be at least 2 characters', 'error')
+      showToast(t('common.nameRequired'), 'error')
       return
     }
     setSaving(true)
     try {
-      await api.put('/auth/profile', form)
-      localStorage.setItem('cc_user', JSON.stringify({ ...user, ...form }))
+      const body = { ...form }
+      if (pendingPicture !== undefined) {
+        body.profile_picture = pendingPicture
+      }
+      await api.put('/auth/profile', body)
+      localStorage.setItem('cc_user', JSON.stringify({ ...user, ...body }))
       window.dispatchEvent(new Event('cc_user_updated'))
       setEditing(false)
-      showToast('Profile updated', 'success')
+      setPendingPicture(undefined)
+      showToast(t('common.profileUpdated'), 'success')
     } catch {
       showToast(t('common.error'), 'error')
     } finally {
       setSaving(false)
     }
-  }
-
-  const roleLabel = {
-    farmer: 'FARMER',
-    buyer: 'BUYER',
-    officer: 'OFFICER',
   }
 
   const LANGS = [
@@ -119,7 +103,7 @@ export default function Profile() {
     <div className="min-h-dvh bg-cream">
       {/* Header */}
       <div className="w-full max-w-md mx-auto px-6 pt-12 pb-4">
-        <h1 className="font-display text-2xl font-bold tracking-wide text-paddy text-center">CROPCONTRACT</h1>
+        <h1 className="font-display text-2xl font-bold tracking-wide text-paddy text-center">{t('appName')}</h1>
       </div>
 
       <div className="flex flex-col items-center px-6 pb-8 w-full max-w-md mx-auto">
@@ -148,7 +132,7 @@ export default function Profile() {
 
         {/* Role badge */}
         <span className="mt-2 inline-block px-4 py-1 rounded-full bg-paddy text-white text-xs font-bold tracking-wider">
-          {roleLabel[user.role] || user.role?.toUpperCase()}
+          {t(`common.${user.role}`) || user.role?.toUpperCase()}
         </span>
 
         {/* Info card */}
@@ -157,7 +141,7 @@ export default function Profile() {
           {user.role === 'officer' && (
             <>
               <div>
-                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Officer ID</p>
+                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.officerId')}</p>
                 <p className="text-sm font-medium text-paddy mt-0.5">{user.officer_id || '—'}</p>
               </div>
               <div className="border-t border-surface-border/60" />
@@ -166,7 +150,7 @@ export default function Profile() {
 
           {/* Email */}
           <div>
-            <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Email Address</p>
+            <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.emailAddress')}</p>
             <p className="text-sm font-medium text-paddy mt-0.5">{user.email || '—'}</p>
           </div>
 
@@ -174,7 +158,7 @@ export default function Profile() {
 
           {/* Phone */}
           <div>
-            <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Phone Number</p>
+            <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.phoneLabel')}</p>
             <p className="text-sm font-medium text-paddy mt-0.5">{user.phone || '—'}</p>
           </div>
 
@@ -183,7 +167,7 @@ export default function Profile() {
             <>
               <div className="border-t border-surface-border/60" />
               <div>
-                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Department</p>
+                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.departmentLabel')}</p>
                 <p className="text-sm font-medium text-paddy mt-0.5">{user.department || '—'}</p>
               </div>
             </>
@@ -194,7 +178,7 @@ export default function Profile() {
             <>
               <div className="border-t border-surface-border/60" />
               <div>
-                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">District / Region</p>
+                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.districtRegion')}</p>
                 <p className="text-sm font-medium text-paddy mt-0.5">{user.district || t(`regions.${user.region}`, { defaultValue: user.region || '—' })}</p>
               </div>
             </>
@@ -205,7 +189,7 @@ export default function Profile() {
             <>
               <div className="border-t border-surface-border/60" />
               <div>
-                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Designation</p>
+                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.designationLabel')}</p>
                 <p className="text-sm font-medium text-paddy mt-0.5">{user.designation || '—'}</p>
               </div>
             </>
@@ -216,7 +200,7 @@ export default function Profile() {
             <>
               <div className="border-t border-surface-border/60" />
               <div>
-                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Farm Location</p>
+                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.farmLocationLabel')}</p>
                 <p className="text-sm font-medium text-paddy mt-0.5">{user.farm_location || '—'}</p>
               </div>
             </>
@@ -227,7 +211,7 @@ export default function Profile() {
             <>
               <div className="border-t border-surface-border/60" />
               <div>
-                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Company Location</p>
+                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.companyLocationLabel')}</p>
                 <p className="text-sm font-medium text-paddy mt-0.5">{user.company_location || '—'}</p>
               </div>
             </>
@@ -238,7 +222,7 @@ export default function Profile() {
             <>
               <div className="border-t border-surface-border/60" />
               <div>
-                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Sourcing Region</p>
+                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.sourcingRegion')}</p>
                 <p className="text-sm font-medium text-paddy mt-0.5">{t(`regions.${user.region}`, { defaultValue: user.region || '—' })}</p>
               </div>
             </>
@@ -249,7 +233,7 @@ export default function Profile() {
             <>
               <div className="border-t border-surface-border/60" />
               <div>
-                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Delivery Address</p>
+                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.deliveryAddress')}</p>
                 <p className="text-sm font-medium text-paddy mt-0.5">{user.delivery_address || '—'}</p>
               </div>
             </>
@@ -260,7 +244,7 @@ export default function Profile() {
             <>
               <div className="border-t border-surface-border/60" />
               <div>
-                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Delivery Address 2</p>
+                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.deliveryAddress2')}</p>
                 <p className="text-sm font-medium text-paddy mt-0.5">{user.delivery_address_2 || '—'}</p>
               </div>
             </>
@@ -271,7 +255,7 @@ export default function Profile() {
             <>
               <div className="border-t border-surface-border/60" />
               <div>
-                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Region</p>
+                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.regionLabel')}</p>
                 <p className="text-sm font-medium text-paddy mt-0.5">{t(`regions.${user.region}`, { defaultValue: user.region || '—' })}</p>
               </div>
             </>
@@ -282,7 +266,7 @@ export default function Profile() {
             <>
               <div className="border-t border-surface-border/60" />
               <div>
-                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Crop Types</p>
+                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.cropTypesLabel')}</p>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {cropTypes.map((crop) => (
                     <span
@@ -304,13 +288,13 @@ export default function Profile() {
             onClick={() => setEditing(true)}
             className="flex-1 py-3 rounded-2xl border-2 border-paddy text-paddy font-display font-bold text-sm hover:bg-paddy/5 active:scale-[0.98] transition"
           >
-            Edit Profile
+            {t('common.editProfile')}
           </button>
           <button
             onClick={() => { logout(); window.location.href = '/login' }}
             className="flex-1 py-3 rounded-2xl text-clay font-display font-bold text-sm hover:underline active:scale-[0.98] transition"
           >
-            Log Out
+            {t('common.logOut')}
           </button>
         </div>
       </div>
@@ -336,7 +320,7 @@ export default function Profile() {
               {/* Modal Header */}
               <div className="sticky top-0 bg-cream px-6 pt-6 pb-4 border-b border-surface-border z-10">
                 <div className="flex items-center justify-between">
-                  <h2 className="font-display text-lg font-bold text-paddy">Edit Profile</h2>
+                  <h2 className="font-display text-lg font-bold text-paddy">{t('common.editProfile')}</h2>
                   <button
                     onClick={() => setEditing(false)}
                     className="w-8 h-8 rounded-full bg-surface-border/30 grid place-items-center hover:bg-surface-border/50 transition"
@@ -353,7 +337,19 @@ export default function Profile() {
                 {/* Profile Picture */}
                 <div className="flex items-center gap-4">
                   <div className="relative shrink-0">
-                    {user.profile_picture ? (
+                    {pendingPicture !== undefined ? (
+                      pendingPicture ? (
+                        <img
+                          src={pendingPicture}
+                          alt="Preview"
+                          className="w-16 h-16 rounded-full object-cover border-2 border-paddy/20"
+                        />
+                      ) : (
+                        <div className="w-16 h-16 rounded-full bg-paddy/10 border-2 border-paddy/20 grid place-items-center">
+                          <span className="text-paddy font-display font-bold text-xl">{user.name?.[0] || '?'}</span>
+                        </div>
+                      )
+                    ) : user.profile_picture ? (
                       <img
                         src={user.profile_picture}
                         alt="Profile"
@@ -370,14 +366,22 @@ export default function Profile() {
                       onClick={() => modalFileRef.current?.click()}
                       className="px-3 py-1.5 rounded-full bg-turmeric text-paddy text-xs font-semibold hover:brightness-110 transition"
                     >
-                      Change Photo
+                      {t('common.changePhoto')}
                     </button>
-                    {user.profile_picture && (
+                    {user.profile_picture && pendingPicture !== null && (
                       <button
                         onClick={removePicture}
                         className="px-3 py-1.5 rounded-full bg-clay/15 text-clay text-xs font-semibold hover:bg-clay/25 transition"
                       >
-                        Remove
+                        {t('common.remove')}
+                      </button>
+                    )}
+                    {pendingPicture !== undefined && (
+                      <button
+                        onClick={() => setPendingPicture(undefined)}
+                        className="px-3 py-1.5 rounded-full bg-surface-border/50 text-text-muted text-xs font-semibold hover:bg-surface-border/75 transition"
+                      >
+                        {t('common.undo')}
                       </button>
                     )}
                   </div>
@@ -392,7 +396,7 @@ export default function Profile() {
 
                 {/* Name */}
                 <div>
-                  <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Name</label>
+                  <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.nameField')}</label>
                   <input
                     className="input-field mt-1"
                     value={form.name}
@@ -402,7 +406,7 @@ export default function Profile() {
 
                 {/* Email */}
                 <div>
-                  <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Email</label>
+                  <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.emailField')}</label>
                   <input
                     type="email"
                     className="input-field mt-1"
@@ -413,7 +417,7 @@ export default function Profile() {
 
                 {/* Phone */}
                 <div>
-                  <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Phone</label>
+                  <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.phoneField')}</label>
                   <input
                     type="tel"
                     className="input-field mt-1"
@@ -424,7 +428,7 @@ export default function Profile() {
 
                 {/* Region */}
                 <div>
-                  <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Region</label>
+                  <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.regionField')}</label>
                   <select
                     className="input-field mt-1"
                     value={form.region}
@@ -441,7 +445,7 @@ export default function Profile() {
                 {user.role === 'farmer' && (
                   <>
                     <div>
-                      <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Farm Location</label>
+                      <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.farmLocationField')}</label>
                       <input
                         className="input-field mt-1"
                         value={form.farm_location}
@@ -449,7 +453,7 @@ export default function Profile() {
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Crop Types</label>
+                      <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.cropTypesField')}</label>
                       <select
                         className="input-field mt-1"
                         value={form.crop_types}
@@ -468,7 +472,7 @@ export default function Profile() {
                 {user.role === 'buyer' && (
                   <>
                     <div>
-                      <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Company Location</label>
+                      <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.companyLocationField')}</label>
                       <input
                         className="input-field mt-1"
                         value={form.company_location}
@@ -476,7 +480,7 @@ export default function Profile() {
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Delivery Address</label>
+                      <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.deliveryAddressField')}</label>
                       <input
                         className="input-field mt-1"
                         value={form.delivery_address}
@@ -484,7 +488,7 @@ export default function Profile() {
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Delivery Address 2</label>
+                      <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.deliveryAddress2Field')}</label>
                       <input
                         className="input-field mt-1"
                         value={form.delivery_address_2}
@@ -498,7 +502,7 @@ export default function Profile() {
                 {user.role === 'officer' && (
                   <>
                     <div>
-                      <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Department</label>
+                      <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.departmentField')}</label>
                       <input
                         className="input-field mt-1"
                         value={form.department}
@@ -506,7 +510,7 @@ export default function Profile() {
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">District</label>
+                      <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.districtField')}</label>
                       <select
                         className="input-field mt-1"
                         value={form.district}
@@ -519,7 +523,7 @@ export default function Profile() {
                       </select>
                     </div>
                     <div>
-                      <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Designation</label>
+                      <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.designationField')}</label>
                       <input
                         className="input-field mt-1"
                         value={form.designation}
@@ -537,7 +541,7 @@ export default function Profile() {
                   disabled={saving}
                   className="w-full py-3 rounded-2xl bg-turmeric text-paddy font-display font-bold text-sm hover:brightness-110 active:scale-[0.98] transition disabled:opacity-50"
                 >
-                  {saving ? 'Saving...' : 'Save Changes'}
+                  {saving ? t('common.saving') : t('common.saveChanges')}
                 </button>
               </div>
             </motion.div>

@@ -49,7 +49,7 @@ export default function Login() {
   return (
     <div className="min-h-dvh flex flex-col items-center bg-cream">
       <div className="w-full flex justify-end p-4">
-        <LanguageToggle />
+        <LanguageToggle light />
       </div>
       {/* Main content */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8 w-full max-w-lg mx-auto">

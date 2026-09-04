@@ -34,11 +34,7 @@ const RegionalOutbreaks = lazy(() => import('./pages/officer/RegionalOutbreaks.j
 const RegionDetail = lazy(() => import('./pages/officer/RegionDetail.jsx'))
 
 function PageSpinner() {
-  return (
-    <div className="flex items-center justify-center py-24">
-      <div className="w-8 h-8 border-3 border-paddy/20 border-t-paddy rounded-full animate-spin" />
-    </div>
-  )
+  return null
 }
 
 function ProtectedLayout() {

@@ -129,7 +129,7 @@ export default function FarmerRegister() {
 
         {/* Language toggle */}
         <div className="mt-4">
-          <LanguageToggle />
+          <LanguageToggle light />
         </div>
 
         {/* Form header */}

@@ -54,7 +54,7 @@ export default function Register() {
       <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8 w-full max-w-lg mx-auto">
         {/* Language toggle */}
         <div className="absolute top-4 right-4">
-          <LanguageToggle />
+          <LanguageToggle light />
         </div>
 
         {/* Logo */}

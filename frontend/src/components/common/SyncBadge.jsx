@@ -7,10 +7,10 @@ export default function SyncBadge({ online, syncing, pending }) {
   const state = !online ? 'offline' : syncing ? 'syncing' : pending > 0 ? 'pending' : 'synced'
 
   const config = {
-    offline: { icon: WifiOff, label: t('common.offlineOffline'), bg: 'bg-surface-border/60 text-text-muted' },
-    syncing: { icon: Loader2, label: t('common.syncing'), bg: 'bg-turmeric/15 text-turmeric' },
-    pending: { icon: null, label: t('common.pending', { count: pending }), bg: 'bg-turmeric/15 text-turmeric' },
-    synced: { icon: CheckCircle2, label: t('common.synced'), bg: 'bg-teal/15 text-teal' },
+    offline: { icon: WifiOff, label: t('common.offlineOffline'), bg: 'bg-white/10 text-white/70' },
+    syncing: { icon: Loader2, label: t('common.syncing'), bg: 'bg-turmeric/20 text-turmeric' },
+    pending: { icon: null, label: t('common.pending', { count: pending }), bg: 'bg-turmeric/20 text-turmeric' },
+    synced: { icon: CheckCircle2, label: t('common.synced'), bg: 'bg-white/10 text-white/70' },
   }
 
   const { icon: Icon, label, bg } = config[state]
@@ -32,7 +32,7 @@ export default function SyncBadge({ online, syncing, pending }) {
           />
         )}
         {state === 'pending' && (
-          <span className="w-1.5 h-1.5 rounded-full bg-turmeric animate-pulse" />
+          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
         )}
         {label}
       </motion.div>
