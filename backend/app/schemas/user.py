@@ -46,6 +46,7 @@ class OTPVerify(BaseModel):
 
 class UserOut(BaseModel):
     id: str
+    user_id: str | None = None
     name: str
     email: str
     role: str

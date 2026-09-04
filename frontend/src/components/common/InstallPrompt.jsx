@@ -65,7 +65,7 @@ export default function InstallPrompt() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="fixed bottom-20 md:bottom-6 inset-x-0 z-50 px-4 md:px-6 md:max-w-md md:ml-auto md:mr-6"
+          className="fixed bottom-20 inset-x-0 z-50 px-4"
         >
           <div className="bg-paddy text-white rounded-2xl shadow-raised p-4 flex items-center gap-3 border border-white/10">
             <div className="w-10 h-10 rounded-xl bg-turmeric grid place-items-center shrink-0">

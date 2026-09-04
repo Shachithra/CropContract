@@ -83,11 +83,12 @@ async def seed_db():
     # Demo users
     users = [
         {
+            "user_id": "FRM-001",
             "name": "Kumari Silva",
             "email": "farmer@demo.lk",
             "role": "farmer",
             "region": "Dambulla",
-            "phone": "0771234567",
+            "phone": "+94771234567",
             "preferred_language": "en",
             "hashed_password": hash_password("demo1234"),
             "farm_name": "Silva Farm",
@@ -102,11 +103,12 @@ async def seed_db():
             "created_at": today.isoformat(),
         },
         {
+            "user_id": "BUY-001",
             "name": "Ravi Perera",
             "email": "buyer@demo.lk",
             "role": "buyer",
             "region": "Colombo",
-            "phone": "0779876543",
+            "phone": "+94779876543",
             "preferred_language": "en",
             "hashed_password": hash_password("demo1234"),
             "company_name": "Perera Exports",
@@ -120,11 +122,12 @@ async def seed_db():
             "created_at": today.isoformat(),
         },
         {
+            "user_id": "OFF-001",
             "name": "Officer Nimal",
             "email": "officer@demo.lk",
             "role": "officer",
             "region": "Nuwara Eliya",
-            "phone": "0775551234",
+            "phone": "+94775551234",
             "preferred_language": "en",
             "hashed_password": hash_password("demo1234"),
             "officer_id": "AGR-001",

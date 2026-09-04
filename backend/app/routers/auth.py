@@ -16,6 +16,14 @@ bearer = HTTPBearer(auto_error=False)
 DEFAULT_OTP = "123456"
 
 
+def _normalize_phone(phone: str) -> str:
+    """Normalize phone number: leading 0 → +94."""
+    phone = phone.strip()
+    if phone.startswith("0"):
+        return "+94" + phone[1:]
+    return phone
+
+
 def create_token(user: dict) -> str:
     payload = {
         "sub": str(user["_id"]),
@@ -95,6 +103,7 @@ def require_role(*roles: str):
 async def register(body: UserRegister):
     db = get_db()
     email = body.email.lower()
+    phone = _normalize_phone(body.phone) if body.phone else None
     
     # Check if email already exists
     existing_user = await db.users.find_one({"email": email})
@@ -102,9 +111,9 @@ async def register(body: UserRegister):
         raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
     
     # Check if phone matches a permanently banned user
-    if body.phone:
+    if phone:
         banned_user = await db.users.find_one({
-            "phone": body.phone.strip(),
+            "phone": phone,
             "banned_permanently": True,
         })
         if banned_user:
@@ -124,13 +133,24 @@ async def register(body: UserRegister):
             "This email is permanently banned from the platform",
         )
     
+    # Generate user ID based on role
+    role_prefix = {"farmer": "FRM", "buyer": "BUY", "officer": "OFF"}
+    prefix = role_prefix.get(body.role, "USR")
+    count = await db.users.count_documents({"role": body.role})
+    user_id = f"{prefix}-{str(count + 1).zfill(3)}"
+    # Ensure uniqueness
+    while await db.users.find_one({"user_id": user_id}):
+        count += 1
+        user_id = f"{prefix}-{str(count + 1).zfill(3)}"
+    
     # Create user document
     user_doc = {
+        "user_id": user_id,
         "name": body.name,
         "email": email,
         "role": body.role,
         "region": body.region,
-        "phone": body.phone,
+        "phone": phone,
         "preferred_language": body.preferred_language,
         "hashed_password": hash_password(body.password),
         "warning_count": 0,
@@ -168,7 +188,7 @@ async def register(body: UserRegister):
 @router.post("/login")
 async def login(body: UserLogin):
     db = get_db()
-    phone = body.phone.strip()
+    phone = _normalize_phone(body.phone)
     
     # Find user by phone number
     user = await db.users.find_one({"phone": phone})
@@ -215,7 +235,7 @@ async def login(body: UserLogin):
 @router.post("/verify-otp")
 async def verify_otp(body: OTPVerify):
     db = get_db()
-    phone = body.phone.strip()
+    phone = _normalize_phone(body.phone)
     
     # Check OTP from MongoDB
     otp_doc = await db.otps.find_one({"phone": phone})
@@ -287,3 +307,28 @@ async def change_password(body: PasswordChange, user: dict = Depends(get_current
         {"$set": {"hashed_password": hash_password(body.new_password)}}
     )
     return {"message": "Password updated successfully"}
+
+
+@router.get("/users/search")
+async def search_users(
+    q: str = "",
+    role: str = "",
+    user: dict = Depends(require_role("officer")),
+):
+    """Search users by user_id, name, or phone. Officers only."""
+    db = get_db()
+    query: dict = {}
+    if role:
+        query["role"] = role
+    if q:
+        query["$or"] = [
+            {"user_id": {"$regex": q, "$options": "i"}},
+            {"name": {"$regex": q, "$options": "i"}},
+            {"phone": {"$regex": q, "$options": "i"}},
+        ]
+    cursor = db.users.find(query).limit(20)
+    users = []
+    async for u in cursor:
+        u["id"] = str(u["_id"])
+        users.append(UserOut(**u).model_dump())
+    return users

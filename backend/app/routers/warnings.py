@@ -32,7 +32,9 @@ async def _check_and_apply_ban(db, user_id: str) -> dict:
     The had_temp_ban flag preserves the fact that a ban was served, so the
     next set of 3 warnings can escalate to permanent ban.
     """
-    user = await db.users.find_one({"_id": to_oid(user_id)})
+    user = await db.users.find_one({"user_id": user_id})
+    if not user:
+        user = await db.users.find_one({"_id": to_oid(user_id)})
     if not user:
         return {"is_banned": False, "ban_type": "none"}
 
@@ -84,7 +86,10 @@ async def _check_and_apply_ban(db, user_id: str) -> dict:
 async def issue_warning(body: WarningCreate, user: dict = Depends(require_role("officer"))):
     db = get_db()
 
-    target = await db.users.find_one({"_id": to_oid(body.target_user_id)})
+    # Look up target by user_id (e.g. FRM-001) or fallback to _id
+    target = await db.users.find_one({"user_id": body.target_user_id})
+    if not target:
+        target = await db.users.find_one({"_id": to_oid(body.target_user_id)})
     if not target:
         raise HTTPException(status_code=404, detail="Target user not found")
     if target["role"] not in ("farmer", "buyer"):
@@ -113,7 +118,7 @@ async def issue_warning(body: WarningCreate, user: dict = Depends(require_role("
             ban_type = "temporary"
 
     await db.users.update_one(
-        {"_id": to_oid(body.target_user_id)},
+        {"_id": target["_id"]},
         {"$set": update_fields},
     )
 
@@ -138,8 +143,9 @@ async def issue_warning(body: WarningCreate, user: dict = Depends(require_role("
 @router.get("/warnings/mine", response_model=list[WarningOut])
 async def my_warnings(user: dict = Depends(get_current_user)):
     db = get_db()
+    uid = user.get("user_id", str(user["_id"]))
     warnings = await db.warnings.find(
-        {"target_user_id": str(user["_id"])}
+        {"target_user_id": uid}
     ).sort("issued_at", -1).to_list(100)
     return [
         WarningOut(**{**{k: v for k, v in w.items() if k != "_id"}, "id": str(w["_id"])})
@@ -162,7 +168,8 @@ async def target_warnings(user_id: str, user: dict = Depends(require_role("offic
 @router.get("/ban-status")
 async def get_ban_status(user: dict = Depends(get_current_user)):
     db = get_db()
-    status_info = await _check_and_apply_ban(db, str(user["_id"]))
+    uid = user.get("user_id", str(user["_id"]))
+    status_info = await _check_and_apply_ban(db, uid)
     return status_info
 
 

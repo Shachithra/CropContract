@@ -149,7 +149,7 @@ export default function FarmerLogin() {
             <input
               id="phone"
               type="tel"
-              placeholder="07X XXX XXXX"
+              placeholder="+94 7X XXX XXXX"
               className={`input-field ${errors.phone ? 'border-clay focus:border-clay focus:ring-clay/50' : ''}`}
               {...registerField('phone')}
             />

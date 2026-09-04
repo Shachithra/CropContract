@@ -6,7 +6,6 @@ import OverCommitRecovery from '../../components/farmer/OverCommitRecovery.jsx'
 import Toast from '../../components/common/Toast.jsx'
 import InstallPrompt from '../../components/common/InstallPrompt.jsx'
 import TopBar from '../layout/TopBar.jsx'
-import DesktopSidebar from '../layout/DesktopSidebar.jsx'
 import NavTabs from '../layout/NavTabs.jsx'
 import OfflineBanner from '../layout/OfflineBanner.jsx'
 import { Outlet, useLocation } from 'react-router-dom'
@@ -33,11 +32,10 @@ export default function AppShell() {
   }, [])
 
   return (
-    <div className="min-h-dvh flex flex-col md:flex-row">
-      <DesktopSidebar />
-      <div className="flex-1 flex flex-col min-w-0 md:ml-64">
+    <div className="min-h-dvh flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         <TopBar syncState={{ online, syncing, pending }} />
-        <main className="flex-1 w-full max-w-5xl mx-auto px-4 pb-28 md:pb-8 pt-4">
+        <main className="flex-1 w-full max-w-5xl mx-auto px-4 pb-28 pt-4">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
@@ -50,7 +48,7 @@ export default function AppShell() {
             </motion.div>
           </AnimatePresence>
         </main>
-        <NavTabs className="md:hidden" />
+        <NavTabs />
       </div>
       <OfflineBanner />
       <InstallPrompt />
