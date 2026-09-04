@@ -15,7 +15,7 @@ export default function LanguageToggle({ light = false }) {
         <button
           key={l.code}
           onClick={() => i18n.changeLanguage(l.code)}
-          className={`px-2 py-1 text-[10px] font-bold rounded-md transition ${
+          className={`px-2.5 py-1 text-xs font-bold rounded-md transition ${
             i18n.language === l.code
               ? light
                 ? 'bg-turmeric text-paddy'

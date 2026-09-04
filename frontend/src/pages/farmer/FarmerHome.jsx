@@ -1,12 +1,14 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ScanLine, ArrowRight, ChevronRight, Camera } from 'lucide-react'
+import { ScanLine, ArrowRight, ChevronRight, Camera, AlertTriangle } from 'lucide-react'
 import { motion } from 'framer-motion'
 import GrowthThread from '../../components/farmer/GrowthThread.jsx'
 import Card from '../../components/common/Card.jsx'
 import Chip from '../../components/common/Chip.jsx'
+import BanCountdown from '../../components/common/BanCountdown.jsx'
 import { useContracts, useMyCommitments } from '../../hooks/useContracts.js'
+import { useMyWarnings, useBanStatus } from '../../hooks/useWarnings.js'
 import { useAuth } from '../../hooks/useAuth.jsx'
 
 export default function FarmerHome() {
@@ -14,6 +16,8 @@ export default function FarmerHome() {
   const { user } = useAuth()
   const { data: commitments = [] } = useMyCommitments()
   const { data: contracts = [] } = useContracts()
+  const { data: warnings = [] } = useMyWarnings()
+  const { data: banStatus } = useBanStatus()
 
   const activeCommitments = useMemo(
     () => commitments.filter((c) => c.status === 'active' || c.status === 'pending-sync'),
@@ -28,6 +32,9 @@ export default function FarmerHome() {
     [contracts],
   )
 
+  const warningCount = warnings.length
+  const isBanned = banStatus?.is_banned
+
   return (
     <div className="space-y-5">
       {/* Greeting */}
@@ -37,6 +44,53 @@ export default function FarmerHome() {
           {user?.name || 'Farmer'}
         </h1>
       </div>
+
+      {/* Warning Banner */}
+      {warningCount > 0 && !isBanned && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <Card className={`border-l-4 ${
+            warningCount >= 3 ? 'border-l-clay bg-clay/5' :
+            warningCount >= 2 ? 'border-l-turmeric bg-turmeric/5' :
+            'border-l-turmeric bg-turmeric/5'
+          }`}>
+            <div className="flex items-center gap-3">
+              <AlertTriangle size={20} className={
+                warningCount >= 3 ? 'text-clay' : 'text-turmeric'
+              } />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-paddy">
+                  {t('warning.warningCount', { count: warningCount })}
+                </p>
+                <p className="text-xs text-text-muted mt-0.5">
+                  {warningCount >= 3 ? t('warning.nextWarningPermBan') : t('warning.nextWarningBan')}
+                </p>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+      )}
+
+      {/* Ban Countdown */}
+      {isBanned && banStatus.ban_type === 'temporary' && banStatus.banned_until && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <Card className="border-l-4 border-l-clay bg-clay/5 space-y-3">
+            <div className="flex items-center gap-3">
+              <AlertTriangle size={20} className="text-clay" />
+              <div>
+                <p className="text-sm font-semibold text-clay">{t('ban.tempBan')}</p>
+                <p className="text-xs text-text-muted">{t('ban.bannedUntil', { date: banStatus.banned_until })}</p>
+              </div>
+            </div>
+            <BanCountdown bannedUntil={banStatus.banned_until} />
+          </Card>
+        </motion.div>
+      )}
 
       {/* Active contract card */}
       {latest && latestContract ? (

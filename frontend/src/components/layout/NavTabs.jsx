@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Home, LayoutDashboard, FileText, Store, FilePlus2, ClipboardCheck, AlertTriangle, BarChart3, User } from 'lucide-react'
+import { Home, LayoutDashboard, FileText, Store, FilePlus2, ClipboardCheck, AlertTriangle, BarChart3, User, ShieldAlert, DollarSign } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth.jsx'
 
 const tabsByRole = {
@@ -21,7 +21,8 @@ const tabsByRole = {
   officer: [
     { to: '/officer', icon: ClipboardCheck, label: 'nav.review' },
     { to: '/officer/outbreaks', icon: BarChart3, label: 'nav.outbreaks' },
-    { to: '/officer/alert', icon: AlertTriangle, label: 'nav.issueAlert' },
+    { to: '/officer/warnings', icon: ShieldAlert, label: 'nav.warnings' },
+    { to: '/officer/price-ranges', icon: DollarSign, label: 'nav.priceRanges' },
     { to: '/profile', icon: User, label: 'nav.profile' },
   ],
 }

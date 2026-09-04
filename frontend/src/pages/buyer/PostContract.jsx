@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, CheckCircle2, Loader2 } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Loader2, AlertTriangle } from 'lucide-react'
 import Button from '../../components/common/Button.jsx'
 import Card from '../../components/common/Card.jsx'
 import api from '../../lib/api.js'
@@ -54,6 +54,24 @@ export default function PostContract() {
   })
 
   const formValues = watch()
+
+  // Check price range when all fields are filled
+  const { data: priceCheck } = useQuery({
+    queryKey: ['price-check', formValues.crop_type, formValues.region, formValues.price_per_kg],
+    queryFn: async () => {
+      if (!formValues.crop_type || !formValues.region || !formValues.price_per_kg) return null
+      try {
+        const { data } = await api.get(
+          `/price-ranges/check/${encodeURIComponent(formValues.crop_type)}/${encodeURIComponent(formValues.region)}?price=${formValues.price_per_kg}`
+        )
+        return data
+      } catch {
+        return null
+      }
+    },
+    enabled: !!formValues.crop_type && !!formValues.region && !!formValues.price_per_kg,
+    staleTime: 10_000,
+  })
 
   async function onSubmit(data) {
     setError('')
@@ -186,6 +204,18 @@ export default function PostContract() {
                 <label className="label-muted" htmlFor="price">PRICE PER KG (Rs.)</label>
                 <input id="price" type="number" step="0.01" min={0.01} className={`input-field ${errors.price_per_kg ? 'border-clay' : ''}`} placeholder="e.g. 210" {...register('price_per_kg')} />
                 {errors.price_per_kg && <p className="text-clay text-xs mt-1">{errors.price_per_kg.message}</p>}
+                {priceCheck && !priceCheck.in_range && (
+                  <div className={`flex items-center gap-2 mt-2 px-3 py-2 rounded-xl text-xs ${priceCheck.below_minimum ? 'bg-clay/10 border border-clay/30 text-clay' : 'bg-turmeric/10 border border-turmeric/30 text-turmeric'}`}>
+                    <AlertTriangle size={14} />
+                    <span>{priceCheck.message}</span>
+                  </div>
+                )}
+                {priceCheck && priceCheck.in_range && priceCheck.min_price !== null && (
+                  <div className="flex items-center gap-2 mt-2 px-3 py-2 rounded-xl text-xs bg-teal/10 border border-teal/30 text-teal">
+                    <CheckCircle2 size={14} />
+                    <span>{t('priceRange.withinRange')}</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -193,6 +223,7 @@ export default function PostContract() {
             <div>
               <label className="label-muted" htmlFor="region">REGION</label>
               <select id="region" className="input-field" {...register('region')}>
+                <option value="All Regions">All Regions</option>
                 {SRI_LANKA_DISTRICTS.map((r) => (
                   <option key={r} value={r}>{t(`regions.${r}`, { defaultValue: r })}</option>
                 ))}

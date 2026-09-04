@@ -16,7 +16,9 @@
     "outbreaks": "Outbreaks",
     "logout": "Log out",
     "profile": "Profile",
-    "fulfilment": "Fulfilment"
+    "fulfilment": "Fulfilment",
+    "priceRanges": "Price Ranges",
+    "warnings": "Warnings"
   },
   "auth": {
     "welcomeBack": "Welcome",
@@ -464,5 +466,92 @@
     "Monaragala": "Monaragala",
     "Ratnapura": "Ratnapura",
     "Kegalle": "Kegalle"
+  },
+  "warning": {
+    "title": "Warnings & Enforcement",
+    "issueWarning": "Issue Warning",
+    "reason": "Reason for warning",
+    "violationType": "Violation type",
+    "violationTypes": {
+      "pricing": "Pricing violation",
+      "disease_report": "Disease report issue",
+      "contract_breach": "Contract breach",
+      "conduct": "Conduct violation",
+      "other": "Other"
+    },
+    "warningCount": "{{count}} warning(s)",
+    "warningOf": "Warning {{current}} of {{max}}",
+    "issuedTo": "Issued to {{name}}",
+    "issuedBy": "Issued by {{name}}",
+    "issuedAt": "Issued on {{date}}",
+    "confirmIssue": "Issue this warning?",
+    "warningIssued": "Warning issued successfully",
+    "targetUser": "Select user",
+    "allWarnings": "All warnings",
+    "myWarnings": "My warnings",
+    "noWarnings": "No warnings issued yet",
+    "noMyWarnings": "You have no warnings",
+    "nextWarningBan": "Next warning will result in a 7-day ban",
+    "nextWarningPermBan": "Next warning will result in a permanent ban",
+    "viewAll": "View all warnings"
+  },
+  "ban": {
+    "accountBanned": "Account Banned",
+    "tempBan": "Your account has been temporarily banned",
+    "permBan": "Your account has been permanently banned",
+    "banReason": "Reason: {{reason}}",
+    "banDuration": "Ban duration: 7 days",
+    "timeRemaining": "Time remaining",
+    "days": "{{count}} day(s)",
+    "hours": "{{count}} hour(s)",
+    "minutes": "{{count}} minute(s)",
+    "seconds": "{{count}} second(s)",
+    "banExpired": "Your ban has expired. You can now use the app.",
+    "contactSupport": "Contact support for assistance",
+    "warningsBeforeBan": "{{count}} warning(s) before ban",
+    "bannedUntil": "Banned until {{date}}",
+    "permanentlyBanned": "This account is permanently banned and cannot be reactivated."
+  },
+  "priceRange": {
+    "title": "Price Ranges",
+    "setRange": "Set Price Range",
+    "cropType": "Crop type",
+    "region": "Region",
+    "minPrice": "Minimum price (LKR/kg)",
+    "maxPrice": "Maximum price (LKR/kg)",
+    "setBy": "Set by {{name}}",
+    "setAt": "Set on {{date}}",
+    "rangeSaved": "Price range saved",
+    "deleteRange": "Delete range",
+    "confirmDelete": "Remove this price range?",
+    "noRanges": "No price ranges set yet",
+    "belowMinimum": "Below minimum price",
+    "aboveMaximum": "Above maximum price",
+    "withinRange": "Within price range",
+    "priceWarning": "This price is below the minimum of Rs. {{min}}/kg",
+    "checkPrice": "Check price against range"
+  },
+  "safety": {
+    "title": "Safety Precautions",
+    "SAFETY_WASH_HANDS_AFTER_CONTACT": "Wash hands thoroughly after handling affected plants",
+    "SAFETY_DISPOSE_INFECTED_MATERIAL": "Dispose of all infected material in trash — do not compost",
+    "SAFETY_AVOID_SPREAD_TO_HEALTHY_PLANTS": "Avoid contact with healthy plants until hands and tools are cleaned",
+    "SAFETY_USE_CLEAN_TOOLS": "Clean and disinfect all tools before use on healthy plants",
+    "SAFETY_USE_PROTECTIVE_GLOVES": "Wear protective gloves when handling affected plants",
+    "SAFETY_IMPROVE_VENTILATION": "Improve air circulation around affected plants",
+    "SAFETY_QUARANTINE_AFFECTED_PLANTS": "Isolate affected plants immediately to prevent spread"
+  },
+  "scanReview": {
+    "officerSolution": "Officer's solution",
+    "solutionPlaceholder": "Describe the recommended solution for this case...",
+    "safetyPrecautions": "Safety precautions for farmers",
+    "issueRegionalAlert": "Issue regional alert to all farmers in {{region}}",
+    "alertMessage": "Alert message to farmers",
+    "alertPlaceholder": "Describe the disease situation and what farmers should do...",
+    "markAsDone": "Mark as resolved",
+    "provideSolution": "Provide solution & review",
+    "criticalCase": "CRITICAL — Requires immediate regional alert",
+    "highCase": "HIGH — Officer review required",
+    "moderateCase": "MODERATE — Safety precautions recommended"
   }
 }

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowLeft, History, CheckCircle2, XCircle, Leaf } from 'lucide-react'
+import { ArrowLeft, History, CheckCircle2, XCircle, Leaf, AlertTriangle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import ScanCamera from '../../components/farmer/ScanCamera.jsx'
 import Button from '../../components/common/Button.jsx'
@@ -89,6 +89,7 @@ export default function DiseaseScan() {
 
   // Result state
   if (result) {
+    const isFlagged = result.severity === 'high' || result.severity === 'critical'
     return (
       <div className="space-y-4 max-w-xl mx-auto">
         {/* Image preview */}
@@ -135,6 +136,25 @@ export default function DiseaseScan() {
             </div>
           </div>
 
+          {/* Officer review notice for flagged scans */}
+          {isFlagged && (
+            <div className={`rounded-xl px-4 py-3 border ${
+              result.severity === 'critical'
+                ? 'bg-clay/10 border-clay/30 text-clay'
+                : 'bg-turmeric/10 border-turmeric/30 text-turmeric'
+            }`}>
+              <p className="text-sm font-semibold">
+                {result.severity === 'critical'
+                  ? 'This scan has been flagged as CRITICAL and sent to your Agriculture Officer for immediate review.'
+                  : 'This scan has been sent to your Agriculture Officer for review.'
+                }
+              </p>
+              <p className="text-xs mt-1 opacity-80">
+                The officer will provide solutions and safety precautions for your region.
+              </p>
+            </div>
+          )}
+
           {/* Treatment */}
           <div>
             <p className="label-muted">RECOMMENDED TREATMENT</p>
@@ -153,6 +173,27 @@ export default function DiseaseScan() {
               ))}
             </ol>
           </div>
+
+          {/* Safety precautions from AI */}
+          {result.safety_precautions && result.safety_precautions.length > 0 && (
+            <div>
+              <p className="label-muted">SAFETY PRECAUTIONS</p>
+              <ul className="space-y-2 mt-2">
+                {result.safety_precautions.map((key, i) => (
+                  <motion.li
+                    key={i}
+                    initial={{ opacity: 0, x: -12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 + 0.3 }}
+                    className="flex items-start gap-2.5 text-sm"
+                  >
+                    <AlertTriangle size={16} className="text-turmeric shrink-0 mt-0.5" />
+                    <span className="text-paddy">{t(`safety.${key}`, key)}</span>
+                  </motion.li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* Offline notice */}
           <div className="flex items-center gap-2 text-xs text-text-muted bg-cream rounded-xl px-3 py-2 border border-surface-border">
@@ -235,20 +276,42 @@ export default function DiseaseScan() {
             {history.map((s) => (
               <li
                 key={s.id}
-                className="flex items-center justify-between bg-cream border border-surface-border rounded-xl px-3.5 py-2.5"
+                className="bg-cream border border-surface-border rounded-xl px-3.5 py-2.5"
               >
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-paddy truncate">{s.disease}</p>
-                  <p className="text-[11px] text-text-muted">
-                    {s.scanned_at} · {Math.round(s.confidence * 100)}%
-                  </p>
+                <div className="flex items-center justify-between">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-paddy truncate">{s.disease}</p>
+                    <p className="text-[11px] text-text-muted">
+                      {s.scanned_at} · {Math.round(s.confidence * 100)}%
+                    </p>
+                  </div>
+                  {s.review_status === 'confirmed' ? (
+                    <CheckCircle2 size={16} className="text-teal shrink-0" />
+                  ) : s.review_status === 'dismissed' ? (
+                    <XCircle size={16} className="text-text-muted shrink-0" />
+                  ) : (
+                    <Chip tone={s.severity}>{s.severity}</Chip>
+                  )}
                 </div>
-                {s.review_status === 'confirmed' ? (
-                  <CheckCircle2 size={16} className="text-teal shrink-0" />
-                ) : s.review_status === 'dismissed' ? (
-                  <XCircle size={16} className="text-text-muted shrink-0" />
-                ) : (
-                  <Chip tone={s.severity}>{s.severity}</Chip>
+                {/* Officer review details */}
+                {s.officer_solution && (
+                  <div className="mt-2 bg-teal/5 border border-teal/20 rounded-lg px-3 py-2">
+                    <p className="text-[10px] text-teal uppercase font-semibold">Officer's Solution</p>
+                    <p className="text-xs text-paddy mt-1">{s.officer_solution}</p>
+                  </div>
+                )}
+                {s.safety_precautions && s.safety_precautions.length > 0 && (
+                  <div className="mt-2">
+                    <p className="text-[10px] text-turmeric uppercase font-semibold">Safety Precautions</p>
+                    <ul className="mt-1 space-y-1">
+                      {s.safety_precautions.map((key, i) => (
+                        <li key={i} className="text-[11px] text-text-muted flex items-start gap-1.5">
+                          <span className="text-turmeric mt-0.5">•</span>
+                          <span>{t(`safety.${key}`, key)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
               </li>
             ))}

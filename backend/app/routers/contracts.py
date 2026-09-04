@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -50,6 +50,41 @@ async def create_contract(body: ContractCreate, user: dict = Depends(require_rol
     deadline = body.commit_deadline or (today + timedelta(days=14))
     delivery = body.delivery_date or (deadline + timedelta(days=45))
     
+    # Server-side price range validation
+    price_range = await db.price_ranges.find_one({
+        "crop_type": {"$regex": f"^{body.crop_type}$", "$options": "i"},
+        "region": {"$regex": f"^{body.region}$", "$options": "i"},
+    })
+
+    price_warning_issued = False
+    if price_range:
+        min_price = price_range["min_price_per_kg"]
+        if body.price_per_kg < min_price:
+            # Auto-issue a warning to the buyer for below-minimum pricing
+            existing_warning_count = await db.warnings.count_documents({
+                "target_user_id": str(user["_id"]),
+                "violation_type": "pricing",
+            })
+            warning_doc = {
+                "target_user_id": str(user["_id"]),
+                "target_user_role": "buyer",
+                "target_user_name": user["name"],
+                "reason": f"Posted {body.crop_type} contract at Rs. {body.price_per_kg}/kg in {body.region}, which is below the minimum price of Rs. {min_price}/kg",
+                "violation_type": "pricing",
+                "warning_number": existing_warning_count + 1,
+                "issued_by": "system",
+                "issued_by_name": "System (auto-detected)",
+                "issued_at": datetime.now(timezone.utc).isoformat(),
+            }
+            await db.warnings.insert_one(warning_doc)
+            
+            # Increment the buyer's warning count
+            await db.users.update_one(
+                {"_id": user["_id"]},
+                {"$inc": {"warning_count": 1}},
+            )
+            price_warning_issued = True
+
     contract = {
         "buyer_id": str(user["_id"]),
         "crop_type": body.crop_type,

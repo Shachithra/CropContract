@@ -1,10 +1,11 @@
 import uuid
-from datetime import date
+from datetime import date, datetime, timezone
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
 from app.database import get_db, to_oid
 from app.routers.auth import get_current_user, require_role
+from app.schemas.scan import ScanReviewRequest
 from app.services.disease_model import analyze_leaf
 
 router = APIRouter(tags=["scans"])
@@ -36,8 +37,12 @@ async def disease_scan(
         "client_action_id": client_action_id,
         **result,
         "scanned_at": date.today().isoformat(),
-        "flagged": result["severity"] == "high",
-        "review_status": "pending" if result["severity"] == "high" else "none",
+        "flagged": result["severity"] in ("high", "critical"),
+        "review_status": "pending" if result["severity"] in ("high", "critical") else "none",
+        "officer_solution": None,
+        "safety_precautions": result.get("safety_precautions", []),
+        "reviewed_by": None,
+        "reviewed_at": None,
     }
     
     insert_result = await db.scans.insert_one(scan)
@@ -61,21 +66,49 @@ async def flagged_scans(user: dict = Depends(require_role("officer"))):
 
 
 @router.post("/scans/{scan_id}/review")
-async def review_scan(scan_id: str, action: str, user: dict = Depends(require_role("officer"))):
+async def review_scan(
+    scan_id: str,
+    body: ScanReviewRequest,
+    user: dict = Depends(require_role("officer")),
+):
     db = get_db()
-    if action not in ("confirmed", "dismissed"):
-        raise HTTPException(status_code=400, detail="action must be confirmed|dismissed")
-    
-    result = await db.scans.update_one(
-        {"_id": to_oid(scan_id)},
-        {"$set": {"review_status": action}}
-    )
-    
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Scan not found")
-    
+
     scan = await db.scans.find_one({"_id": to_oid(scan_id)})
-    return scan
+    if not scan:
+        raise HTTPException(status_code=404, detail="Scan not found")
+
+    update_fields = {
+        "review_status": body.action,
+        "reviewed_by": str(user["_id"]),
+        "reviewed_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    if body.officer_solution:
+        update_fields["officer_solution"] = body.officer_solution
+    if body.safety_precautions:
+        update_fields["safety_precautions"] = body.safety_precautions
+
+    await db.scans.update_one(
+        {"_id": to_oid(scan_id)},
+        {"$set": update_fields},
+    )
+
+    # Auto-create regional alert for critical cases or when officer requests it
+    if body.issue_alert or scan.get("severity") == "critical":
+        alert_message = body.alert_message or f"Critical disease detected: {scan.get('disease', 'Unknown')} in {scan.get('region', 'Unknown region')}. All farmers in the area should inspect crops immediately."
+        alert = {
+            "region": scan.get("region", "Unknown"),
+            "disease": scan.get("disease", "Unknown"),
+            "message": alert_message,
+            "issued_by": str(user["_id"]),
+            "issued_by_name": user["name"],
+            "issued_at": datetime.now(timezone.utc).isoformat(),
+            "related_scan_id": scan_id,
+        }
+        await db.alerts.insert_one(alert)
+
+    updated_scan = await db.scans.find_one({"_id": to_oid(scan_id)})
+    return updated_scan
 
 
 def new_action_id() -> str:

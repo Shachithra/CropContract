@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ShieldAlert, AlertTriangle } from 'lucide-react'
+import { ShieldAlert, AlertTriangle, DollarSign, Users } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Card from '../../components/common/Card.jsx'
 import FlaggedScanCard from '../../components/officer/FlaggedScanCard.jsx'
@@ -24,6 +24,11 @@ export default function OfficerReview() {
     queryFn: async () => (await api.get('/alerts')).data,
   })
 
+  const { data: priceRanges = [] } = useQuery({
+    queryKey: ['price-ranges'],
+    queryFn: async () => (await api.get('/price-ranges')).data,
+  })
+
   const outbreakByRegion = useMemo(() => {
     const map = {}
     for (const s of scans) {
@@ -34,11 +39,12 @@ export default function OfficerReview() {
     return Object.values(map).sort((a, b) => b.count - a.count)
   }, [scans])
 
-  async function review(scanId, action) {
+  async function review(scanId, reviewBody) {
     try {
-      await api.post(`/scans/${scanId}/review?action=${action}`)
+      await api.post(`/scans/${scanId}/review`, reviewBody)
       queryClient.invalidateQueries({ queryKey: ['flagged-scans'] })
-      showToast(action === 'confirmed' ? t('officer.confirmed') : t('officer.dismissed'), 'success')
+      queryClient.invalidateQueries({ queryKey: ['alerts'] })
+      showToast(t('officer.confirmed'), 'success')
     } catch {
       showToast(t('common.error'), 'error')
     }
@@ -61,6 +67,8 @@ export default function OfficerReview() {
   }, [scans])
 
   const recentFlagged = scans.filter((s) => s.review_status === 'pending').slice(0, 3)
+  const criticalCount = scans.filter((s) => s.severity === 'critical').length
+  const priceRangeCount = priceRanges.length
 
   return (
     <div className="space-y-5">
@@ -82,6 +90,14 @@ export default function OfficerReview() {
         <Card className="text-center py-4">
           <p className="font-display text-3xl font-bold text-turmeric">{alerts.length}</p>
           <p className="text-xs text-text-muted mt-1">{t('officer.activeAlerts')}</p>
+        </Card>
+        <Card className="text-center py-4">
+          <p className="font-display text-3xl font-bold text-clay">{criticalCount}</p>
+          <p className="text-xs text-text-muted mt-1">Critical Cases</p>
+        </Card>
+        <Card className="text-center py-4">
+          <p className="font-display text-3xl font-bold text-teal">{priceRangeCount}</p>
+          <p className="text-xs text-text-muted mt-1">Price Ranges</p>
         </Card>
       </div>
 
@@ -141,10 +157,25 @@ export default function OfficerReview() {
         )}
       </div>
 
-      {/* View outbreaks link */}
-      <Link to="/officer/outbreaks" className="block">
-        <button className="btn-turmeric w-full !rounded-xl !py-3">
-          {t('officer.viewRegionalOutbreaks')}
+      {/* Quick links */}
+      <div className="grid grid-cols-2 gap-3">
+        <Link to="/officer/outbreaks" className="block">
+          <button className="btn-turmeric w-full !rounded-xl !py-3">
+            {t('officer.viewRegionalOutbreaks')}
+          </button>
+        </Link>
+        <Link to="/officer/warnings" className="block">
+          <button className="w-full rounded-xl px-4 py-3 font-display font-semibold text-sm text-paddy border border-paddy/30 hover:bg-paddy/5 active:scale-[0.98] transition">
+            <Users size={16} className="inline mr-2" />
+            Warnings
+          </button>
+        </Link>
+      </div>
+
+      <Link to="/officer/price-ranges" className="block">
+        <button className="w-full rounded-xl px-4 py-3 font-display font-semibold text-sm text-paddy border border-paddy/30 hover:bg-paddy/5 active:scale-[0.98] transition">
+          <DollarSign size={16} className="inline mr-2" />
+          Manage Price Ranges
         </button>
       </Link>
     </div>

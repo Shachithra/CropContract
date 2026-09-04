@@ -51,6 +51,20 @@ async def connect_db():
         IndexModel([("region", ASCENDING)]),
     ])
     
+    await db.warnings.create_indexes([
+        IndexModel([("target_user_id", ASCENDING)]),
+        IndexModel([("issued_at", ASCENDING)]),
+    ])
+    
+    await db.price_ranges.create_indexes([
+        IndexModel([("crop_type", ASCENDING), ("region", ASCENDING)], unique=True),
+    ])
+    
+    await db.scans.create_indexes([
+        IndexModel([("farmer_id", ASCENDING)]),
+        IndexModel([("flagged", ASCENDING), ("review_status", ASCENDING)]),
+    ])
+    
     print(f"Connected to MongoDB: {settings.MONGODB_DB_NAME}")
 
 
@@ -81,6 +95,10 @@ async def seed_db():
             "farm_size_acres": 5.0,
             "crop_types": ["Tomato", "Green Chilli"],
             "years_experience": 8,
+            "warning_count": 0,
+            "banned_until": None,
+            "banned_permanently": False,
+            "had_temp_ban": False,
             "created_at": today.isoformat(),
         },
         {
@@ -95,6 +113,10 @@ async def seed_db():
             "company_location": "Colombo",
             "business_type": "Wholesale",
             "delivery_address": "123 Export Lane, Colombo",
+            "warning_count": 0,
+            "banned_until": None,
+            "banned_permanently": False,
+            "had_temp_ban": False,
             "created_at": today.isoformat(),
         },
         {
@@ -110,6 +132,10 @@ async def seed_db():
             "district": "Nuwara Eliya",
             "designation": "Senior Officer",
             "years_of_service": 12,
+            "warning_count": 0,
+            "banned_until": None,
+            "banned_permanently": False,
+            "had_temp_ban": False,
             "created_at": today.isoformat(),
         },
     ]
@@ -205,7 +231,39 @@ async def seed_db():
     }
     await db.outbreaks.insert_one(outbreak)
 
-    print("Seeded demo data: 3 users, 3 contracts, 1 commitment, 1 alert, 1 outbreak")
+    # Demo price ranges
+    price_ranges = [
+        {
+            "crop_type": "Tomato",
+            "region": "Dambulla",
+            "min_price_per_kg": 150.0,
+            "max_price_per_kg": 350.0,
+            "set_by": officer_id,
+            "set_by_name": "Officer Nimal",
+            "set_at": today.isoformat(),
+        },
+        {
+            "crop_type": "Green Chilli",
+            "region": "Jaffna",
+            "min_price_per_kg": 350.0,
+            "max_price_per_kg": 600.0,
+            "set_by": officer_id,
+            "set_by_name": "Officer Nimal",
+            "set_at": today.isoformat(),
+        },
+        {
+            "crop_type": "Carrot",
+            "region": "Nuwara Eliya",
+            "min_price_per_kg": 120.0,
+            "max_price_per_kg": 280.0,
+            "set_by": officer_id,
+            "set_by_name": "Officer Nimal",
+            "set_at": today.isoformat(),
+        },
+    ]
+    await db.price_ranges.insert_many(price_ranges)
+
+    print("Seeded demo data: 3 users, 3 contracts, 1 commitment, 1 alert, 1 outbreak, 3 price ranges")
 
 
 async def close_db():

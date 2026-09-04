@@ -1,16 +1,21 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { FileSignature, Weight, TrendingUp, Percent, Plus, ChevronRight } from 'lucide-react'
+import { FileSignature, Weight, TrendingUp, Percent, Plus, ChevronRight, AlertTriangle } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { motion } from 'framer-motion'
 import StatCard from '../../components/buyer/StatCard.jsx'
 import Card from '../../components/common/Card.jsx'
 import Chip from '../../components/common/Chip.jsx'
+import BanCountdown from '../../components/common/BanCountdown.jsx'
 import api from '../../lib/api.js'
 import { useQuery } from '@tanstack/react-query'
+import { useMyWarnings, useBanStatus } from '../../hooks/useWarnings.js'
 
 export default function BuyerDashboard() {
   const { t } = useTranslation()
+  const { data: warnings = [] } = useMyWarnings()
+  const { data: banStatus } = useBanStatus()
 
   const { data: contracts = [] } = useQuery({
     queryKey: ['contracts', 'all'],
@@ -69,6 +74,9 @@ export default function BuyerDashboard() {
       .slice(0, 4)
   }, [mine])
 
+  const warningCount = warnings.length
+  const isBanned = banStatus?.is_banned
+
   return (
     <div className="space-y-5">
       {/* Greeting */}
@@ -79,6 +87,53 @@ export default function BuyerDashboard() {
         </div>
         <span className="px-2.5 py-1 rounded-full bg-paddy/10 text-paddy text-[11px] font-semibold">{t('common.account')}</span>
       </div>
+
+      {/* Warning Banner */}
+      {warningCount > 0 && !isBanned && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <Card className={`border-l-4 ${
+            warningCount >= 3 ? 'border-l-clay bg-clay/5' :
+            warningCount >= 2 ? 'border-l-turmeric bg-turmeric/5' :
+            'border-l-turmeric bg-turmeric/5'
+          }`}>
+            <div className="flex items-center gap-3">
+              <AlertTriangle size={20} className={
+                warningCount >= 3 ? 'text-clay' : 'text-turmeric'
+              } />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-paddy">
+                  {t('warning.warningCount', { count: warningCount })}
+                </p>
+                <p className="text-xs text-text-muted mt-0.5">
+                  {warningCount >= 3 ? t('warning.nextWarningPermBan') : t('warning.nextWarningBan')}
+                </p>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+      )}
+
+      {/* Ban Countdown */}
+      {isBanned && banStatus.ban_type === 'temporary' && banStatus.banned_until && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <Card className="border-l-4 border-l-clay bg-clay/5 space-y-3">
+            <div className="flex items-center gap-3">
+              <AlertTriangle size={20} className="text-clay" />
+              <div>
+                <p className="text-sm font-semibold text-clay">{t('ban.tempBan')}</p>
+                <p className="text-xs text-text-muted">{t('ban.bannedUntil', { date: banStatus.banned_until })}</p>
+              </div>
+            </div>
+            <BanCountdown bannedUntil={banStatus.banned_until} />
+          </Card>
+        </motion.div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { motion } from 'framer-motion'
 import Button from '../../components/common/Button.jsx'
 import PasswordInput from '../../components/common/PasswordInput.jsx'
+import BanCountdown from '../../components/common/BanCountdown.jsx'
 import { homePathFor, useAuth } from '../../hooks/useAuth.jsx'
 
 const loginSchema = z.object({
@@ -23,6 +24,7 @@ export default function BuyerLogin() {
   const navigate = useNavigate()
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [banData, setBanData] = useState(null)
 
   const {
     register: registerField,
@@ -35,6 +37,45 @@ export default function BuyerLogin() {
 
   if (user) return <Navigate to={homePathFor(user.role)} replace />
 
+  // Show ban screen
+  if (banData) {
+    return (
+      <div className="min-h-dvh flex flex-col items-center bg-cream">
+        <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8 w-full max-w-md">
+          <div className="w-24 h-24 rounded-full bg-clay/15 grid place-items-center mb-6">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-clay">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+            </svg>
+          </div>
+          <h1 className="font-display text-2xl font-bold text-clay mb-2">
+            {banData.ban_type === 'permanent' ? t('ban.permBan') : t('ban.tempBan')}
+          </h1>
+          {banData.reason && (
+            <p className="text-sm text-text-muted mb-4 text-center">{t('ban.banReason', { reason: banData.reason })}</p>
+          )}
+          {banData.ban_type === 'temporary' && banData.banned_until && (
+            <div className="space-y-4 mb-6">
+              <p className="text-sm text-text-muted text-center">{t('ban.timeRemaining')}</p>
+              <BanCountdown bannedUntil={banData.banned_until} />
+            </div>
+          )}
+          {banData.ban_type === 'permanent' && (
+            <div className="bg-clay/10 border border-clay/20 rounded-xl px-4 py-3 mb-6 max-w-sm">
+              <p className="text-sm text-clay text-center">{t('ban.permanentlyBanned')}</p>
+            </div>
+          )}
+          <button
+            onClick={() => setBanData(null)}
+            className="text-sm font-semibold text-paddy underline underline-offset-2 hover:text-turmeric transition"
+          >
+            ← Back to Login
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   async function onSubmit(data) {
     setError('')
     setLoading(true)
@@ -44,6 +85,13 @@ export default function BuyerLogin() {
         phone: data.phone,
         password: data.password,
       })
+
+      // Check if banned
+      if (response.data.banned) {
+        setBanData(response.data.ban_info)
+        return
+      }
+
       // Navigate to OTP page with phone and role
       navigate('/login/otp', {
         state: {

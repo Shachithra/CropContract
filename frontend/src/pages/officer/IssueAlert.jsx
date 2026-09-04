@@ -98,6 +98,7 @@ export default function IssueAlert() {
             <div>
               <label className="label-muted" htmlFor="region">REGION</label>
               <select id="region" className={`input-field ${errors.region ? 'border-clay' : ''}`} {...register('region')}>
+                <option value="All Regions">All Regions</option>
                 {SRI_LANKA_DISTRICTS.map((r) => (
                   <option key={r} value={r}>{t(`regions.${r}`, { defaultValue: r })}</option>
                 ))}

@@ -28,6 +28,7 @@ with open(_labels_path, encoding="utf-8") as fh:
 
 TREATMENTS = LABEL_DATA["treatments"]
 ADVICE = LABEL_DATA["advice"]
+SAFETY_PRECAUTIONS = LABEL_DATA.get("safety_precautions", {})
 DISEASE_TO_KEY = LABEL_DATA.get("disease_to_key", {})
 CLASSES = {c.get("disease_key", str(c["index"])): c for c in LABEL_DATA["classes"]}
 
@@ -142,6 +143,7 @@ def analyze_leaf(image_bytes: bytes) -> dict:
     disease_key = DISEASE_TO_KEY.get(disease, f"DISEASE_{disease.upper().replace(' ', '_')}")
     advice_key = ADVICE.get(disease, "ADVICE_HEALTHY")
     treatment_keys = TREATMENTS.get(disease, ["TREATMENT_MONITOR_WEEKLY"])
+    safety_keys = SAFETY_PRECAUTIONS.get(disease, [])
 
     return {
         "disease": disease,
@@ -152,5 +154,6 @@ def analyze_leaf(image_bytes: bytes) -> dict:
         "treatment_step_keys": treatment_keys,
         "advice_key": advice_key,
         "advice": disease,
+        "safety_precautions": safety_keys,
         "engine": _engine_name,
     }
