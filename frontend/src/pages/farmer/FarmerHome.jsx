@@ -6,14 +6,14 @@ import { motion } from 'framer-motion'
 import GrowthThread from '../../components/farmer/GrowthThread.jsx'
 import Card from '../../components/common/Card.jsx'
 import Chip from '../../components/common/Chip.jsx'
-import { MOCK_CONTRACTS, MOCK_COMMITMENTS } from '../../lib/mockData.js'
+import { useContracts, useMyCommitments } from '../../hooks/useContracts.js'
 import { useAuth } from '../../hooks/useAuth.jsx'
 
 export default function FarmerHome() {
   const { t } = useTranslation()
   const { user } = useAuth()
-  const commitments = MOCK_COMMITMENTS
-  const contracts = MOCK_CONTRACTS
+  const { data: commitments = [] } = useMyCommitments()
+  const { data: contracts = [] } = useContracts()
 
   const activeCommitments = useMemo(
     () => commitments.filter((c) => c.status === 'active' || c.status === 'pending-sync'),

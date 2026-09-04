@@ -1,21 +1,30 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, ArrowRight } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Card from '../../components/common/Card.jsx'
 import Chip from '../../components/common/Chip.jsx'
 import GrowthThread from '../../components/farmer/GrowthThread.jsx'
-import { MOCK_CONTRACTS, MOCK_COMMITMENTS } from '../../lib/mockData.js'
+import { useContracts, useMyCommitments, useUpdateCommitmentStatus } from '../../hooks/useContracts.js'
 
 const TABS = ['Active', 'Upcoming', 'Completed']
+const STATUS_FLOW = ['active', 'growing', 'ready', 'harvested', 'delivered']
+const STATUS_LABELS = {
+  active: 'Mark as Growing',
+  growing: 'Mark as Ready',
+  ready: 'Mark as Harvested',
+  harvested: 'Mark as Delivered',
+}
+const STATUS_TO_PROGRESS = { active: 0, growing: 1, ready: 2, harvested: 3, delivered: 4 }
 
 export default function MyContracts() {
   const { t } = useTranslation()
-  const commitments = MOCK_COMMITMENTS
-  const contracts = MOCK_CONTRACTS
-  const isLoading = false
+  const { data: commitments = [], isLoading: loadingCommitments } = useMyCommitments()
+  const { data: contracts = [], isLoading: loadingContracts } = useContracts()
+  const isLoading = loadingCommitments || loadingContracts
   const [activeTab, setActiveTab] = useState('Active')
   const [openId, setOpenId] = useState(null)
+  const updateStatus = useUpdateCommitmentStatus()
 
   const filtered = useMemo(() => {
     return commitments.filter((c) => {
@@ -65,7 +74,7 @@ export default function MyContracts() {
           {filtered.map((c) => {
             const contract = contracts.find((x) => x.id === c.contract_id)
             const open = openId === c.id
-            const progress = activeTab === 'Completed' ? 4 : activeTab === 'Upcoming' ? 1 : Math.min(c.id % 5, 3)
+            const progress = STATUS_TO_PROGRESS[c.status] ?? 0
 
             return (
               <Card key={c.id} className="!p-0 overflow-hidden">
@@ -105,6 +114,19 @@ export default function MyContracts() {
                     >
                       <div className="px-4 pb-4 pt-1 border-t border-surface-border/60">
                         <GrowthThread progress={progress} />
+                        {STATUS_FLOW.includes(c.status) && c.status !== 'delivered' && (
+                          <button
+                            disabled={updateStatus.isPending}
+                            onClick={() => updateStatus.mutate({
+                              commitmentId: c.id,
+                              status: STATUS_FLOW[STATUS_FLOW.indexOf(c.status) + 1],
+                            })}
+                            className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-paddy text-white text-sm font-semibold active:scale-[0.97] disabled:opacity-50 transition"
+                          >
+                            {STATUS_LABELS[c.status]}
+                            <ArrowRight size={16} />
+                          </button>
+                        )}
                       </div>
                     </motion.div>
                   )}

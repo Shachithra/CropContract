@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, CheckCircle2, Minus, Plus } from 'lucide-react'
 import Card from '../../components/common/Card.jsx'
 import Chip from '../../components/common/Chip.jsx'
 import Button from '../../components/common/Button.jsx'
 import Sheet from '../../components/common/Sheet.jsx'
-import { queueAction } from '../../lib/db.js'
+import { commitToContract } from '../../hooks/useContracts.js'
 import { useAuth } from '../../hooks/useAuth.jsx'
 import { showToast } from '../../components/common/Toast.jsx'
-import { MOCK_CONTRACTS } from '../../lib/mockData.js'
+import api from '../../lib/api.js'
 
 export default function ContractDetail() {
   const { t } = useTranslation()
@@ -20,12 +20,34 @@ export default function ContractDetail() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
 
-  const contract = MOCK_CONTRACTS.find((c) => c.id === Number(id)) || null
+  const { data: contract, isLoading } = useQuery({
+    queryKey: ['contract', id],
+    queryFn: async () => {
+      const { data } = await api.get(`/contracts/${id}`)
+      return data
+    },
+    enabled: !!id,
+  })
 
   const [showCommit, setShowCommit] = useState(false)
   const [qty, setQty] = useState(100)
   const [committing, setCommitting] = useState(false)
   const [committed, setCommitted] = useState(false)
+
+  useEffect(() => {
+    if (committed) {
+      const timer = setTimeout(() => navigate('/farmer/contracts'), 1500)
+      return () => clearTimeout(timer)
+    }
+  }, [committed, navigate])
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <div className="w-8 h-8 border-3 border-paddy/20 border-t-paddy rounded-full animate-spin" />
+      </div>
+    )
+  }
 
   if (!contract) {
     return <p className="text-text-muted text-sm py-10 text-center">{t('common.error')}</p>
@@ -37,7 +59,7 @@ export default function ContractDetail() {
   async function doCommit() {
     setCommitting(true)
     try {
-      await queueAction('create_commitment', { contract_id: contract.id, quantity_kg: qty })
+      await commitToContract(contract.id, qty)
       queryClient.invalidateQueries({ queryKey: ['contracts'] })
       queryClient.invalidateQueries({ queryKey: ['commitments'] })
       setShowCommit(false)
@@ -48,13 +70,6 @@ export default function ContractDetail() {
       setCommitting(false)
     }
   }
-
-  useEffect(() => {
-    if (committed) {
-      const timer = setTimeout(() => navigate('/farmer/contracts'), 1500)
-      return () => clearTimeout(timer)
-    }
-  }, [committed, navigate])
 
   if (committed) {
     return (

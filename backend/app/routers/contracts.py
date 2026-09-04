@@ -132,15 +132,40 @@ async def commit_to_contract(
     return CommitmentOut(**{**{k: v for k, v in commitment.items() if k != "_id"}, "id": str(commitment["_id"]), "farmer_name": user["name"]})
 
 
+@router.patch("/commitments/{commitment_id}/status")
+async def update_commitment_status(
+    commitment_id: str,
+    body: dict,
+    user: dict = Depends(require_role("farmer")),
+):
+    db = get_db()
+    commitment = await db.commitments.find_one({"_id": to_oid(commitment_id)})
+    if not commitment:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Commitment not found")
+    if commitment["farmer_id"] != str(user["_id"]):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Not your commitment")
+
+    new_status = body.get("status")
+    allowed = ["active", "growing", "ready", "harvested", "delivered"]
+    if new_status not in allowed:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Invalid status. Allowed: {allowed}")
+
+    await db.commitments.update_one(
+        {"_id": to_oid(commitment_id)},
+        {"$set": {"status": new_status}},
+    )
+    return {"ok": True, "status": new_status}
+
+
 @router.get("/commitments/mine", response_model=list[CommitmentOut])
 async def my_commitments(user: dict = Depends(get_current_user)):
     db = get_db()
     query = {}
     if user["role"] == "farmer":
-        query["farmer_id"] = user["_id"]
+        query["farmer_id"] = str(user["_id"])
     else:
         # For buyer, find commitments for their contracts
-        buyer_contracts = await db.contracts.find({"buyer_id": user["_id"]}).to_list(1000)
+        buyer_contracts = await db.contracts.find({"buyer_id": str(user["_id"])}).to_list(1000)
         contract_ids = [str(c["_id"]) for c in buyer_contracts]
         query["contract_id"] = {"$in": contract_ids}
     

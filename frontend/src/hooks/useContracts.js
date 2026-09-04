@@ -1,8 +1,7 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../lib/api.js'
-import { isOnline } from '../lib/sync.js'
 import { cacheGet, cacheSet, queueAction } from '../lib/db.js'
-import { MOCK_CONTRACTS, MOCK_COMMITMENTS } from '../lib/mockData.js'
+import { isOnline } from '../lib/sync.js'
 
 export function useContracts() {
   return useQuery({
@@ -19,7 +18,7 @@ export function useContracts() {
         const cached = await cacheGet('contracts')
         if (cached?.length > 0) return cached
       } catch { /* idb unavailable */ }
-      return MOCK_CONTRACTS
+      return []
     },
   })
 }
@@ -30,16 +29,14 @@ export function useMyCommitments(enabled = true) {
     queryFn: async () => {
       try {
         const { data } = await api.get('/commitments/mine')
-        if (data?.length > 0) {
-          try { await cacheSet('commitments', data) } catch { /* idb unavailable */ }
-          return data
-        }
+        try { await cacheSet('commitments', data || []) } catch { /* idb unavailable */ }
+        return data || []
       } catch { /* offline / timeout */ }
       try {
         const cached = await cacheGet('commitments')
-        if (cached?.length > 0) return cached
+        if (cached) return cached
       } catch { /* idb unavailable */ }
-      return MOCK_COMMITMENTS
+      return []
     },
     enabled,
   })
@@ -62,4 +59,17 @@ export async function commitToContract(contractId, quantityKg) {
     quantity_kg: quantityKg,
   })
   return { synced: false, actionId }
+}
+
+export function useUpdateCommitmentStatus() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ commitmentId, status }) => {
+      const { data } = await api.patch(`/commitments/${commitmentId}/status`, { status })
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['commitments'] })
+    },
+  })
 }

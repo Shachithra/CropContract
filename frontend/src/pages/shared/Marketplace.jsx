@@ -4,15 +4,14 @@ import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Card from '../../components/common/Card.jsx'
-import { MOCK_CONTRACTS } from '../../lib/mockData.js'
+import { useContracts } from '../../hooks/useContracts.js'
 import { SRI_LANKA_DISTRICTS } from '../../lib/sriLankaRegions.js'
 
 const FILTER_TABS = ['All crops', 'Region', 'Price', 'Delivery date']
 
 export default function Marketplace() {
   const { t } = useTranslation()
-  const contracts = MOCK_CONTRACTS
-  const isLoading = false
+  const { data: contracts = [], isLoading } = useContracts()
   const [search, setSearch] = useState('')
   const [activeFilter, setActiveFilter] = useState('All crops')
   const [selectedRegion, setSelectedRegion] = useState('')
