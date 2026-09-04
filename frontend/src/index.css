@@ -45,6 +45,23 @@
     @apply w-full rounded-xl bg-white border border-surface-border px-4 py-2.5 text-sm text-paddy placeholder:text-text-muted/50
       outline-none focus:border-turmeric focus:ring-1 focus:ring-turmeric/50 transition;
   }
+  input::-ms-reveal {
+    display: none !important;
+  }
+  input::-webkit-credentials-auto-fill-button {
+    display: none !important;
+  }
+  [data-1p-ignore]::after,
+  [data-lpignore]::after {
+    display: none !important;
+  }
+  /* Hide password manager injected icons (1Password, LastPass, Bitwarden, Dashlane, Chrome) */
+  .password-toggle-container > svg,
+  .password-toggle-container > [class*="icon"],
+  [data-lp-ignore] > [data-lp-icon],
+  .awsspc-container {
+    display: none !important;
+  }
   .label-muted {
     @apply block text-xs font-medium uppercase tracking-wider text-text-muted mb-1.5;
   }

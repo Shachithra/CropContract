@@ -171,7 +171,7 @@ export default function MyContracts() {
                           </div>
                         )}
 
-                        {STATUS_FLOW.includes(c.status) && c.status !== 'paid' && c.status !== 'harvested' && (
+                        {STATUS_FLOW.includes(c.status) && c.status !== 'paid' && c.status !== 'harvested' && c.status !== 'delivered' && (
                           <button
                             disabled={updateStatus.isPending}
                             onClick={() => updateStatus.mutate({
