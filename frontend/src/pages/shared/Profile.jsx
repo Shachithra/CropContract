@@ -6,12 +6,27 @@ import { SRI_LANKA_DISTRICTS } from '../../lib/sriLankaRegions.js'
 import { ALL_CROPS } from '../../lib/sriLankaCrops.js'
 import { compressImage } from '../../lib/imageCompress.js'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Star } from 'lucide-react'
 import api from '../../lib/api.js'
+import ReviewList from '../../components/common/ReviewList.jsx'
+
+import { useQuery } from '@tanstack/react-query'
 
 export default function Profile() {
   const { t } = useTranslation()
   const { user, logout } = useAuth()
   const modalFileRef = useRef(null)
+
+  const { data: reviewStats } = useQuery({
+    queryKey: ['reviewStats', user?._id || user?.id],
+    queryFn: async () => {
+      const userId = user?._id || user?.id
+      if (!userId) return null
+      const { data } = await api.get(`/reviews/stats/${userId}`)
+      return data
+    },
+    enabled: !!(user?._id || user?.id),
+  })
 
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -287,6 +302,23 @@ export default function Profile() {
             {t('common.logOut')}
           </button>
         </div>
+
+        {/* Reviews section */}
+        {(user.role === 'farmer' || user.role === 'buyer') && (
+          <div className="w-full mt-6">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-display font-bold text-sm text-paddy">{t('review.reviews')}</h3>
+              {reviewStats && reviewStats.total_reviews > 0 && (
+                <div className="flex items-center gap-1">
+                  <Star size={12} className="fill-turmeric text-turmeric" />
+                  <span className="text-xs font-semibold text-paddy">{reviewStats.avg_rating}</span>
+                  <span className="text-[10px] text-text-muted">({reviewStats.total_reviews})</span>
+                </div>
+              )}
+            </div>
+            <ReviewList userId={user._id || user.id} />
+          </div>
+        )}
       </div>
 
       {/* Edit Profile Modal */}

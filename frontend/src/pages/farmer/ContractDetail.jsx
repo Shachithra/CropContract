@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, Link } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, CheckCircle2, Minus, Plus } from 'lucide-react'
@@ -114,7 +114,12 @@ export default function ContractDetail() {
       <div className="space-y-0">
         <div className="flex items-center justify-between py-3 border-b border-surface-border/60">
           <span className="text-sm text-text-muted">Buyer</span>
-          <span className="text-sm font-semibold text-paddy">{contract.buyer_name || '—'}</span>
+          <Link
+            to={contract.buyer_id ? `/user/${contract.buyer_id}` : '#'}
+            className="text-sm font-semibold text-paddy hover:text-turmeric transition"
+          >
+            {contract.buyer_name || '—'}
+          </Link>
         </div>
         <div className="flex items-center justify-between py-3 border-b border-surface-border/60">
           <span className="text-sm text-text-muted">Region</span>

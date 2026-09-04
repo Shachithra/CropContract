@@ -65,6 +65,13 @@ async def connect_db():
         IndexModel([("flagged", ASCENDING), ("review_status", ASCENDING)]),
     ])
     
+    await db.reviews.create_indexes([
+        IndexModel([("reviewee_id", ASCENDING)]),
+        IndexModel([("reviewer_id", ASCENDING)]),
+        IndexModel([("contract_id", ASCENDING)]),
+        IndexModel([("reviewer_id", ASCENDING), ("contract_id", ASCENDING)], unique=True),
+    ])
+    
     print(f"Connected to MongoDB: {settings.MONGODB_DB_NAME}")
 
 
@@ -266,7 +273,36 @@ async def seed_db():
     ]
     await db.price_ranges.insert_many(price_ranges)
 
-    print("Seeded demo data: 3 users, 3 contracts, 1 commitment, 1 alert, 1 outbreak, 3 price ranges")
+    # Demo reviews
+    reviews = [
+        {
+            "reviewer_id": farmer_id,
+            "reviewer_name": "Kumari Silva",
+            "reviewer_role": "farmer",
+            "reviewee_id": buyer_id,
+            "reviewee_name": "Ravi Perera",
+            "reviewee_role": "buyer",
+            "contract_id": None,
+            "rating": 5,
+            "comment": "Excellent buyer! Paid on time and communicated well throughout the contract.",
+            "created_at": today.isoformat(),
+        },
+        {
+            "reviewer_id": buyer_id,
+            "reviewer_name": "Ravi Perera",
+            "reviewer_role": "buyer",
+            "reviewee_id": farmer_id,
+            "reviewee_name": "Kumari Silva",
+            "reviewee_role": "farmer",
+            "contract_id": None,
+            "rating": 4,
+            "comment": "Reliable farmer with good quality produce. Delivery was slightly delayed but overall satisfied.",
+            "created_at": today.isoformat(),
+        },
+    ]
+    await db.reviews.insert_many(reviews)
+
+    print("Seeded demo data: 3 users, 3 contracts, 1 commitment, 1 alert, 1 outbreak, 3 price ranges, 2 reviews")
 
 
 async def close_db():

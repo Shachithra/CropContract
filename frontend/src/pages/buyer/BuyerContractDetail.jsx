@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft, ChevronRight, Calendar, CheckCircle2 } from 'lucide-react'
+import { ArrowLeft, ChevronRight, Calendar, CheckCircle2, MessageSquarePlus } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Card from '../../components/common/Card.jsx'
 import Chip from '../../components/common/Chip.jsx'
+import Sheet from '../../components/common/Sheet.jsx'
+import ReviewForm from '../../components/common/ReviewForm.jsx'
 import api from '../../lib/api.js'
 import { showToast } from '../../components/common/Toast.jsx'
 import { CROP_GRADES } from '../../lib/sriLankaCrops.js'
@@ -27,6 +29,7 @@ export default function BuyerContractDetail() {
   const queryClient = useQueryClient()
   const [confirming, setConfirming] = useState(null)
   const [deliveryForm, setDeliveryForm] = useState({})
+  const [reviewTarget, setReviewTarget] = useState(null)
 
   const { data: contracts = [], isLoading: loadingContracts } = useQuery({
     queryKey: ['contracts', 'all'],
@@ -48,6 +51,29 @@ export default function BuyerContractDetail() {
     () => commitments.filter((c) => c.contract_id === id),
     [commitments, id],
   )
+
+  const paidCommitmentIds = useMemo(
+    () => contractCommitments.filter((c) => c.status === 'paid').map((c) => c.id),
+    [contractCommitments],
+  )
+
+  const { data: reviewChecks = {} } = useQuery({
+    queryKey: ['reviewChecks', paidCommitmentIds],
+    queryFn: async () => {
+      const checks = {}
+      for (const cid of paidCommitmentIds) {
+        const c = contractCommitments.find((x) => x.id === cid)
+        if (c?.farmer_id) {
+          try {
+            const { data } = await api.get(`/reviews/check/${c.farmer_id}?contract_id=${id}`)
+            checks[cid] = data.reviewed
+          } catch { checks[cid] = false }
+        }
+      }
+      return checks
+    },
+    enabled: paidCommitmentIds.length > 0,
+  })
 
   const pct = contract ? Math.round((contract.committed_kg / Math.max(contract.total_kg, 1)) * 100) : 0
   const deliveredKg = contractCommitments.reduce((s, c) => s + (c.delivered_qty_kg || 0), 0)
@@ -270,9 +296,24 @@ export default function BuyerContractDetail() {
 
                   {/* Paid done */}
                   {c.status === 'paid' && (
-                    <div className="flex items-center justify-center gap-2 py-2 text-teal">
-                      <CheckCircle2 size={16} />
-                      <span className="text-sm font-semibold">Payment completed</span>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-center gap-2 py-2 text-teal">
+                        <CheckCircle2 size={16} />
+                        <span className="text-sm font-semibold">Payment completed</span>
+                      </div>
+
+                      {!reviewChecks[c.id] && c.farmer_id && (
+                        <button
+                          onClick={() => setReviewTarget({ id: c.farmer_id, name: c.farmer_name || 'Farmer', contractId: id })}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl border-2 border-turmeric text-turmeric text-sm font-semibold active:scale-[0.97] transition"
+                        >
+                          <MessageSquarePlus size={14} />
+                          {t('review.leaveReview')}
+                        </button>
+                      )}
+                      {reviewChecks[c.id] && (
+                        <p className="text-xs text-teal font-semibold text-center">{t('review.alreadyReviewed')}</p>
+                      )}
                     </div>
                   )}
                 </Card>
@@ -289,6 +330,18 @@ export default function BuyerContractDetail() {
       >
         ← Back to Contracts
       </button>
+
+      {/* Review sheet */}
+      <Sheet open={!!reviewTarget} onClose={() => setReviewTarget(null)} title={t('review.leaveReview')}>
+        {reviewTarget && (
+          <ReviewForm
+            revieweeId={reviewTarget.id}
+            revieweeName={reviewTarget.name}
+            contractId={reviewTarget.contractId}
+            onSuccess={() => setReviewTarget(null)}
+          />
+        )}
+      </Sheet>
     </div>
   )
 }

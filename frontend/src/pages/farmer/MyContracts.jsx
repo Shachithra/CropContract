@@ -1,11 +1,15 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown, ArrowRight } from 'lucide-react'
+import { ChevronDown, ArrowRight, MessageSquarePlus } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useQuery } from '@tanstack/react-query'
 import Card from '../../components/common/Card.jsx'
 import Chip from '../../components/common/Chip.jsx'
+import Sheet from '../../components/common/Sheet.jsx'
+import ReviewForm from '../../components/common/ReviewForm.jsx'
 import GrowthThread from '../../components/farmer/GrowthThread.jsx'
 import { useContracts, useMyCommitments, useUpdateCommitmentStatus, useSubmitDelivery } from '../../hooks/useContracts.js'
+import api from '../../lib/api.js'
 
 const TABS = ['Active', 'Upcoming', 'Completed']
 const STATUS_FLOW = ['active', 'growing', 'ready', 'harvested', 'delivered', 'paid']
@@ -35,8 +39,35 @@ export default function MyContracts() {
   const [activeTab, setActiveTab] = useState('Active')
   const [openId, setOpenId] = useState(null)
   const [deliveryForms, setDeliveryForms] = useState({})
+  const [reviewTarget, setReviewTarget] = useState(null)
   const updateStatus = useUpdateCommitmentStatus()
   const submitDelivery = useSubmitDelivery()
+
+  const paidCommitmentIds = useMemo(
+    () => commitments.filter((c) => c.status === 'paid').map((c) => c.id),
+    [commitments],
+  )
+
+  const { data: reviewChecks = {} } = useQuery({
+    queryKey: ['reviewChecks', paidCommitmentIds],
+    queryFn: async () => {
+      const checks = {}
+      for (const cid of paidCommitmentIds) {
+        const c = commitments.find((x) => x.id === cid)
+        if (c?.contract_id) {
+          const contract = contracts.find((x) => x.id === c.contract_id)
+          if (contract?.buyer_id) {
+            try {
+              const { data } = await api.get(`/reviews/check/${contract.buyer_id}?contract_id=${c.contract_id}`)
+              checks[cid] = data.reviewed
+            } catch { checks[cid] = false }
+          }
+        }
+      }
+      return checks
+    },
+    enabled: paidCommitmentIds.length > 0,
+  })
 
   const filtered = useMemo(() => {
     return commitments.filter((c) => {
@@ -184,6 +215,19 @@ export default function MyContracts() {
                             <ArrowRight size={16} />
                           </button>
                         )}
+
+                        {c.status === 'paid' && !reviewChecks[c.id] && contract?.buyer_id && (
+                          <button
+                            onClick={() => setReviewTarget({ id: contract.buyer_id, name: contract.buyer_name || 'Buyer', contractId: c.contract_id })}
+                            className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-turmeric text-turmeric text-sm font-semibold active:scale-[0.97] transition"
+                          >
+                            <MessageSquarePlus size={14} />
+                            {t('review.leaveReview')}
+                          </button>
+                        )}
+                        {c.status === 'paid' && reviewChecks[c.id] && (
+                          <p className="mt-2 text-xs text-teal font-semibold text-center">{t('review.alreadyReviewed')}</p>
+                        )}
                       </div>
                     </motion.div>
                   )}
@@ -193,6 +237,18 @@ export default function MyContracts() {
           })}
         </div>
       )}
+
+      {/* Review sheet */}
+      <Sheet open={!!reviewTarget} onClose={() => setReviewTarget(null)} title={t('review.leaveReview')}>
+        {reviewTarget && (
+          <ReviewForm
+            revieweeId={reviewTarget.id}
+            revieweeName={reviewTarget.name}
+            contractId={reviewTarget.contractId}
+            onSuccess={() => setReviewTarget(null)}
+          />
+        )}
+      </Sheet>
     </div>
   )
 }

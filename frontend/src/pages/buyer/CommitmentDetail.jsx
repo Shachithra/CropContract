@@ -1,11 +1,13 @@
 import { useTranslation } from 'react-i18next'
-import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, CheckCircle2, Calendar } from 'lucide-react'
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import { ArrowLeft, CheckCircle2, Calendar, MessageSquarePlus } from 'lucide-react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import Card from '../../components/common/Card.jsx'
 import Chip from '../../components/common/Chip.jsx'
 import Button from '../../components/common/Button.jsx'
+import Sheet from '../../components/common/Sheet.jsx'
+import ReviewForm from '../../components/common/ReviewForm.jsx'
 import api from '../../lib/api.js'
 import { showToast } from '../../components/common/Toast.jsx'
 import { CROP_GRADES } from '../../lib/sriLankaCrops.js'
@@ -37,11 +39,22 @@ export default function CommitmentDetail() {
     refetchInterval: 15000,
   })
 
+  const { data: reviewedData } = useQuery({
+    queryKey: ['reviewCheck', commitment?.farmer_id],
+    queryFn: async () => {
+      if (!commitment?.farmer_id) return { reviewed: false }
+      const { data } = await api.get(`/reviews/check/${commitment.farmer_id}`)
+      return data
+    },
+    enabled: !!commitment?.farmer_id && commitment?.status === 'paid',
+  })
+
   const commitment = commitments.find((c) => c.id === id)
   const contract = commitment ? contracts.find((x) => x.id === commitment.contract_id) : null
 
   const [confirming, setConfirming] = useState(false)
   const [form, setForm] = useState({ delivered_qty_kg: '', quality_grade: 'Grade A' })
+  const [showReview, setShowReview] = useState(false)
 
   async function confirmDelivery() {
     if (!commitment) return
@@ -104,7 +117,12 @@ export default function CommitmentDetail() {
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h1 className="font-display text-2xl font-bold text-paddy">{commitment.farmer_name || 'Farmer'}</h1>
+          <Link
+            to={commitment.farmer_id ? `/user/${commitment.farmer_id}` : '#'}
+            className="font-display text-2xl font-bold text-paddy hover:text-turmeric transition"
+          >
+            {commitment.farmer_name || 'Farmer'}
+          </Link>
         </div>
         <Chip tone={commitment.status}>{STATUS_LABEL[commitment.status] || commitment.status}</Chip>
       </div>
@@ -178,8 +196,32 @@ export default function CommitmentDetail() {
         <Card className="text-center py-6">
           <CheckCircle2 size={28} className="mx-auto mb-2 text-teal" />
           <p className="text-sm text-text-muted">Payment completed</p>
+
+          {/* Review farmer button */}
+          {!reviewedData?.reviewed && commitment.farmer_id && (
+            <button
+              onClick={() => setShowReview(true)}
+              className="mt-3 flex items-center justify-center gap-2 mx-auto px-4 py-2 rounded-xl border-2 border-turmeric text-turmeric text-sm font-semibold active:scale-[0.97] transition"
+            >
+              <MessageSquarePlus size={14} />
+              {t('review.leaveReview')}
+            </button>
+          )}
+          {reviewedData?.reviewed && (
+            <p className="mt-2 text-xs text-teal font-semibold">{t('review.alreadyReviewed')}</p>
+          )}
         </Card>
       )}
+
+      {/* Review sheet */}
+      <Sheet open={showReview} onClose={() => setShowReview(false)} title={t('review.leaveReview')}>
+        <ReviewForm
+          revieweeId={commitment.farmer_id}
+          revieweeName={commitment.farmer_name || 'Farmer'}
+          contractId={commitment.contract_id}
+          onSuccess={() => setShowReview(false)}
+        />
+      </Sheet>
 
       {/* Back to fulfillment */}
       <button

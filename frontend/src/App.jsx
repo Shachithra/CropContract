@@ -16,6 +16,7 @@ import AppShell from './components/layout/AppShell.jsx'
 
 const Marketplace = lazy(() => import('./pages/shared/Marketplace.jsx'))
 const Profile = lazy(() => import('./pages/shared/Profile.jsx'))
+const UserProfile = lazy(() => import('./pages/shared/UserProfile.jsx'))
 
 const FarmerHome = lazy(() => import('./pages/farmer/FarmerHome.jsx'))
 const DiseaseScan = lazy(() => import('./pages/farmer/DiseaseScan.jsx'))
@@ -109,6 +110,7 @@ export default function App() {
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/marketplace/:id" element={<ContractDetail />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/user/:id" element={<UserProfile />} />
         </Route>
 
         <Route path="*" element={<RootRedirect />} />

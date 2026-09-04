@@ -553,5 +553,19 @@
     "criticalCase": "CRITICAL — Requires immediate regional alert",
     "highCase": "HIGH — Officer review required",
     "moderateCase": "MODERATE — Safety precautions recommended"
+  },
+  "review": {
+    "reviews": "Reviews",
+    "leaveReview": "Leave a Review",
+    "rate": "Rate",
+    "yourReview": "Your Review",
+    "placeholder": "Share your experience working with this person...",
+    "submit": "Submit Review",
+    "submitted": "Review submitted successfully",
+    "alreadyReviewed": "You have already reviewed this user",
+    "noReviews": "No reviews yet",
+    "selectRating": "Please select a rating",
+    "commentTooShort": "Review must be at least 3 characters",
+    "basedOn": "Based on {{count}} review(s)"
   }
 }

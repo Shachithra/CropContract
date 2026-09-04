@@ -336,3 +336,17 @@ async def search_users(
         u["id"] = str(u["_id"])
         users.append(UserOut(**u).model_dump())
     return users
+
+
+@router.get("/users/{user_id}")
+async def get_user_by_id(user_id: str, user: dict = Depends(get_current_user)):
+    """Get a user profile by their MongoDB ObjectId. Any authenticated user."""
+    db = get_db()
+    try:
+        target = await db.users.find_one({"_id": to_oid(user_id)})
+    except Exception:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid user ID")
+    if not target:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+    target["id"] = str(target["_id"])
+    return UserOut(**target)

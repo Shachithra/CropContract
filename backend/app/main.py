@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import connect_db, close_db, seed_db
-from app.routers import auth, contracts, scans, sync, alerts, outbreaks, deliveries, warnings, price_ranges
+from app.routers import auth, contracts, scans, sync, alerts, outbreaks, deliveries, warnings, price_ranges, reviews
 
 logging.basicConfig(level=logging.INFO)
 
@@ -40,6 +40,7 @@ app.include_router(outbreaks.router)
 app.include_router(deliveries.router)
 app.include_router(warnings.router)
 app.include_router(price_ranges.router)
+app.include_router(reviews.router)
 
 
 @app.get("/health")
