@@ -11,7 +11,7 @@ import api from '../../lib/api.js'
 export default function Profile() {
   const { t } = useTranslation()
   const { user, logout } = useAuth()
-  const fileInputRef = useRef(null)
+  const modalFileRef = useRef(null)
 
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -57,7 +57,9 @@ export default function Profile() {
       const reader = new FileReader()
       reader.onload = async () => {
         try {
-          await api.put('/auth/profile', { profile_picture: reader.result })
+          const { data } = await api.put('/auth/profile', { profile_picture: reader.result })
+          localStorage.setItem('cc_user', JSON.stringify(data))
+          window.dispatchEvent(new Event('cc_user_updated'))
           showToast(t('common.profilePictureUpdated'), 'success')
           window.location.reload()
         } catch {
@@ -65,6 +67,18 @@ export default function Profile() {
         }
       }
       reader.readAsDataURL(compressed)
+    } catch {
+      showToast(t('common.error'), 'error')
+    }
+  }
+
+  async function removePicture() {
+    try {
+      const { data } = await api.put('/auth/profile', { profile_picture: null })
+      localStorage.setItem('cc_user', JSON.stringify(data))
+      window.dispatchEvent(new Event('cc_user_updated'))
+      showToast(t('common.profilePictureUpdated'), 'success')
+      window.location.reload()
     } catch {
       showToast(t('common.error'), 'error')
     }
@@ -127,22 +141,6 @@ export default function Profile() {
               <span className="text-paddy font-display font-bold text-3xl">{user.name?.[0] || '?'}</span>
             </div>
           )}
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-turmeric grid place-items-center border-2 border-white shadow-md hover:brightness-110 transition"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-              <circle cx="12" cy="13" r="4" />
-            </svg>
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handlePictureChange}
-          />
         </motion.div>
 
         {/* Name */}
@@ -154,7 +152,7 @@ export default function Profile() {
         </span>
 
         {/* Info card */}
-        <div className="w-full mt-6 bg-white rounded-2xl border border-surface-border p-5 space-y-4">
+        <div className="w-full mt-6 bg-white rounded-2xl border border-surface-border p-5 space-y-4 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-4 md:space-y-0">
           {/* Officer fields - shown first for officers */}
           {user.role === 'officer' && (
             <>
@@ -300,21 +298,21 @@ export default function Profile() {
           )}
         </div>
 
-        {/* Edit Profile button */}
-        <button
-          onClick={() => setEditing(true)}
-          className="w-full mt-6 py-3 rounded-2xl border-2 border-paddy text-paddy font-display font-bold text-sm hover:bg-paddy/5 active:scale-[0.98] transition"
-        >
-          Edit Profile
-        </button>
-
-        {/* Log Out */}
-        <button
-          onClick={() => { logout(); window.location.href = '/login' }}
-          className="mt-4 text-clay font-display font-semibold text-sm hover:underline active:scale-[0.98] transition"
-        >
-          Log Out
-        </button>
+        {/* Edit Profile + Log Out buttons */}
+        <div className="w-full mt-6 flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={() => setEditing(true)}
+            className="flex-1 py-3 rounded-2xl border-2 border-paddy text-paddy font-display font-bold text-sm hover:bg-paddy/5 active:scale-[0.98] transition"
+          >
+            Edit Profile
+          </button>
+          <button
+            onClick={() => { logout(); window.location.href = '/login' }}
+            className="flex-1 py-3 rounded-2xl text-clay font-display font-bold text-sm hover:underline active:scale-[0.98] transition"
+          >
+            Log Out
+          </button>
+        </div>
       </div>
 
       {/* Edit Profile Modal */}
@@ -352,6 +350,46 @@ export default function Profile() {
 
               {/* Modal Body */}
               <div className="px-6 py-5 space-y-4">
+                {/* Profile Picture */}
+                <div className="flex items-center gap-4">
+                  <div className="relative shrink-0">
+                    {user.profile_picture ? (
+                      <img
+                        src={user.profile_picture}
+                        alt="Profile"
+                        className="w-16 h-16 rounded-full object-cover border-2 border-paddy/20"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full bg-paddy/10 border-2 border-paddy/20 grid place-items-center">
+                        <span className="text-paddy font-display font-bold text-xl">{user.name?.[0] || '?'}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => modalFileRef.current?.click()}
+                      className="px-3 py-1.5 rounded-full bg-turmeric text-paddy text-xs font-semibold hover:brightness-110 transition"
+                    >
+                      Change Photo
+                    </button>
+                    {user.profile_picture && (
+                      <button
+                        onClick={removePicture}
+                        className="px-3 py-1.5 rounded-full bg-clay/15 text-clay text-xs font-semibold hover:bg-clay/25 transition"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    ref={modalFileRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handlePictureChange}
+                  />
+                </div>
+
                 {/* Name */}
                 <div>
                   <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Name</label>

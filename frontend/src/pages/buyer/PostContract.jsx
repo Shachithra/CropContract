@@ -130,7 +130,7 @@ export default function PostContract() {
   }
 
   return (
-    <div className="max-w-lg mx-auto space-y-4">
+    <div className="max-w-lg mx-auto space-y-4 md:max-w-xl">
       {/* Header */}
       <div className="flex items-center gap-3">
         <button onClick={() => step === 1 ? setStep(0) : navigate(-1)} className="text-text-muted hover:text-paddy">

@@ -73,3 +73,19 @@ export function useUpdateCommitmentStatus() {
     },
   })
 }
+
+export function useSubmitDelivery() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ commitmentId, delivered_qty_kg, quality_grade }) => {
+      const { data } = await api.post(`/commitments/${commitmentId}/delivery`, {
+        delivered_qty_kg,
+        quality_grade,
+      })
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['commitments'] })
+    },
+  })
+}

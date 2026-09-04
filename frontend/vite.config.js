@@ -16,7 +16,10 @@ export default defineConfig({
         theme_color: '#2F5233',
         background_color: '#EFE9D8',
         display: 'standalone',
+        orientation: 'portrait-primary',
         start_url: '/',
+        scope: '/',
+        categories: ['business', 'productivity'],
         icons: [
           { src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
           { src: '/icon-maskable.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' },

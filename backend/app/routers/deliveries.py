@@ -18,7 +18,7 @@ async def create_delivery(body: DeliveryCreate, user: dict = Depends(require_rol
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Commitment not found")
 
     contract = await db.contracts.find_one({"_id": to_oid(commitment["contract_id"])})
-    if not contract or contract["buyer_id"] != user["_id"]:
+    if not contract or contract["buyer_id"] != str(user["_id"]):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Not your contract")
 
     delivery = {

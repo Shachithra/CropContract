@@ -102,7 +102,7 @@ export default function FarmerHome() {
             </Link>
           </div>
 
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4">
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4 md:grid md:grid-cols-2 lg:grid-cols-4 md:overflow-visible md:px-0 md:mx-0">
             {openContracts.map((c, i) => (
               <motion.div
                 key={c.id}

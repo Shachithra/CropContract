@@ -5,17 +5,27 @@ import { AnimatePresence, motion } from 'framer-motion'
 import Card from '../../components/common/Card.jsx'
 import Chip from '../../components/common/Chip.jsx'
 import GrowthThread from '../../components/farmer/GrowthThread.jsx'
-import { useContracts, useMyCommitments, useUpdateCommitmentStatus } from '../../hooks/useContracts.js'
+import { useContracts, useMyCommitments, useUpdateCommitmentStatus, useSubmitDelivery } from '../../hooks/useContracts.js'
 
 const TABS = ['Active', 'Upcoming', 'Completed']
-const STATUS_FLOW = ['active', 'growing', 'ready', 'harvested', 'delivered']
+const STATUS_FLOW = ['active', 'growing', 'ready', 'harvested', 'delivered', 'paid']
 const STATUS_LABELS = {
   active: 'Mark as Growing',
   growing: 'Mark as Ready',
   ready: 'Mark as Harvested',
-  harvested: 'Mark as Delivered',
+  harvested: 'Submit Delivery',
+  delivered: 'Mark as Paid',
 }
-const STATUS_TO_PROGRESS = { active: 0, growing: 1, ready: 2, harvested: 3, delivered: 4 }
+const STATUS_TO_PROGRESS = { active: 0, growing: 1, ready: 2, harvested: 3, delivered: 4, paid: 4 }
+const STATUS_LABEL_CHIP = {
+  active: 'Active',
+  growing: 'Growing',
+  ready: 'Ready',
+  harvested: 'Harvested',
+  delivered: 'Delivered',
+  paid: 'Paid',
+}
+const CROP_GRADES = ['Grade A', 'Grade B', 'Grade C', 'Export']
 
 export default function MyContracts() {
   const { t } = useTranslation()
@@ -24,12 +34,14 @@ export default function MyContracts() {
   const isLoading = loadingCommitments || loadingContracts
   const [activeTab, setActiveTab] = useState('Active')
   const [openId, setOpenId] = useState(null)
+  const [deliveryForms, setDeliveryForms] = useState({})
   const updateStatus = useUpdateCommitmentStatus()
+  const submitDelivery = useSubmitDelivery()
 
   const filtered = useMemo(() => {
     return commitments.filter((c) => {
       if (activeTab === 'Active') return c.status === 'active' || c.status === 'pending-sync' || c.status === 'growing'
-      if (activeTab === 'Upcoming') return c.status === 'committed' || c.status === 'ready'
+      if (activeTab === 'Upcoming') return c.status === 'committed' || c.status === 'ready' || c.status === 'harvested'
       if (activeTab === 'Completed') return c.status === 'delivered' || c.status === 'paid' || c.status === 'synced'
       return true
     })
@@ -40,7 +52,7 @@ export default function MyContracts() {
       <h1 className="font-display text-2xl font-bold text-paddy">{t('nav.myContracts')}</h1>
 
       {/* Tabs */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         {TABS.map((tab) => (
           <button
             key={tab}
@@ -94,8 +106,8 @@ export default function MyContracts() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <Chip tone={c.sync_status || activeTab.toLowerCase()}>
-                      {c.sync_status === 'synced' ? 'Synced' : activeTab === 'Completed' ? 'Delivered' : activeTab === 'Upcoming' ? 'Committed' : 'Growing'}
+                    <Chip tone={c.status || activeTab.toLowerCase()}>
+                      {STATUS_LABEL_CHIP[c.status] || activeTab}
                     </Chip>
                     <ChevronDown
                       size={16}
@@ -114,7 +126,52 @@ export default function MyContracts() {
                     >
                       <div className="px-4 pb-4 pt-1 border-t border-surface-border/60">
                         <GrowthThread progress={progress} />
-                        {STATUS_FLOW.includes(c.status) && c.status !== 'delivered' && (
+
+                        {c.delivered_qty_kg > 0 && (
+                          <p className="mt-2 text-xs text-text-muted text-right">
+                            Delivered: <span className="font-semibold text-paddy">{c.delivered_qty_kg} kg</span>
+                          </p>
+                        )}
+
+                        {c.status === 'harvested' && (
+                          <div className="mt-3 space-y-2">
+                            <input
+                              type="number"
+                              min={1}
+                              className="input-field text-sm"
+                              placeholder={`Qty (max ${c.quantity_kg} kg)`}
+                              value={deliveryForms[c.id]?.qty || ''}
+                              onChange={(e) => setDeliveryForms((f) => ({
+                                ...f,
+                                [c.id]: { ...f[c.id], qty: e.target.value },
+                              }))}
+                            />
+                            <select
+                              className="input-field text-sm"
+                              value={deliveryForms[c.id]?.grade || 'Grade A'}
+                              onChange={(e) => setDeliveryForms((f) => ({
+                                ...f,
+                                [c.id]: { ...f[c.id], grade: e.target.value },
+                              }))}
+                            >
+                              {CROP_GRADES.map((g) => <option key={g} value={g}>{g}</option>)}
+                            </select>
+                            <button
+                              disabled={submitDelivery.isPending || !deliveryForms[c.id]?.qty}
+                              onClick={() => submitDelivery.mutate({
+                                commitmentId: c.id,
+                                delivered_qty_kg: parseInt(deliveryForms[c.id].qty),
+                                quality_grade: deliveryForms[c.id].grade || 'Grade A',
+                              })}
+                              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-paddy text-white text-sm font-semibold active:scale-[0.97] disabled:opacity-50 transition"
+                            >
+                              Submit Delivery
+                              <ArrowRight size={16} />
+                            </button>
+                          </div>
+                        )}
+
+                        {STATUS_FLOW.includes(c.status) && c.status !== 'paid' && c.status !== 'harvested' && (
                           <button
                             disabled={updateStatus.isPending}
                             onClick={() => updateStatus.mutate({
@@ -124,6 +181,17 @@ export default function MyContracts() {
                             className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-paddy text-white text-sm font-semibold active:scale-[0.97] disabled:opacity-50 transition"
                           >
                             {STATUS_LABELS[c.status]}
+                            <ArrowRight size={16} />
+                          </button>
+                        )}
+
+                        {c.status === 'delivered' && (
+                          <button
+                            disabled={updateStatus.isPending}
+                            onClick={() => updateStatus.mutate({ commitmentId: c.id, status: 'paid' })}
+                            className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-paddy text-white text-sm font-semibold active:scale-[0.97] disabled:opacity-50 transition"
+                          >
+                            Mark as Paid
                             <ArrowRight size={16} />
                           </button>
                         )}

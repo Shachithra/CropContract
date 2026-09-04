@@ -85,7 +85,7 @@ export default function IssueAlert() {
   }
 
   return (
-    <div className="max-w-lg mx-auto space-y-4">
+    <div className="max-w-lg mx-auto space-y-4 md:max-w-xl">
       {/* Header */}
       <div>
         <h1 className="font-display text-2xl font-bold text-paddy">Issue Regional Alert</h1>

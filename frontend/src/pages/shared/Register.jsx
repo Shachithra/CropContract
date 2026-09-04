@@ -51,7 +51,7 @@ export default function Register() {
   return (
     <div className="min-h-dvh flex flex-col items-center bg-cream">
       {/* Main content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8 w-full max-w-lg mx-auto">
         {/* Language toggle */}
         <div className="absolute top-4 right-4">
           <LanguageToggle />

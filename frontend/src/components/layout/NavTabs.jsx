@@ -26,14 +26,14 @@ const tabsByRole = {
   ],
 }
 
-export default function NavTabs() {
+export default function NavTabs({ className = '' }) {
   const { t } = useTranslation()
   const { user } = useAuth()
   const location = useLocation()
   const tabs = tabsByRole[user?.role] || []
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-surface-border pb-[env(safe-area-inset-bottom)]">
+    <nav className={`fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-surface-border pb-[env(safe-area-inset-bottom)] ${className}`}>
       <div className="max-w-5xl mx-auto flex">
         {tabs.map(({ to, icon: Icon, label }) => {
           const active =

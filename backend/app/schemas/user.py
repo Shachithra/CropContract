@@ -52,6 +52,7 @@ class UserOut(BaseModel):
     region: str
     phone: str | None = None
     preferred_language: str = "en"
+    profile_picture: str | None = None
     
     # Farmer fields
     farm_location: str | None = None

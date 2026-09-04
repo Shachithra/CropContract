@@ -37,7 +37,7 @@ export default function Marketplace() {
   }, [contracts, search, selectedRegion])
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 md:max-w-2xl">
       <h1 className="font-display text-2xl font-bold text-paddy">{t('nav.marketplace')}</h1>
 
       {/* Search bar */}

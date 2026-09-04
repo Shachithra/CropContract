@@ -184,7 +184,7 @@ export default function DiseaseScan() {
 
   // Camera view
   return (
-    <div className="space-y-4 max-w-xl mx-auto">
+    <div className="space-y-4 max-w-xl mx-auto md:max-w-2xl">
       {/* Header */}
       <div className="flex items-center justify-between">
         <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-text-muted hover:text-paddy">

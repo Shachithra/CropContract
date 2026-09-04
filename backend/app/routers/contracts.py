@@ -136,6 +136,41 @@ async def commit_to_contract(
 async def update_commitment_status(
     commitment_id: str,
     body: dict,
+    user: dict = Depends(get_current_user),
+):
+    db = get_db()
+    commitment = await db.commitments.find_one({"_id": to_oid(commitment_id)})
+    if not commitment:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Commitment not found")
+
+    new_status = body.get("status")
+
+    if user["role"] == "farmer":
+        if commitment["farmer_id"] != str(user["_id"]):
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Not your commitment")
+        allowed = ["active", "growing", "ready", "harvested", "delivered", "paid"]
+    elif user["role"] == "buyer":
+        contract = await db.contracts.find_one({"_id": to_oid(commitment["contract_id"])})
+        if not contract or contract["buyer_id"] != str(user["_id"]):
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Not your contract")
+        allowed = ["delivered", "paid"]
+    else:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Not authorized")
+
+    if new_status not in allowed:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Invalid status. Allowed: {allowed}")
+
+    await db.commitments.update_one(
+        {"_id": to_oid(commitment_id)},
+        {"$set": {"status": new_status}},
+    )
+    return {"ok": True, "status": new_status}
+
+
+@router.post("/commitments/{commitment_id}/delivery")
+async def farmer_submit_delivery(
+    commitment_id: str,
+    body: dict,
     user: dict = Depends(require_role("farmer")),
 ):
     db = get_db()
@@ -145,16 +180,24 @@ async def update_commitment_status(
     if commitment["farmer_id"] != str(user["_id"]):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Not your commitment")
 
-    new_status = body.get("status")
-    allowed = ["active", "growing", "ready", "harvested", "delivered"]
-    if new_status not in allowed:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Invalid status. Allowed: {allowed}")
+    delivered_qty = body.get("delivered_qty_kg", 0)
+    if delivered_qty <= 0:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "delivered_qty_kg must be > 0")
+
+    delivery = {
+        "commitment_id": commitment_id,
+        "delivered_qty_kg": delivered_qty,
+        "quality_grade": body.get("quality_grade", "Grade A"),
+        "delivered_at": date.today().isoformat(),
+        "payment_status": "pending",
+    }
+    await db.deliveries.insert_one(delivery)
 
     await db.commitments.update_one(
         {"_id": to_oid(commitment_id)},
-        {"$set": {"status": new_status}},
+        {"$set": {"status": "delivered"}},
     )
-    return {"ok": True, "status": new_status}
+    return {"ok": True, "delivered_qty_kg": delivered_qty}
 
 
 @router.get("/commitments/mine", response_model=list[CommitmentOut])
@@ -176,5 +219,8 @@ async def my_commitments(user: dict = Depends(get_current_user)):
         data = {k: v for k, v in m.items() if k != "_id"}
         data["id"] = str(m["_id"])
         data["farmer_name"] = farmer["name"] if farmer else None
+        # Aggregate delivered qty from deliveries collection
+        deliveries = await db.deliveries.find({"commitment_id": str(m["_id"])}).to_list(100)
+        data["delivered_qty_kg"] = sum(d.get("delivered_qty_kg", 0) for d in deliveries)
         out.append(CommitmentOut(**data))
     return sorted(out, key=lambda x: x.id)

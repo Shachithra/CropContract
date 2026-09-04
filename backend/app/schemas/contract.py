@@ -44,3 +44,4 @@ class CommitmentOut(BaseModel):
     status: str
     sync_status: str
     committed_at: str
+    delivered_qty_kg: int | None = None

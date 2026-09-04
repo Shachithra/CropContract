@@ -98,7 +98,7 @@ export default function ContractDetail() {
   }
 
   return (
-    <div className="space-y-4 max-w-lg mx-auto">
+    <div className="space-y-4 max-w-lg mx-auto md:max-w-xl">
       {/* Back button */}
       <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-text-muted hover:text-paddy">
         <ArrowLeft size={16} /> {t('common.back')}

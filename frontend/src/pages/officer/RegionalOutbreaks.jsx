@@ -79,8 +79,8 @@ export default function RegionalOutbreaks() {
       )}
 
       {/* Risk legend */}
-      <Card className="space-y-3">
-        <p className="font-display font-bold text-sm text-paddy">Risk legend</p>
+      <Card className="space-y-3 md:flex md:items-center md:gap-6 md:space-y-0">
+        <p className="font-display font-bold text-sm text-paddy shrink-0">Risk legend</p>
         <div className="flex flex-wrap gap-2">
           <RiskBadge level="low" />
           <RiskBadge level="moderate" />

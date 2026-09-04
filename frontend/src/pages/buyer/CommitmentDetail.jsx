@@ -10,6 +10,15 @@ import api from '../../lib/api.js'
 import { showToast } from '../../components/common/Toast.jsx'
 import { CROP_GRADES } from '../../lib/sriLankaCrops.js'
 
+const STATUS_LABEL = {
+  active: 'Active',
+  growing: 'Growing',
+  ready: 'Ready',
+  harvested: 'Harvested',
+  delivered: 'Delivered',
+  paid: 'Paid',
+}
+
 export default function CommitmentDetail() {
   const { t } = useTranslation()
   const { id } = useParams()
@@ -26,7 +35,7 @@ export default function CommitmentDetail() {
     queryFn: async () => (await api.get('/contracts?status_filter=all')).data,
   })
 
-  const commitment = commitments.find((c) => c.id === parseInt(id))
+  const commitment = commitments.find((c) => c.id === id)
   const contract = commitment ? contracts.find((x) => x.id === commitment.contract_id) : null
 
   const [confirming, setConfirming] = useState(false)
@@ -45,6 +54,20 @@ export default function CommitmentDetail() {
       queryClient.invalidateQueries({ queryKey: ['contracts'] })
       showToast(t('buyer.deliveryConfirm') + ' ✓', 'success')
       navigate('/buyer/fulfilment')
+    } catch {
+      showToast(t('common.error'), 'error')
+    } finally {
+      setConfirming(false)
+    }
+  }
+
+  async function markPaid() {
+    if (!commitment) return
+    setConfirming(true)
+    try {
+      await api.patch(`/commitments/${commitment.id}/status`, { status: 'paid' })
+      queryClient.invalidateQueries({ queryKey: ['buyer-commitments'] })
+      showToast('Marked as paid ✓', 'success')
     } catch {
       showToast(t('common.error'), 'error')
     } finally {
@@ -81,7 +104,7 @@ export default function CommitmentDetail() {
         <div>
           <h1 className="font-display text-2xl font-bold text-paddy">{commitment.farmer_name || 'Farmer'}</h1>
         </div>
-        <Chip tone="growing">Growing</Chip>
+        <Chip tone={commitment.status}>{STATUS_LABEL[commitment.status] || commitment.status}</Chip>
       </div>
 
       {/* Details */}
@@ -92,7 +115,7 @@ export default function CommitmentDetail() {
         </div>
         <div className="flex items-center justify-between py-3 border-b border-surface-border/60">
           <span className="text-sm text-text-muted">Crop journey</span>
-          <span className="text-sm font-semibold text-paddy">Growing</span>
+          <span className="text-sm font-semibold text-paddy">{STATUS_LABEL[commitment.status] || commitment.status}</span>
         </div>
         <div className="flex items-center justify-between py-3 border-b border-surface-border/60">
           <span className="text-sm text-text-muted">Expected delivery</span>
@@ -106,10 +129,9 @@ export default function CommitmentDetail() {
         </div>
       </Card>
 
-      {/* Confirm delivery form */}
-      {commitment.status === 'active' && (
+      {/* Mark as delivered */}
+      {(commitment.status === 'harvested' || commitment.status === 'ready' || commitment.status === 'growing') && (
         <div className="space-y-4">
-          {/* Delivery confirmation */}
           <Card className="space-y-4">
             <div>
               <label className="label-muted" htmlFor="delivered_qty">QUANTITY RECEIVED IN KG</label>
@@ -137,19 +159,23 @@ export default function CommitmentDetail() {
           </Card>
 
           <Button onClick={confirmDelivery} loading={confirming} className="w-full">
-            Confirm & Update Fulfillment
+            Confirm Delivery
           </Button>
         </div>
       )}
 
-      {commitment.status !== 'active' && (
+      {/* Mark as paid */}
+      {commitment.status === 'delivered' && (
+        <Button onClick={markPaid} loading={confirming} className="w-full">
+          Mark as Paid
+        </Button>
+      )}
+
+      {/* Done */}
+      {commitment.status === 'paid' && (
         <Card className="text-center py-6">
           <CheckCircle2 size={28} className="mx-auto mb-2 text-teal" />
-          <p className="text-sm text-text-muted">
-            {commitment.status === 'delivered' ? 'Delivery confirmed' :
-             commitment.status === 'paid' ? 'Payment completed' :
-             `Status: ${commitment.status}`}
-          </p>
+          <p className="text-sm text-text-muted">Payment completed</p>
         </Card>
       )}
 

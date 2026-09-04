@@ -74,7 +74,7 @@ export default function OfficerReview() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card className="text-center py-4">
           <p className="font-display text-3xl font-bold text-paddy">{scans.length}</p>
           <p className="text-xs text-text-muted mt-1">{t('officer.flaggedCount')}</p>

@@ -81,17 +81,18 @@ export default function BuyerDashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatCard icon={FileSignature} value={stats.activeCount} label={t('buyer.activeContracts')} delay={0} />
         <StatCard icon={Weight} value={`${(stats.totalCommitted / 1000).toFixed(1)}t`} label={t('buyer.totalCommitted')} tone="gold" delay={0.05} />
         <StatCard icon={TrendingUp} value={`${(stats.expectedHarvest / 1000).toFixed(1)}t`} label={t('buyer.expectedHarvest')} tone="teal" delay={0.1} />
         <StatCard icon={Percent} value={`${stats.fulfillmentRate}%`} label={t('buyer.fulfillmentRate')} tone="emerald" delay={0.15} />
       </div>
 
-      {/* Supply forecast chart */}
-      <Card className="space-y-3">
-        <p className="font-display font-bold text-sm text-paddy">{t('common.weeklyForecast')}</p>
-        <div className="h-40">
+      {/* Supply forecast chart + Regional share side by side on desktop */}
+      <div className="md:grid md:grid-cols-2 md:gap-4">
+        <Card className="space-y-3">
+          <p className="font-display font-bold text-sm text-paddy">{t('common.weeklyForecast')}</p>
+          <div className="h-40">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData}>
               <XAxis dataKey="week" tick={{ fontSize: 11, fill: '#6B6558' }} />
@@ -112,7 +113,7 @@ export default function BuyerDashboard() {
 
       {/* Regional supply share */}
       {regionalShare.length > 0 && (
-        <Card className="space-y-3">
+        <Card className="space-y-3 md:mt-0">
           <p className="font-display font-bold text-sm text-paddy">{t('common.regionalSupply')}</p>
           <div className="space-y-3">
             {regionalShare.map((r) => (
@@ -132,6 +133,7 @@ export default function BuyerDashboard() {
           </div>
         </Card>
       )}
+      </div>
 
       {/* Post new contract */}
       <div className="space-y-3">

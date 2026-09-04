@@ -52,7 +52,7 @@ export default function Login() {
         <LanguageToggle />
       </div>
       {/* Main content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8 w-full max-w-lg mx-auto">
         {/* Logo */}
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}

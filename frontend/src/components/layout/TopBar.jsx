@@ -20,15 +20,18 @@ export default function TopBar({ syncState = {} }) {
   return (
     <header className="sticky top-0 z-30 bg-paddy/95 backdrop-blur border-b border-paddy/20">
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
+        {/* Mobile: show logo + name. Desktop: sidebar handles it */}
         <button
           onClick={() => navigate('/')}
-          className="flex items-center gap-2 font-display font-bold tracking-tight"
+          className="flex items-center gap-2 font-display font-bold tracking-tight md:hidden"
         >
           <span className="w-8 h-8 rounded-lg bg-turmeric grid place-items-center">
             <Leaf size={17} className="text-white" />
           </span>
           <span className="text-white">{t('appName')}</span>
         </button>
+        {/* Desktop: spacer to push controls right */}
+        <div className="hidden md:block flex-1" />
 
         <div className="flex items-center gap-2.5">
           <SyncBadge online={online} syncing={syncing} pending={pending} />
