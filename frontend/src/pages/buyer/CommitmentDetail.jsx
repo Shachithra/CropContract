@@ -28,11 +28,13 @@ export default function CommitmentDetail() {
   const { data: commitments = [], isLoading } = useQuery({
     queryKey: ['buyer-commitments'],
     queryFn: async () => (await api.get('/commitments/mine')).data,
+    refetchInterval: 15000,
   })
 
   const { data: contracts = [] } = useQuery({
     queryKey: ['contracts', 'all'],
     queryFn: async () => (await api.get('/contracts?status_filter=all')).data,
+    refetchInterval: 15000,
   })
 
   const commitment = commitments.find((c) => c.id === id)

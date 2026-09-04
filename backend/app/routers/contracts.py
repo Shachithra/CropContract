@@ -55,6 +55,11 @@ async def create_contract(body: ContractCreate, user: dict = Depends(require_rol
         "crop_type": {"$regex": f"^{body.crop_type}$", "$options": "i"},
         "region": {"$regex": f"^{body.region}$", "$options": "i"},
     })
+    if not price_range:
+        price_range = await db.price_ranges.find_one({
+            "crop_type": {"$regex": f"^{body.crop_type}$", "$options": "i"},
+            "region": "All Regions",
+        })
 
     price_warning_issued = False
     if price_range:

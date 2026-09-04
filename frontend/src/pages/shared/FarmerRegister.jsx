@@ -166,6 +166,7 @@ export default function FarmerRegister() {
               id="phone"
               type="tel"
               placeholder="+94 77 123 4567"
+              maxLength={13}
               className={`input-field ${errors.phone ? 'border-clay focus:border-clay focus:ring-clay/50' : ''}`}
               {...registerField('phone')}
             />

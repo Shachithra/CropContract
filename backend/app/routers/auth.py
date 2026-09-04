@@ -17,8 +17,12 @@ DEFAULT_OTP = "123456"
 
 
 def _normalize_phone(phone: str) -> str:
-    """Normalize phone number: leading 0 → +94."""
-    phone = phone.strip()
+    """Normalize phone number to +94XXXXXXXXX format."""
+    phone = phone.strip().replace(" ", "")
+    if phone.startswith("+94"):
+        return phone
+    if phone.startswith("94"):
+        return "+94" + phone[2:]
     if phone.startswith("0"):
         return "+94" + phone[1:]
     return phone

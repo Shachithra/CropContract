@@ -116,7 +116,7 @@ export default function RegisterForm() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="label-muted" htmlFor="phone">{t('auth.phone')}</label>
-              <input id="phone" type="tel" className="input-field" placeholder="+94 77 123 4567" {...registerField('phone')} />
+              <input id="phone" type="tel" maxLength={13} className="input-field" placeholder="+94 77 123 4567" {...registerField('phone')} />
             </div>
             <div>
               <label className="label-muted" htmlFor="password">{t('auth.password')}</label>

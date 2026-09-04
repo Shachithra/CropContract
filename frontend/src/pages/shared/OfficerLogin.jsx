@@ -102,6 +102,7 @@ export default function OfficerLogin() {
               id="phone"
               type="tel"
               placeholder="+94 7X XXX XXXX"
+              maxLength={13}
               className={`input-field ${errors.phone ? 'border-clay focus:border-clay focus:ring-clay/50' : ''}`}
               {...registerField('phone')}
             />

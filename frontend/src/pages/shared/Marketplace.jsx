@@ -4,21 +4,61 @@ import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Card from '../../components/common/Card.jsx'
-import { useContracts } from '../../hooks/useContracts.js'
+import Chip from '../../components/common/Chip.jsx'
+import { useContracts, useMyCommitments } from '../../hooks/useContracts.js'
+import { useAuth } from '../../hooks/useAuth.jsx'
 import { SRI_LANKA_DISTRICTS } from '../../lib/sriLankaRegions.js'
 
 const FILTER_TABS = ['All crops', 'Region', 'Price', 'Delivery date']
+const COMMITMENT_STATUS = {
+  active: 'Active',
+  growing: 'Growing',
+  ready: 'Ready',
+  harvested: 'Harvested',
+  delivered: 'Delivered',
+  paid: 'Paid',
+  synced: 'Synced',
+}
 
 export default function Marketplace() {
   const { t } = useTranslation()
+  const { user } = useAuth()
   const { data: contracts = [], isLoading } = useContracts()
+  const { data: commitments = [] } = useMyCommitments(true, { refetchInterval: 15000 })
   const [search, setSearch] = useState('')
   const [activeFilter, setActiveFilter] = useState('All crops')
   const [selectedRegion, setSelectedRegion] = useState('')
 
-  const filtered = useMemo(() => {
-    let result = contracts.filter((c) => c.status === 'open')
+  const isBuyer = user?.role === 'buyer'
 
+  const myContracts = useMemo(() => {
+    if (!isBuyer) return []
+    return contracts.filter((c) => c.buyer_id === user?.id)
+  }, [contracts, isBuyer, user?.id])
+
+  const myCommitments = useMemo(() => {
+    if (!isBuyer) return []
+    return commitments
+  }, [commitments, isBuyer])
+
+  const filtered = useMemo(() => {
+    if (isBuyer) {
+      let result = myContracts
+      if (search) {
+        const q = search.toLowerCase()
+        result = result.filter(
+          (c) =>
+            c.crop_type?.toLowerCase().includes(q) ||
+            c.region?.toLowerCase().includes(q),
+        )
+      }
+      if (selectedRegion) {
+        result = result.filter((c) => c.region === selectedRegion)
+      }
+      return result
+    }
+
+    let result = contracts.filter((c) => c.status === 'open')
     if (search) {
       const q = search.toLowerCase()
       result = result.filter(
@@ -28,24 +68,28 @@ export default function Marketplace() {
           c.region?.toLowerCase().includes(q),
       )
     }
-
     if (selectedRegion) {
       result = result.filter((c) => c.region === selectedRegion)
     }
-
     return result
-  }, [contracts, search, selectedRegion])
+  }, [contracts, myContracts, isBuyer, search, selectedRegion])
+
+  function getCommitmentsForContract(contractId) {
+    return myCommitments.filter((c) => c.contract_id === contractId)
+  }
 
   return (
     <div className="space-y-4 md:max-w-2xl">
-      <h1 className="font-display text-2xl font-bold text-paddy">{t('nav.marketplace')}</h1>
+      <h1 className="font-display text-2xl font-bold text-paddy">
+        {isBuyer ? t('nav.myContracts') || 'My Contracts' : t('nav.marketplace')}
+      </h1>
 
       {/* Search bar */}
       <div className="relative">
         <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
         <input
           type="text"
-          placeholder={t('contract.searchPlaceholder') || 'Search crop or buyer'}
+          placeholder={isBuyer ? 'Search crop or region...' : (t('contract.searchPlaceholder') || 'Search crop or buyer')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="input-field pl-10"
@@ -93,13 +137,18 @@ export default function Marketplace() {
         <p className="text-text-muted text-sm py-10 text-center">{t('common.loading')}</p>
       ) : filtered.length === 0 ? (
         <Card className="text-center py-12">
-          <p className="text-text-muted text-sm">{t('common.empty')}</p>
+          <p className="text-text-muted text-sm">
+            {isBuyer ? 'No contracts yet. Post a contract to get started.' : t('common.empty')}
+          </p>
         </Card>
       ) : (
         <div className="space-y-3">
           {filtered.map((c, i) => {
             const remaining = c.total_kg - c.committed_kg
             const pct = Math.round((c.committed_kg / Math.max(c.total_kg, 1)) * 100)
+            const contractCommitments = isBuyer ? getCommitmentsForContract(c.id) : []
+            const deliveredKg = contractCommitments.reduce((s, cm) => s + (cm.delivered_qty_kg || 0), 0)
+
             return (
               <motion.div
                 key={c.id}
@@ -116,6 +165,9 @@ export default function Marketplace() {
                         {c.buyer_name || 'Buyer'} · {t(`regions.${c.region}`, { defaultValue: c.region })}
                       </p>
                     </div>
+                    {isBuyer && (
+                      <Chip tone={c.status}>{c.status}</Chip>
+                    )}
                   </div>
 
                   {/* Stats row */}
@@ -129,8 +181,12 @@ export default function Marketplace() {
                       <p className="font-display font-bold text-sm text-paddy">Rs. {c.price_per_kg}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-text-muted uppercase tracking-wider">Commit by</p>
-                      <p className="font-display font-bold text-sm text-turmeric">{c.commit_deadline || '—'}</p>
+                      <p className="text-[10px] text-text-muted uppercase tracking-wider">
+                        {isBuyer ? 'Delivery' : 'Commit by'}
+                      </p>
+                      <p className="font-display font-bold text-sm text-turmeric">
+                        {isBuyer ? (c.delivery_date || '—') : (c.commit_deadline || '—')}
+                      </p>
                     </div>
                   </div>
 
@@ -144,17 +200,55 @@ export default function Marketplace() {
                         className="h-full rounded-full bg-turmeric"
                       />
                     </div>
-                    <p className="text-[11px] text-text-muted">
-                      {remaining.toLocaleString()} kg remaining
-                    </p>
+                    <div className="flex justify-between text-[11px] text-text-muted">
+                      <span>{c.committed_kg?.toLocaleString()} kg committed</span>
+                      <span>{remaining.toLocaleString()} kg remaining</span>
+                    </div>
                   </div>
 
-                  {/* Commit button */}
-                  <Link to={`/marketplace/${c.id}`}>
-                    <button className="w-full rounded-xl px-4 py-2.5 font-display font-semibold text-sm text-white bg-paddy hover:brightness-110 active:scale-[0.98] transition">
-                      Commit
-                    </button>
-                  </Link>
+                  {/* Buyer: show commitment summary */}
+                  {isBuyer && contractCommitments.length > 0 && (
+                    <div className="bg-paddy/5 rounded-xl p-3 space-y-2">
+                      <p className="text-[10px] text-text-muted uppercase tracking-wider font-semibold">
+                        Farmer Commitments ({contractCommitments.length})
+                      </p>
+                      {contractCommitments.slice(0, 3).map((cm) => (
+                        <div key={cm.id} className="flex items-center justify-between">
+                          <span className="text-xs text-paddy font-medium">{cm.farmer_name || 'Farmer'}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-text-muted">{cm.quantity_kg} kg</span>
+                            <Chip tone={cm.status}>{COMMITMENT_STATUS[cm.status] || cm.status}</Chip>
+                          </div>
+                        </div>
+                      ))}
+                      {contractCommitments.length > 3 && (
+                        <p className="text-[11px] text-text-muted text-center">
+                          +{contractCommitments.length - 3} more
+                        </p>
+                      )}
+                      {deliveredKg > 0 && (
+                        <div className="flex justify-between text-xs pt-1 border-t border-surface-border/60">
+                          <span className="text-text-muted">Delivered</span>
+                          <span className="font-semibold text-paddy">{deliveredKg.toLocaleString()} kg</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Action */}
+                  {isBuyer ? (
+                    <Link to={`/buyer/contract/${c.id}`}>
+                      <button className="w-full rounded-xl px-4 py-2.5 font-display font-semibold text-sm text-white bg-paddy hover:brightness-110 active:scale-[0.98] transition">
+                        View Details
+                      </button>
+                    </Link>
+                  ) : (
+                    <Link to={`/marketplace/${c.id}`}>
+                      <button className="w-full rounded-xl px-4 py-2.5 font-display font-semibold text-sm text-white bg-paddy hover:brightness-110 active:scale-[0.98] transition">
+                        Commit
+                      </button>
+                    </Link>
+                  )}
                 </Card>
               </motion.div>
             )

@@ -171,7 +171,7 @@ export default function MyContracts() {
                           </div>
                         )}
 
-                        {STATUS_FLOW.includes(c.status) && c.status !== 'paid' && c.status !== 'harvested' && c.status !== 'delivered' && (
+                        {STATUS_FLOW.includes(c.status) && c.status !== 'paid' && c.status !== 'harvested' && (
                           <button
                             disabled={updateStatus.isPending}
                             onClick={() => updateStatus.mutate({
@@ -181,17 +181,6 @@ export default function MyContracts() {
                             className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-paddy text-white text-sm font-semibold active:scale-[0.97] disabled:opacity-50 transition"
                           >
                             {STATUS_LABELS[c.status]}
-                            <ArrowRight size={16} />
-                          </button>
-                        )}
-
-                        {c.status === 'delivered' && (
-                          <button
-                            disabled={updateStatus.isPending}
-                            onClick={() => updateStatus.mutate({ commitmentId: c.id, status: 'paid' })}
-                            className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-paddy text-white text-sm font-semibold active:scale-[0.97] disabled:opacity-50 transition"
-                          >
-                            Mark as Paid
                             <ArrowRight size={16} />
                           </button>
                         )}

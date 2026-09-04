@@ -64,10 +64,18 @@ async def list_price_ranges(user: dict = Depends(get_current_user)):
 @router.get("/price-ranges/check/{crop_type}/{region}")
 async def check_price_range(crop_type: str, region: str, price: float, user: dict = Depends(get_current_user)):
     db = get_db()
+    
+    # Try exact region match first, then fall back to "All Regions"
     price_range = await db.price_ranges.find_one({
         "crop_type": {"$regex": f"^{crop_type}$", "$options": "i"},
         "region": {"$regex": f"^{region}$", "$options": "i"},
     })
+    
+    if not price_range:
+        price_range = await db.price_ranges.find_one({
+            "crop_type": {"$regex": f"^{crop_type}$", "$options": "i"},
+            "region": "All Regions",
+        })
 
     if not price_range:
         return {

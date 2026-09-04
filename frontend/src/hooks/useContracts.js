@@ -23,7 +23,7 @@ export function useContracts() {
   })
 }
 
-export function useMyCommitments(enabled = true) {
+export function useMyCommitments(enabled = true, opts = {}) {
   return useQuery({
     queryKey: ['commitments'],
     queryFn: async () => {
@@ -39,6 +39,7 @@ export function useMyCommitments(enabled = true) {
       return []
     },
     enabled,
+    ...opts,
   })
 }
 

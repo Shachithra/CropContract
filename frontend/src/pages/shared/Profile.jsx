@@ -16,13 +16,13 @@ export default function Profile() {
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [pendingPicture, setPendingPicture] = useState(undefined)
-  const [form, setForm] = useState({
+  const [form, setForm] = useState(() => ({
     name: user?.name || '',
     email: user?.email || '',
     phone: user?.phone || '',
     region: user?.region || '',
     farm_location: user?.farm_location || '',
-    crop_types: user?.crop_types || '',
+    crop_types: Array.isArray(user?.crop_types) ? user.crop_types.join(', ') : (user?.crop_types || ''),
     company_name: user?.company_name || '',
     company_location: user?.company_location || '',
     delivery_address: user?.delivery_address || '',
@@ -30,7 +30,7 @@ export default function Profile() {
     department: user?.department || '',
     district: user?.district || '',
     designation: user?.designation || '',
-  })
+  }))
 
   if (!user) return null
 
@@ -41,6 +41,26 @@ export default function Profile() {
         ? user.crop_types
         : []
     : []
+
+  function openEdit() {
+    setForm({
+      name: user?.name || '',
+      email: user?.email || '',
+      phone: user?.phone || '',
+      region: user?.region || '',
+      farm_location: user?.farm_location || '',
+      crop_types: Array.isArray(user?.crop_types) ? user.crop_types.join(', ') : (user?.crop_types || ''),
+      company_name: user?.company_name || '',
+      company_location: user?.company_location || '',
+      delivery_address: user?.delivery_address || '',
+      delivery_address_2: user?.delivery_address_2 || '',
+      department: user?.department || '',
+      district: user?.district || '',
+      designation: user?.designation || '',
+    })
+    setPendingPicture(undefined)
+    setEditing(true)
+  }
 
   function updateField(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -135,17 +155,19 @@ export default function Profile() {
           {t(`common.${user.role}`) || user.role?.toUpperCase()}
         </span>
 
+        {/* User ID */}
+        {user.user_id && (
+          <p className="mt-1.5 text-xs text-text-muted font-mono">{user.user_id}</p>
+        )}
+
         {/* Info card */}
         <div className="w-full mt-6 bg-white rounded-2xl border border-surface-border p-5 space-y-4 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-4 md:space-y-0">
           {/* Officer fields - shown first for officers */}
           {user.role === 'officer' && (
-            <>
-              <div>
-                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.officerId')}</p>
-                <p className="text-sm font-medium text-paddy mt-0.5">{user.officer_id || '—'}</p>
-              </div>
-              <div className="border-t border-surface-border/60" />
-            </>
+            <div>
+              <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.officerId')}</p>
+              <p className="text-sm font-medium text-paddy mt-0.5">{user.officer_id || '—'}</p>
+            </div>
           )}
 
           {/* Email */}
@@ -153,8 +175,6 @@ export default function Profile() {
             <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.emailAddress')}</p>
             <p className="text-sm font-medium text-paddy mt-0.5">{user.email || '—'}</p>
           </div>
-
-          <div className="border-t border-surface-border/60" />
 
           {/* Phone */}
           <div>
@@ -164,128 +184,98 @@ export default function Profile() {
 
           {/* Department (officer only) */}
           {user.role === 'officer' && (
-            <>
-              <div className="border-t border-surface-border/60" />
-              <div>
-                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.departmentLabel')}</p>
-                <p className="text-sm font-medium text-paddy mt-0.5">{user.department || '—'}</p>
-              </div>
-            </>
+            <div>
+              <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.departmentLabel')}</p>
+              <p className="text-sm font-medium text-paddy mt-0.5">{user.department || '—'}</p>
+            </div>
           )}
 
           {/* District / Region (officer only) */}
           {user.role === 'officer' && (
-            <>
-              <div className="border-t border-surface-border/60" />
-              <div>
-                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.districtRegion')}</p>
-                <p className="text-sm font-medium text-paddy mt-0.5">{user.district || t(`regions.${user.region}`, { defaultValue: user.region || '—' })}</p>
-              </div>
-            </>
+            <div>
+              <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.districtRegion')}</p>
+              <p className="text-sm font-medium text-paddy mt-0.5">{user.district || t(`regions.${user.region}`, { defaultValue: user.region || '—' })}</p>
+            </div>
           )}
 
           {/* Designation (officer only) */}
           {user.role === 'officer' && (
-            <>
-              <div className="border-t border-surface-border/60" />
-              <div>
-                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.designationLabel')}</p>
-                <p className="text-sm font-medium text-paddy mt-0.5">{user.designation || '—'}</p>
-              </div>
-            </>
+            <div>
+              <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.designationLabel')}</p>
+              <p className="text-sm font-medium text-paddy mt-0.5">{user.designation || '—'}</p>
+            </div>
           )}
 
           {/* Farm Location (farmer only) */}
           {user.role === 'farmer' && (
-            <>
-              <div className="border-t border-surface-border/60" />
-              <div>
-                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.farmLocationLabel')}</p>
-                <p className="text-sm font-medium text-paddy mt-0.5">{user.farm_location || '—'}</p>
-              </div>
-            </>
+            <div>
+              <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.farmLocationLabel')}</p>
+              <p className="text-sm font-medium text-paddy mt-0.5">{user.farm_location || '—'}</p>
+            </div>
           )}
 
           {/* Company Location (buyer only) */}
           {user.role === 'buyer' && (
-            <>
-              <div className="border-t border-surface-border/60" />
-              <div>
-                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.companyLocationLabel')}</p>
-                <p className="text-sm font-medium text-paddy mt-0.5">{user.company_location || '—'}</p>
-              </div>
-            </>
+            <div>
+              <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.companyLocationLabel')}</p>
+              <p className="text-sm font-medium text-paddy mt-0.5">{user.company_location || '—'}</p>
+            </div>
           )}
 
           {/* Sourcing Region (buyer only) */}
           {user.role === 'buyer' && (
-            <>
-              <div className="border-t border-surface-border/60" />
-              <div>
-                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.sourcingRegion')}</p>
-                <p className="text-sm font-medium text-paddy mt-0.5">{t(`regions.${user.region}`, { defaultValue: user.region || '—' })}</p>
-              </div>
-            </>
+            <div>
+              <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.sourcingRegion')}</p>
+              <p className="text-sm font-medium text-paddy mt-0.5">{t(`regions.${user.region}`, { defaultValue: user.region || '—' })}</p>
+            </div>
           )}
 
           {/* Delivery Address (buyer only) */}
           {user.role === 'buyer' && (
-            <>
-              <div className="border-t border-surface-border/60" />
-              <div>
-                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.deliveryAddress')}</p>
-                <p className="text-sm font-medium text-paddy mt-0.5">{user.delivery_address || '—'}</p>
-              </div>
-            </>
+            <div>
+              <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.deliveryAddress')}</p>
+              <p className="text-sm font-medium text-paddy mt-0.5">{user.delivery_address || '—'}</p>
+            </div>
           )}
 
           {/* Delivery Address 2 (buyer only) */}
           {user.role === 'buyer' && (
-            <>
-              <div className="border-t border-surface-border/60" />
-              <div>
-                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.deliveryAddress2')}</p>
-                <p className="text-sm font-medium text-paddy mt-0.5">{user.delivery_address_2 || '—'}</p>
-              </div>
-            </>
+            <div>
+              <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.deliveryAddress2')}</p>
+              <p className="text-sm font-medium text-paddy mt-0.5">{user.delivery_address_2 || '—'}</p>
+            </div>
           )}
 
           {/* Region (farmer/buyer) */}
           {user.role !== 'officer' && (
-            <>
-              <div className="border-t border-surface-border/60" />
-              <div>
-                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.regionLabel')}</p>
-                <p className="text-sm font-medium text-paddy mt-0.5">{t(`regions.${user.region}`, { defaultValue: user.region || '—' })}</p>
-              </div>
-            </>
+            <div>
+              <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.regionLabel')}</p>
+              <p className="text-sm font-medium text-paddy mt-0.5">{t(`regions.${user.region}`, { defaultValue: user.region || '—' })}</p>
+            </div>
           )}
 
           {/* Crop Types (farmer only) */}
           {user.role === 'farmer' && cropTypes.length > 0 && (
-            <>
-              <div className="border-t border-surface-border/60" />
-              <div>
-                <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.cropTypesLabel')}</p>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {cropTypes.map((crop) => (
-                    <span
-                      key={crop}
-                      className="px-3 py-1 rounded-full bg-paddy text-white text-xs font-semibold"
-                    >
-                      {crop}
-                    </span>
-                  ))}
-                </div>
+            <div>
+              <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.cropTypesLabel')}</p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {cropTypes.map((crop) => (
+                  <span
+                    key={crop}
+                    className="px-3 py-1 rounded-full bg-paddy text-white text-xs font-semibold"
+                  >
+                    {crop}
+                  </span>
+                ))}
               </div>
-            </>
+            </div>
           )}
         </div>
 
         {/* Edit Profile + Log Out buttons */}
         <div className="w-full mt-6 flex flex-col sm:flex-row gap-3">
           <button
-            onClick={() => setEditing(true)}
+            onClick={openEdit}
             className="flex-1 py-3 rounded-2xl border-2 border-paddy text-paddy font-display font-bold text-sm hover:bg-paddy/5 active:scale-[0.98] transition"
           >
             {t('common.editProfile')}
@@ -420,6 +410,7 @@ export default function Profile() {
                   <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">{t('common.phoneField')}</label>
                   <input
                     type="tel"
+                    maxLength={13}
                     className="input-field mt-1"
                     value={form.phone}
                     onChange={(e) => updateField('phone', e.target.value)}

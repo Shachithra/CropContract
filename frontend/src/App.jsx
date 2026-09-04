@@ -27,6 +27,7 @@ const BuyerDashboard = lazy(() => import('./pages/buyer/BuyerDashboard.jsx'))
 const PostContract = lazy(() => import('./pages/buyer/PostContract.jsx'))
 const ContractFulfilment = lazy(() => import('./pages/buyer/ContractFulfilment.jsx'))
 const CommitmentDetail = lazy(() => import('./pages/buyer/CommitmentDetail.jsx'))
+const BuyerContractDetail = lazy(() => import('./pages/buyer/BuyerContractDetail.jsx'))
 
 const OfficerReview = lazy(() => import('./pages/officer/OfficerReview.jsx'))
 const IssueAlert = lazy(() => import('./pages/officer/IssueAlert.jsx'))
@@ -91,6 +92,7 @@ export default function App() {
             <Route path="/buyer/post" element={<PostContract />} />
             <Route path="/buyer/fulfilment" element={<ContractFulfilment />} />
             <Route path="/buyer/commitment/:id" element={<CommitmentDetail />} />
+            <Route path="/buyer/contract/:id" element={<BuyerContractDetail />} />
           </Route>
 
           {/* Officer */}
