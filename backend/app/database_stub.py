@@ -71,12 +71,12 @@ def seed() -> None:
         return uid
 
     buyer_id = add_user("Ravi Perera", "buyer@demo.lk", "buyer", "Colombo", "demo1234",
-                        phone="0779876543", company_name="Perera Exports", business_type="Wholesale")
+                        phone="+94779876543", company_name="Perera Exports", business_type="Wholesale")
     farmer_id = add_user("Kumari Silva", "farmer@demo.lk", "farmer", "Dambulla", "demo1234",
-                         phone="0771234567", farm_name="Silva Farm", farm_location="Dambulla", farm_size_acres=5.0,
+                         phone="+94771234567", farm_name="Silva Farm", farm_location="Dambulla", farm_size_acres=5.0,
                          crop_types=["Tomato", "Green Chilli"], years_experience=8)
     add_user("Officer Nimal", "officer@demo.lk", "officer", "Nuwara Eliya", "demo1234",
-             phone="0775551234", officer_id="AGR-001", department="Agriculture", district="Nuwara Eliya",
+             phone="+94775551234", officer_id="AGR-001", department="Agriculture", district="Nuwara Eliya",
              designation="Senior Officer", years_of_service=12)
 
     def add_contract(crop_type, grade, total_kg, committed_kg, price, region, days):

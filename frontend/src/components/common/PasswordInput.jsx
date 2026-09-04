@@ -4,11 +4,11 @@ import { Eye, EyeOff } from 'lucide-react'
 const PasswordInput = forwardRef(function PasswordInput({ className = '', ...props }, ref) {
   const [visible, setVisible] = useState(false)
   return (
-    <div className="relative" data-1p-ignore>
+    <div className="relative" data-1p-ignore data-lpignore="true" data-lastpass-ignore>
       <input
         ref={ref}
         type={visible ? 'text' : 'password'}
-        autoComplete="one-time-code"
+        autoComplete="off"
         className={`input-field pr-10 ${className}`}
         {...props}
       />
