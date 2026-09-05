@@ -76,6 +76,13 @@ async def flagged_scans(user: dict = Depends(require_role("officer"))):
     return [_serialize_scan(s) for s in scans]
 
 
+@router.get("/scans/all")
+async def all_scans(user: dict = Depends(require_role("officer"))):
+    db = get_db()
+    scans = await db.scans.find().sort("_id", -1).to_list(1000)
+    return [_serialize_scan(s) for s in scans]
+
+
 @router.post("/scans/{scan_id}/review")
 async def review_scan(
     scan_id: str,

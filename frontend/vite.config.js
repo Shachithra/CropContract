@@ -7,6 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: 'auto',
       includeAssets: ['icon.svg'],
       manifest: {
         name: 'CropContract — Farm Contracts & AI Leaf Scan',
@@ -27,17 +28,34 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        navigateFallback: 'index.html',
         navigateFallbackDenylist: [/^\/api/],
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: /\/locales\/.*\.json$/,
             handler: 'CacheFirst',
-            options: { cacheName: 'locales-cache' },
+            options: { cacheName: 'locales-cache', expiration: { maxEntries: 20, maxAgeSeconds: 86400 * 30 } },
           },
           {
-            urlPattern: /\/(contracts|alerts|outbreaks)/,
-            handler: 'StaleWhileRevalidate',
-            options: { cacheName: 'api-cache' },
+            urlPattern: /\/api\//,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-cache',
+              expiration: { maxEntries: 100, maxAgeSeconds: 86400 },
+              networkTimeoutSeconds: 3,
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+            handler: 'CacheFirst',
+            options: { cacheName: 'images-cache', expiration: { maxEntries: 60, maxAgeSeconds: 86400 * 30 } },
+          },
+          {
+            urlPattern: /\.(?:woff2|woff|ttf)$/,
+            handler: 'CacheFirst',
+            options: { cacheName: 'fonts-cache', expiration: { maxEntries: 10, maxAgeSeconds: 86400 * 365 } },
           },
         ],
       },
@@ -66,5 +84,8 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
+  },
+  preview: {
+    port: 4173,
   },
 })

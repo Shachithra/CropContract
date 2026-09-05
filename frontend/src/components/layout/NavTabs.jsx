@@ -34,7 +34,7 @@ export default function NavTabs({ className = '' }) {
   const tabs = tabsByRole[user?.role] || []
 
   return (
-    <nav className={`fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-surface-border pb-[env(safe-area-inset-bottom)] ${className}`}>
+    <nav className={`fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-surface-border pb-[env(safe-area-inset-bottom,0px)] ${className}`}>
       <div className="max-w-5xl mx-auto flex">
         {tabs.map(({ to, icon: Icon, label }) => {
           const active =
@@ -46,16 +46,16 @@ export default function NavTabs({ className = '' }) {
               key={to}
               to={to}
               replace={false}
-              className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-semibold transition ${
+              className={`flex-1 flex flex-col items-center gap-0.5 py-3 text-[11px] font-semibold transition ${
                 active ? 'text-paddy' : 'text-text-muted hover:text-paddy'
               }`}
             >
               <span
-                className={`w-9 h-7 grid place-items-center rounded-lg transition ${
+                className={`w-11 h-9 grid place-items-center rounded-xl transition ${
                   active ? 'bg-paddy/10' : ''
                 }`}
               >
-                <Icon size={19} strokeWidth={active ? 2.4 : 1.8} />
+                <Icon size={21} strokeWidth={active ? 2.4 : 1.8} />
               </span>
               {t(label)}
             </NavLink>

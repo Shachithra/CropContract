@@ -35,7 +35,7 @@ export default function AppShell() {
     <div className="min-h-dvh flex flex-col">
       <div className="flex-1 flex flex-col min-w-0">
         <TopBar syncState={{ online, syncing, pending }} />
-        <main className="flex-1 w-full max-w-5xl mx-auto px-4 pb-28 pt-4">
+        <main className="flex-1 w-full max-w-5xl mx-auto px-5 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] pt-4">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}

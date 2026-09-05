@@ -1,12 +1,13 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown, ArrowRight, MessageSquarePlus } from 'lucide-react'
+import { ChevronDown, ArrowRight, MessageSquarePlus, Flag } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
 import Card from '../../components/common/Card.jsx'
 import Chip from '../../components/common/Chip.jsx'
 import Sheet from '../../components/common/Sheet.jsx'
 import ReviewForm from '../../components/common/ReviewForm.jsx'
+import ReportForm from '../../components/common/ReportForm.jsx'
 import GrowthThread from '../../components/farmer/GrowthThread.jsx'
 import { useContracts, useMyCommitments, useUpdateCommitmentStatus, useSubmitDelivery } from '../../hooks/useContracts.js'
 import api from '../../lib/api.js'
@@ -40,6 +41,7 @@ export default function MyContracts() {
   const [openId, setOpenId] = useState(null)
   const [deliveryForms, setDeliveryForms] = useState({})
   const [reviewTarget, setReviewTarget] = useState(null)
+  const [reportTarget, setReportTarget] = useState(null)
   const updateStatus = useUpdateCommitmentStatus()
   const submitDelivery = useSubmitDelivery()
 
@@ -67,6 +69,36 @@ export default function MyContracts() {
       return checks
     },
     enabled: paidCommitmentIds.length > 0,
+  })
+
+  const paidBuyerIds = useMemo(
+    () => commitments.filter((c) => {
+      if (c.status !== 'paid') return false
+      const contract = contracts.find((x) => x.id === c.contract_id)
+      return !!contract?.buyer_id
+    }).map((c) => c.id),
+    [commitments, contracts],
+  )
+
+  const { data: reportChecks = {} } = useQuery({
+    queryKey: ['reportChecks', paidBuyerIds],
+    queryFn: async () => {
+      const checks = {}
+      for (const cid of paidBuyerIds) {
+        const c = commitments.find((x) => x.id === cid)
+        if (c?.contract_id) {
+          const contract = contracts.find((x) => x.id === c.contract_id)
+          if (contract?.buyer_id) {
+            try {
+              const { data } = await api.get(`/reports/check/${contract.buyer_id}?contract_id=${c.contract_id}`)
+              checks[cid] = data.reported
+            } catch { checks[cid] = false }
+          }
+        }
+      }
+      return checks
+    },
+    enabled: paidBuyerIds.length > 0,
   })
 
   const filtered = useMemo(() => {
@@ -228,6 +260,19 @@ export default function MyContracts() {
                         {c.status === 'paid' && reviewChecks[c.id] && (
                           <p className="mt-2 text-xs text-teal font-semibold text-center">{t('review.alreadyReviewed')}</p>
                         )}
+
+                        {c.status === 'paid' && !reportChecks[c.id] && contract?.buyer_id && (
+                          <button
+                            onClick={() => setReportTarget({ id: contract.buyer_id, name: contract.buyer_name || 'Buyer', contractId: c.contract_id })}
+                            className="mt-2 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-clay/40 text-clay text-sm font-semibold active:scale-[0.97] transition"
+                          >
+                            <Flag size={14} />
+                            {t('report.reportUser')}
+                          </button>
+                        )}
+                        {c.status === 'paid' && reportChecks[c.id] && (
+                          <p className="mt-2 text-xs text-clay/60 font-semibold text-center">{t('report.alreadyReported')}</p>
+                        )}
                       </div>
                     </motion.div>
                   )}
@@ -246,6 +291,18 @@ export default function MyContracts() {
             revieweeName={reviewTarget.name}
             contractId={reviewTarget.contractId}
             onSuccess={() => setReviewTarget(null)}
+          />
+        )}
+      </Sheet>
+
+      {/* Report sheet */}
+      <Sheet open={!!reportTarget} onClose={() => setReportTarget(null)} title={t('report.reportUser')}>
+        {reportTarget && (
+          <ReportForm
+            reportedUserId={reportTarget.id}
+            reportedUserName={reportTarget.name}
+            contractId={reportTarget.contractId}
+            onSuccess={() => setReportTarget(null)}
           />
         )}
       </Sheet>

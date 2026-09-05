@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft, ChevronRight, Calendar, CheckCircle2, MessageSquarePlus } from 'lucide-react'
+import { ArrowLeft, ChevronRight, Calendar, CheckCircle2, MessageSquarePlus, Flag } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Card from '../../components/common/Card.jsx'
 import Chip from '../../components/common/Chip.jsx'
 import Sheet from '../../components/common/Sheet.jsx'
 import ReviewForm from '../../components/common/ReviewForm.jsx'
+import ReportForm from '../../components/common/ReportForm.jsx'
 import api from '../../lib/api.js'
 import { showToast } from '../../components/common/Toast.jsx'
 import { CROP_GRADES } from '../../lib/sriLankaCrops.js'
@@ -30,6 +31,7 @@ export default function BuyerContractDetail() {
   const [confirming, setConfirming] = useState(null)
   const [deliveryForm, setDeliveryForm] = useState({})
   const [reviewTarget, setReviewTarget] = useState(null)
+  const [reportTarget, setReportTarget] = useState(null)
 
   const { data: contracts = [], isLoading: loadingContracts } = useQuery({
     queryKey: ['contracts', 'all'],
@@ -73,6 +75,29 @@ export default function BuyerContractDetail() {
       return checks
     },
     enabled: paidCommitmentIds.length > 0,
+  })
+
+  const paidFarmerIds = useMemo(
+    () => contractCommitments.filter((c) => c.status === 'paid' && c.farmer_id).map((c) => c.id),
+    [contractCommitments],
+  )
+
+  const { data: reportChecks = {} } = useQuery({
+    queryKey: ['reportChecks', paidFarmerIds, id],
+    queryFn: async () => {
+      const checks = {}
+      for (const cid of paidFarmerIds) {
+        const c = contractCommitments.find((x) => x.id === cid)
+        if (c?.farmer_id) {
+          try {
+            const { data } = await api.get(`/reports/check/${c.farmer_id}?contract_id=${id}`)
+            checks[cid] = data.reported
+          } catch { checks[cid] = false }
+        }
+      }
+      return checks
+    },
+    enabled: paidFarmerIds.length > 0,
   })
 
   const pct = contract ? Math.round((contract.committed_kg / Math.max(contract.total_kg, 1)) * 100) : 0
@@ -314,6 +339,19 @@ export default function BuyerContractDetail() {
                       {reviewChecks[c.id] && (
                         <p className="text-xs text-teal font-semibold text-center">{t('review.alreadyReviewed')}</p>
                       )}
+
+                      {!reportChecks[c.id] && c.farmer_id && (
+                        <button
+                          onClick={() => setReportTarget({ id: c.farmer_id, name: c.farmer_name || 'Farmer', contractId: id })}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl border-2 border-clay/40 text-clay text-sm font-semibold active:scale-[0.97] transition"
+                        >
+                          <Flag size={14} />
+                          {t('report.reportUser')}
+                        </button>
+                      )}
+                      {reportChecks[c.id] && (
+                        <p className="text-xs text-clay/60 font-semibold text-center">{t('report.alreadyReported')}</p>
+                      )}
                     </div>
                   )}
                 </Card>
@@ -339,6 +377,18 @@ export default function BuyerContractDetail() {
             revieweeName={reviewTarget.name}
             contractId={reviewTarget.contractId}
             onSuccess={() => setReviewTarget(null)}
+          />
+        )}
+      </Sheet>
+
+      {/* Report sheet */}
+      <Sheet open={!!reportTarget} onClose={() => setReportTarget(null)} title={t('report.reportUser')}>
+        {reportTarget && (
+          <ReportForm
+            reportedUserId={reportTarget.id}
+            reportedUserName={reportTarget.name}
+            contractId={reportTarget.contractId}
+            onSuccess={() => setReportTarget(null)}
           />
         )}
       </Sheet>

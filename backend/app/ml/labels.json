@@ -3,56 +3,67 @@
   "classes": [
     {
       "index": 0,
+      "disease": "Healthy Leaf",
       "disease_key": "DISEASE_HEALTHY_LEAF",
       "severity": "low"
     },
     {
       "index": 1,
+      "disease": "Leaf Blight",
       "disease_key": "DISEASE_LEAF_BLIGHT",
       "severity": "high"
     },
     {
       "index": 2,
+      "disease": "Leaf Rust",
       "disease_key": "DISEASE_LEAF_RUST",
       "severity": "moderate"
     },
     {
       "index": 3,
+      "disease": "Powdery Mildew",
       "disease_key": "DISEASE_POWDERY_MILDEW",
       "severity": "moderate"
     },
     {
       "index": 4,
+      "disease": "Bacterial Spot",
       "disease_key": "DISEASE_BACTERIAL_SPOT",
       "severity": "high"
     },
     {
       "index": 5,
+      "disease": "Nitrogen Deficiency",
       "disease_key": "DISEASE_NITROGEN_DEFICIENCY",
       "severity": "low"
     },
     {
       "index": 6,
+      "disease": "Tomato Early Blight",
       "disease_key": "DISEASE_TOMATO_EARLY_BLIGHT",
       "severity": "high"
     },
     {
       "index": 7,
+      "disease": "Tomato Late Blight",
       "disease_key": "DISEASE_TOMATO_LATE_BLIGHT",
       "severity": "high"
     },
     {
       "index": 8,
+      "disease": "Tomato Healthy",
       "disease_key": "DISEASE_TOMATO_HEALTHY",
       "severity": "low"
     },
     {
       "index": 9,
+      "disease": "Chilli Bacterial Spot",
       "disease_key": "DISEASE_CHILLI_BACTERIAL_SPOT",
       "severity": "high"
     },
     {
       "index": 10,
+      "disease": "Chilli Healthy",
       "disease_key": "DISEASE_CHILLI_HEALTHY",
       "severity": "low"
     }

@@ -39,6 +39,9 @@ export default function CommitmentDetail() {
     refetchInterval: 15000,
   })
 
+  const commitment = commitments.find((c) => c.id === id)
+  const contract = commitment ? contracts.find((x) => x.id === commitment.contract_id) : null
+
   const { data: reviewedData } = useQuery({
     queryKey: ['reviewCheck', commitment?.farmer_id],
     queryFn: async () => {
@@ -48,9 +51,6 @@ export default function CommitmentDetail() {
     },
     enabled: !!commitment?.farmer_id && commitment?.status === 'paid',
   })
-
-  const commitment = commitments.find((c) => c.id === id)
-  const contract = commitment ? contracts.find((x) => x.id === commitment.contract_id) : null
 
   const [confirming, setConfirming] = useState(false)
   const [form, setForm] = useState({ delivered_qty_kg: '', quality_grade: 'Grade A' })

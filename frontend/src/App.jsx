@@ -37,6 +37,7 @@ const RegionalOutbreaks = lazy(() => import('./pages/officer/RegionalOutbreaks.j
 const RegionDetail = lazy(() => import('./pages/officer/RegionDetail.jsx'))
 const WarningPanel = lazy(() => import('./pages/officer/WarningPanel.jsx'))
 const PriceRanges = lazy(() => import('./pages/officer/PriceRanges.jsx'))
+const OfficerReports = lazy(() => import('./pages/officer/OfficerReports.jsx'))
 
 function PageSpinner() {
   return null
@@ -106,6 +107,7 @@ export default function App() {
             <Route path="/officer/outbreaks/:region" element={<RegionDetail />} />
             <Route path="/officer/warnings" element={<WarningPanel />} />
             <Route path="/officer/price-ranges" element={<PriceRanges />} />
+            <Route path="/officer/reports" element={<OfficerReports />} />
           </Route>
 
           {/* Shared */}

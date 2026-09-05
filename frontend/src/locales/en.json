@@ -567,5 +567,26 @@
     "selectRating": "Please select a rating",
     "commentTooShort": "Review must be at least 3 characters",
     "basedOn": "Based on {{count}} review(s)"
+  },
+  "report": {
+    "reportUser": "Report User",
+    "warning": "Reports are reviewed by officers. False reports may result in warnings against your account.",
+    "category": "Category",
+    "selectCategory": "Select a reason",
+    "reason": "Describe the issue",
+    "placeholder": "Provide details about the problem you experienced...",
+    "submit": "Submit Report",
+    "submitted": "Report submitted successfully",
+    "alreadyReported": "You have already reported this user for this contract",
+    "about": "Reports are confidential and reviewed within 48 hours",
+    "categories": {
+      "fraud": "Fraud / Scam",
+      "non_payment": "Non-payment",
+      "quality_issue": "Quality Issue",
+      "delivery_issue": "Delivery Problem",
+      "harassment": "Harassment / Abuse",
+      "fake_listing": "Fake Listing",
+      "other": "Other"
+    }
   }
 }

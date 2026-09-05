@@ -1,10 +1,11 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ShieldAlert, AlertTriangle, DollarSign, Users } from 'lucide-react'
+import { ShieldAlert, AlertTriangle, DollarSign, Users, Flag, Leaf } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Card from '../../components/common/Card.jsx'
+import Chip from '../../components/common/Chip.jsx'
 import FlaggedScanCard from '../../components/officer/FlaggedScanCard.jsx'
 import RiskBadge from '../../components/officer/RiskBadge.jsx'
 import api from '../../lib/api.js'
@@ -13,10 +14,11 @@ import { showToast } from '../../components/common/Toast.jsx'
 export default function OfficerReview() {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
+  const [scanFilter, setScanFilter] = useState('all')
 
   const { data: scans = [], isLoading } = useQuery({
-    queryKey: ['flagged-scans'],
-    queryFn: async () => (await api.get('/scans/flagged')).data,
+    queryKey: ['officer-all-scans'],
+    queryFn: async () => (await api.get('/scans/all')).data,
   })
 
   const { data: alerts = [] } = useQuery({
@@ -27,6 +29,11 @@ export default function OfficerReview() {
   const { data: priceRanges = [] } = useQuery({
     queryKey: ['price-ranges'],
     queryFn: async () => (await api.get('/price-ranges')).data,
+  })
+
+  const { data: reports = [] } = useQuery({
+    queryKey: ['reports'],
+    queryFn: async () => (await api.get('/reports')).data,
   })
 
   const outbreakByRegion = useMemo(() => {
@@ -42,7 +49,7 @@ export default function OfficerReview() {
   async function review(scanId, reviewBody) {
     try {
       await api.post(`/scans/${scanId}/review`, reviewBody)
-      queryClient.invalidateQueries({ queryKey: ['flagged-scans'] })
+      queryClient.invalidateQueries({ queryKey: ['officer-all-scans'] })
       queryClient.invalidateQueries({ queryKey: ['alerts'] })
       showToast(t('officer.confirmed'), 'success')
     } catch {
@@ -66,9 +73,17 @@ export default function OfficerReview() {
       .slice(0, 4)
   }, [scans])
 
-  const recentFlagged = scans.filter((s) => s.review_status === 'pending').slice(0, 3)
+  const filteredScans = useMemo(() => {
+    if (scanFilter === 'all') return scans
+    if (scanFilter === 'pending') return scans.filter((s) => s.review_status === 'pending')
+    if (scanFilter === 'reviewed') return scans.filter((s) => s.review_status === 'confirmed' || s.review_status === 'resolved')
+    return scans
+  }, [scans, scanFilter])
+
   const criticalCount = scans.filter((s) => s.severity === 'critical').length
+  const flaggedCount = scans.filter((s) => s.flagged).length
   const priceRangeCount = priceRanges.length
+  const pendingReports = reports.filter((r) => r.status === 'pending').length
 
   return (
     <div className="space-y-5">
@@ -85,15 +100,15 @@ export default function OfficerReview() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card className="text-center py-4">
           <p className="font-display text-3xl font-bold text-paddy">{scans.length}</p>
-          <p className="text-xs text-text-muted mt-1">{t('officer.flaggedCount')}</p>
+          <p className="text-xs text-text-muted mt-1">Total Scans</p>
+        </Card>
+        <Card className="text-center py-4">
+          <p className="font-display text-3xl font-bold text-clay">{flaggedCount}</p>
+          <p className="text-xs text-text-muted mt-1">Flagged Scans</p>
         </Card>
         <Card className="text-center py-4">
           <p className="font-display text-3xl font-bold text-turmeric">{alerts.length}</p>
-          <p className="text-xs text-text-muted mt-1">{t('officer.activeAlerts')}</p>
-        </Card>
-        <Card className="text-center py-4">
-          <p className="font-display text-3xl font-bold text-clay">{criticalCount}</p>
-          <p className="text-xs text-text-muted mt-1">Critical Cases</p>
+          <p className="text-xs text-text-muted mt-1">Active Alerts</p>
         </Card>
         <Card className="text-center py-4">
           <p className="font-display text-3xl font-bold text-teal">{priceRangeCount}</p>
@@ -135,21 +150,42 @@ export default function OfficerReview() {
         </Card>
       )}
 
-      {/* Recently flagged */}
+      {/* All farmer scans */}
       <div className="space-y-3">
-        <p className="font-display font-bold text-sm text-paddy">{t('officer.recentlyFlagged')}</p>
-        {recentFlagged.length === 0 ? (
+        <div className="flex items-center justify-between">
+          <p className="font-display font-bold text-sm text-paddy flex items-center gap-2">
+            <Leaf size={15} className="text-teal" /> Farmer Scans ({filteredScans.length})
+          </p>
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          {['all', 'pending', 'reviewed'].map((f) => (
+            <button
+              key={f}
+              onClick={() => setScanFilter(f)}
+              className={`px-3 py-1.5 rounded-full text-[11px] font-semibold transition border ${
+                scanFilter === f
+                  ? 'bg-paddy text-white border-paddy'
+                  : 'bg-white text-text-muted border-surface-border hover:border-paddy/40'
+              }`}
+            >
+              {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+            </button>
+          ))}
+        </div>
+        {filteredScans.length === 0 ? (
           <Card className="text-center py-8">
             <ShieldAlert size={28} className="mx-auto mb-2 text-paddy/30" />
-            <p className="text-text-muted text-sm">{t('officer.empty')}</p>
+            <p className="text-text-muted text-sm">
+              {scans.length === 0 ? 'No scans yet. Waiting for farmers to scan leaves.' : 'No scans match this filter.'}
+            </p>
           </Card>
         ) : (
-          recentFlagged.map((s, i) => (
+          filteredScans.map((s, i) => (
             <motion.div
               key={s.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
+              transition={{ delay: i * 0.03 }}
             >
               <FlaggedScanCard scan={s} onReview={review} compact />
             </motion.div>
@@ -185,6 +221,18 @@ export default function OfficerReview() {
           </button>
         </Link>
       </div>
+
+      <Link to="/officer/reports" className="block">
+        <button className="w-full rounded-xl px-4 py-3 font-display font-semibold text-sm text-paddy border border-paddy/30 hover:bg-paddy/5 active:scale-[0.98] transition flex items-center justify-center gap-2">
+          <Flag size={16} />
+          User Reports
+          {pendingReports > 0 && (
+            <span className="px-2 py-0.5 rounded-full bg-turmeric/15 text-turmeric text-[10px] font-bold">
+              {pendingReports} pending
+            </span>
+          )}
+        </button>
+      </Link>
     </div>
   )
 }

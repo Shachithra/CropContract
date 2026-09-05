@@ -72,6 +72,13 @@ async def connect_db():
         IndexModel([("reviewer_id", ASCENDING), ("contract_id", ASCENDING)], unique=True),
     ])
     
+    await db.reports.create_indexes([
+        IndexModel([("reporter_id", ASCENDING)]),
+        IndexModel([("reported_user_id", ASCENDING)]),
+        IndexModel([("status", ASCENDING)]),
+        IndexModel([("reporter_id", ASCENDING), ("reported_user_id", ASCENDING), ("contract_id", ASCENDING)]),
+    ])
+    
     print(f"Connected to MongoDB: {settings.MONGODB_DB_NAME}")
 
 
