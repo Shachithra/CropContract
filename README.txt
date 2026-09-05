@@ -427,6 +427,338 @@ Libraries: Web Notifications API
 - showAlertNotification() for alert push
 
 
+SECURITY MEASURES
+==================
+
+1. AUTHENTICATION
+-----------------
+Libraries: PyJWT, passlib, bcrypt, fastapi.security.HTTPBearer
+
+a) JWT Token System
+   - HS256 algorithm for token signing
+   - Payload: user ID (sub), role, expiration
+   - Token expiry: 24 hours (JWT_EXPIRE_MINUTES = 1440)
+   - Expired/invalid tokens rejected with 401 Unauthorized
+
+b) Two-Factor Login (Password + OTP)
+   - Step 1: Verify phone + password
+   - Step 2: Verify 6-digit OTP
+   - OTP stored in MongoDB, deleted after use (no replay)
+   - Default OTP: 123456 (demo only)
+
+c) Password Hashing (bcrypt)
+   - passlib.context.CryptContext with bcrypt scheme
+   - Passwords hashed before database storage (never plaintext)
+   - verify_password() wraps in try/except to prevent timing attacks
+   - Minimum 6 characters enforced
+
+d) Generic Error Messages
+   - "Incorrect phone number or password" (does not reveal which is wrong)
+   - "Invalid or expired token" (does not differentiate cases)
+
+e) No Secrets in API Responses
+   - UserOut schema excludes: hashed_password, warning_count, banned_until,
+     banned_permanently, had_temp_ban
+
+
+2. AUTHORIZATION
+----------------
+Libraries: fastapi (dependency injection)
+
+a) Role-Based Access Control (RBAC)
+   - require_role(*roles) factory creates FastAPI dependency
+   - Checks user.role against allowed roles
+   - Returns 403 Forbidden if unauthorized
+
+b) Endpoint-Level Role Enforcement
+   - POST /contracts           -> buyer only
+   - POST /contracts/{id}/commit -> farmer only
+   - POST /commitments/{id}/delivery -> farmer only
+   - POST /disease-scan        -> farmer or officer
+   - GET  /scans/flagged       -> officer only
+   - POST /scans/{id}/review   -> officer only
+   - POST /alerts              -> officer only
+   - POST /deliveries          -> buyer only
+   - POST /warnings            -> officer only
+   - POST /price-ranges        -> officer only
+   - DELETE /price-ranges/{id} -> officer only
+   - GET  /auth/users/search   -> officer only
+   - POST /reviews             -> farmer or buyer
+
+c) Frontend Role-Based Routing
+   - ProtectedLayout() redirects unauthenticated users to /login
+   - RoleRoute() checks user.role against allowed roles
+   - Role-gated routes: /farmer/*, /buyer/*, /officer/*
+
+
+3. BAN SYSTEM
+-------------
+Libraries: fastapi, motor, framer-motion (countdown)
+
+a) Progressive Warning/Ban Escalation
+   - 3 warnings -> 7-day temporary ban
+   - Ban expires -> had_temp_ban flag set
+   - 3 more warnings -> permanent ban
+   - Warning count resets after ban expiry
+
+b) Ban Check Points
+   - Login: ban status checked before OTP
+   - OTP verification: ban status re-checked
+   - Registration: permanently banned email/phone blocked
+
+c) Ban Types
+   - Temporary: Time-based (7 days), auto-expires
+   - Permanent: Irreversible, blocks re-registration
+
+d) Frontend Ban Enforcement
+   - BanScreen: Full-screen overlay blocking all app access
+   - BanCountdown: Live timer (days:hours:minutes:seconds)
+   - useBanStatus() hook polls /ban-status every 10 seconds
+
+
+4. INPUT VALIDATION
+-------------------
+Libraries: pydantic (backend), zod (frontend)
+
+a) Backend Pydantic Schemas
+   - UserRegister: name (2-80 chars), email (validated @/.), password (min 6),
+     role (regex: farmer|buyer|officer)
+   - ContractCreate: crop_type (2-60), total_kg (>0), price_per_kg (>0)
+   - CommitmentCreate: quantity_kg (>0)
+   - WarningCreate: reason (5-500 chars), violation_type (regex validated)
+   - ReviewCreate: rating (1-5), comment (3-500 chars)
+   - ScanReviewRequest: action (regex: confirmed|dismissed|resolved)
+   - PriceRangeCreate: prices > 0, min < max
+
+b) Frontend Zod Validation
+   - Phone regex: /^(\+94|94|0)?[1-9]\d{8}$/
+   - Password: min 1 char (login), min 6 chars (registration)
+   - Name: min 2 chars
+   - All forms use react-hook-form + zodResolver
+
+c) Email Validation
+   - Custom validator checks for @ and . in domain
+   - Normalized to lowercase before storage
+   - Database unique index enforces uniqueness
+
+d) Phone Number Normalization
+   - Backend: _normalize_phone() converts to +94XXXXXXXXX format
+   - Handles: +94..., 94..., 0... prefixes
+   - Frontend: Zod regex validates Sri Lankan format
+
+
+5. DATA PROTECTION
+------------------
+Libraries: passlib, pydantic
+
+a) Password Security
+   - bcrypt hashing with auto-deprecated scheme rotation
+   - Minimum 6 characters enforced
+   - Current password verified before change
+   - Never stored in plaintext
+
+b) Sensitive Data Exclusion
+   - UserOut schema excludes internal fields
+   - No API responses contain hashed_password, ban details, or warning counts
+
+c) Environment Variables
+   - JWT_SECRET, MONGODB_URL externalized to .env
+   - pydantic-settings loads from .env file
+   - .env.local gitignored (prevents secret overrides)
+
+
+6. CORS CONFIGURATION
+---------------------
+Libraries: fastapi.middleware.cors
+
+a) Configurable Origins
+   - CORS_ORIGINS env var: comma-separated list
+   - Development: localhost:5173, localhost:5174, 127.0.0.1
+   - No wildcard * in origins (specific origins only)
+
+b) Credentials Support
+   - allow_credentials=True for cross-origin auth
+
+
+7. IDEMPOTENCY AND DUPLICATE PREVENTION
+----------------------------------------
+Libraries: fastapi, idb, uuid
+
+a) Commitment Idempotency
+   - client_action_id (UUID) attached to each commitment
+   - Server checks for existing ID before creating
+   - Returns existing record instead of duplicate
+
+b) Sync Endpoint Idempotency
+   - Batch processes offline actions
+   - Each action checked against existing client_action_ids
+   - Duplicates returned as "status: duplicate"
+
+c) Review Duplicate Prevention
+   - Database unique index: reviewer_id + contract_id
+   - Application check: same reviewer + same contract = 409 Conflict
+   - Self-review prevention (reviewer != reviewee)
+   - Same-role prevention (farmer cannot review farmer)
+
+d) Client-Side UUID Generation
+   - crypto.randomUUID() with fallback
+   - Each queued offline action gets unique ID
+
+
+8. BUSINESS LOGIC SECURITY
+---------------------------
+Libraries: fastapi, motor
+
+a) Commitment Ownership Verification
+   - Farmers can only update own commitments
+   - Buyers can only update commitments for their contracts
+   - Ownership checked via farmer_id / buyer_id matching
+
+b) Delivery Ownership Verification
+   - Farmers: delivery for own commitment only
+   - Buyers: delivery for own contract only
+
+c) Contract Status Validation
+   - Commitments only allowed on "open" contracts
+   - Attempting to commit to fulfilled/cancelled = 409 Conflict
+
+d) Over-Commitment Protection
+   - Remaining capacity calculated (total_kg - committed_kg)
+   - Commitment capped at remaining amount
+   - Over-commitment raises descriptive error in sync
+
+e) Price Range Enforcement
+   - Below minimum price = auto-issued warning
+   - Price range min < max validated at creation
+
+f) Warning Target Restriction
+   - Officers can only warn farmers and buyers
+   - Cannot warn other officers
+
+
+9. DATABASE SECURITY
+--------------------
+Libraries: motor, pymongo
+
+a) Unique Indexes
+   - users.email: prevents duplicate accounts
+   - price_ranges.crop_type + region: prevents duplicate ranges
+   - reviews.reviewer_id + contract_id: prevents duplicate reviews
+
+b) Idempotent Seeding
+   - seed_db() checks user_count > 0 before seeding
+   - Prevents duplicate demo data on restart
+
+c) OTP Cleanup
+   - Used OTPs deleted immediately after verification
+   - Prevents OTP replay attacks
+
+d) ObjectId Validation
+   - to_oid() validates MongoDB ObjectId format
+   - Invalid inputs raise exceptions (caught as 400 Bad Request)
+
+
+10. FRONTEND SECURITY
+----------------------
+Libraries: axios, react-hook-form, zod, PasswordInput component
+
+a) JWT Auto-Attach Interceptor
+   - Axios request interceptor reads cc_token from localStorage
+   - Attaches Authorization: Bearer <token> header
+
+b) Automatic Logout on 401
+   - Axios response interceptor catches 401 errors
+   - Removes cc_token and cc_user from localStorage
+   - Dispatches cc_auth_expired event
+
+c) Auth State Listener
+   - useAuth.jsx listens for cc_auth_expired events
+   - Immediately clears user state -> redirect to /login
+
+d) Password Input Masking
+   - WebkitTextSecurity: disc / textSecurity: disc
+   - Toggle visibility button (Eye/EyeOff icons)
+   - autoComplete="off" to prevent auto-fill
+
+e) Image Upload Validation
+   - File size: max 5MB
+   - MIME type: must start with image/
+   - Client-side compression: max 1024px, 0.8 JPEG quality
+
+f) API Timeout
+   - 5-second timeout prevents hanging requests
+
+
+11. OFFLINE SYNC SECURITY
+--------------------------
+Libraries: idb, axios, vite-plugin-pwa
+
+a) Queued Action Tracking
+   - Each action stored with client_action_id and timestamp
+   - IndexedDB outbox with outbox and cache stores
+
+b) Mutex-Style Flush Guard
+   - flushing boolean prevents concurrent flush attempts
+   - Only one sync operation at a time
+
+c) Authenticated Sync
+   - /sync endpoint requires authentication
+   - Only logged-in users can sync offline actions
+
+d) Failed Action Handling
+   - Per-action failure reporting (does not abort batch)
+   - Failed items removed from queue after reporting
+
+e) Service Worker Cache Denylist
+   - API routes excluded from offline cache
+   - Prevents stale API responses served offline
+
+
+12. PWA SECURITY
+-----------------
+Libraries: vite-plugin-pwa, Workbox
+
+a) Service Worker Configuration
+   - autoUpdate registration type
+   - Workbox handles caching and offline support
+
+b) Cache Strategy
+   - CacheFirst for locale JSON files
+   - StaleWhileRevalidate for API endpoints
+   - API routes excluded from navigateFallback
+
+c) Install Prompt
+   - Custom InstallPrompt component
+   - Handles beforeinstallprompt event
+   - Dismiss state stored in localStorage
+
+
+13. ADDITIONAL SECURITY PATTERNS
+---------------------------------
+
+a) Health Check Endpoint
+   - GET /health returns {"status": "ok"}
+   - No auth required (standard for uptime monitoring)
+
+b) Request Timeout
+   - 5-second timeout on frontend API calls
+   - Prevents slow loris-style attacks
+
+c) pydantic-settings extra="ignore"
+   - Prevents crashes from unexpected environment variables
+
+d) MongoDB ObjectId Validation
+   - to_oid() validates format before database queries
+   - Invalid inputs propagate as exceptions
+
+e) Custom Event System
+   - cc_auth_expired: triggers logout
+   - cc_user_updated: refreshes user state
+   - cc_outbox_changed: updates sync status
+   - cc_flush_now: triggers immediate sync
+   - cc_auth_ready: enables post-auth operations
+
+
 API ROUTES
 ==========
 
