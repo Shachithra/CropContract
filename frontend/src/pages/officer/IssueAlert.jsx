@@ -50,8 +50,9 @@ export default function IssueAlert() {
       queryClient.invalidateQueries({ queryKey: ['alerts'] })
       setSentRegion(data.region)
       setSent(true)
-    } catch {
-      showToast(t('common.error'), 'error')
+    } catch (err) {
+      const msg = err.response?.data?.detail || t('common.error')
+      showToast(msg, 'error')
     } finally {
       setLoading(false)
     }

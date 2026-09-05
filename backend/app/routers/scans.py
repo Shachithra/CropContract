@@ -1,4 +1,5 @@
 import uuid
+import base64
 from datetime import date, datetime, timezone
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
@@ -9,6 +10,12 @@ from app.schemas.scan import ScanReviewRequest
 from app.services.disease_model import analyze_leaf
 
 router = APIRouter(tags=["scans"])
+
+
+def _serialize_scan(scan: dict) -> dict:
+    """Convert MongoDB scan document to JSON-serializable dict."""
+    scan["id"] = str(scan.pop("_id"))
+    return scan
 
 
 @router.post("/disease-scan")
@@ -25,6 +32,9 @@ async def disease_scan(
     if not image_bytes:
         raise HTTPException(status_code=400, detail="Empty upload")
 
+    # Store image as base64 data URL for officer viewing
+    image_data_url = f"data:{file.content_type or 'image/jpeg'};base64,{base64.b64encode(image_bytes).decode()}"
+
     result = analyze_leaf(image_bytes)
 
     scan = {
@@ -35,6 +45,7 @@ async def disease_scan(
         "lat": lat,
         "lng": lng,
         "client_action_id": client_action_id,
+        "image_url": image_data_url,
         **result,
         "scanned_at": date.today().isoformat(),
         "flagged": result["severity"] in ("high", "critical"),
@@ -55,14 +66,14 @@ async def disease_scan(
 async def my_scans(user: dict = Depends(get_current_user)):
     db = get_db()
     scans = await db.scans.find({"farmer_id": user["_id"]}).sort("_id", -1).to_list(1000)
-    return scans
+    return [_serialize_scan(s) for s in scans]
 
 
 @router.get("/scans/flagged")
 async def flagged_scans(user: dict = Depends(require_role("officer"))):
     db = get_db()
     scans = await db.scans.find({"flagged": True}).sort([("review_status", 1), ("_id", -1)]).to_list(1000)
-    return scans
+    return [_serialize_scan(s) for s in scans]
 
 
 @router.post("/scans/{scan_id}/review")
@@ -108,7 +119,7 @@ async def review_scan(
         await db.alerts.insert_one(alert)
 
     updated_scan = await db.scans.find_one({"_id": to_oid(scan_id)})
-    return updated_scan
+    return _serialize_scan(updated_scan)
 
 
 def new_action_id() -> str:

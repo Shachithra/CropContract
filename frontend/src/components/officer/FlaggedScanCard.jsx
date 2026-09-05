@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Leaf } from 'lucide-react'
 import Card from '../common/Card.jsx'
 import Chip from '../common/Chip.jsx'
 import Button from '../common/Button.jsx'
@@ -48,12 +49,16 @@ export default function FlaggedScanCard({ scan, onReview, compact = false }) {
     return (
       <Card className="!py-3 cursor-pointer hover:bg-paddy/5 transition" onClick={() => setExpanded(true)}>
         <div className="flex items-center gap-3">
-          {scan.image_url && (
+          {scan.image_url ? (
             <img
               src={scan.image_url}
               alt={scan.disease}
               className="w-12 h-12 rounded-xl object-cover shrink-0"
             />
+          ) : (
+            <div className="w-12 h-12 rounded-xl bg-paddy/10 grid place-items-center shrink-0">
+              <Leaf size={18} className="text-paddy/40" />
+            </div>
           )}
           <div className="flex-1 min-w-0">
             <p className="font-display font-bold text-sm text-paddy truncate">
@@ -78,12 +83,16 @@ export default function FlaggedScanCard({ scan, onReview, compact = false }) {
     return (
       <Card className="space-y-3 cursor-pointer hover:bg-paddy/5 transition" onClick={() => setExpanded(true)}>
         <div className="flex items-start gap-3">
-          {scan.image_url && (
+          {scan.image_url ? (
             <img
               src={scan.image_url}
               alt={scan.disease}
               className="w-14 h-14 rounded-xl object-cover shrink-0"
             />
+          ) : (
+            <div className="w-14 h-14 rounded-xl bg-paddy/10 grid place-items-center shrink-0">
+              <Leaf size={20} className="text-paddy/40" />
+            </div>
           )}
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
@@ -124,6 +133,13 @@ export default function FlaggedScanCard({ scan, onReview, compact = false }) {
 
   return (
     <Card className="space-y-4">
+      {/* Image */}
+      {scan.image_url && (
+        <div className="rounded-xl overflow-hidden border border-surface-border">
+          <img src={scan.image_url} alt={scan.disease} className="w-full aspect-video object-cover" />
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div>

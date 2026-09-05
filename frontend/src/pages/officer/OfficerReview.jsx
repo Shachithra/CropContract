@@ -159,25 +159,32 @@ export default function OfficerReview() {
 
       {/* Quick links */}
       <div className="grid grid-cols-2 gap-3">
-        <Link to="/officer/outbreaks" className="block">
+        <Link to="/officer/alert" className="block">
           <button className="btn-turmeric w-full !rounded-xl !py-3">
+            {t('nav.issueAlert')}
+          </button>
+        </Link>
+        <Link to="/officer/outbreaks" className="block">
+          <button className="w-full rounded-xl px-4 py-3 font-display font-semibold text-sm text-paddy border border-paddy/30 hover:bg-paddy/5 active:scale-[0.98] transition">
             {t('officer.viewRegionalOutbreaks')}
           </button>
         </Link>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
         <Link to="/officer/warnings" className="block">
           <button className="w-full rounded-xl px-4 py-3 font-display font-semibold text-sm text-paddy border border-paddy/30 hover:bg-paddy/5 active:scale-[0.98] transition">
             <Users size={16} className="inline mr-2" />
             Warnings
           </button>
         </Link>
+        <Link to="/officer/price-ranges" className="block">
+          <button className="w-full rounded-xl px-4 py-3 font-display font-semibold text-sm text-paddy border border-paddy/30 hover:bg-paddy/5 active:scale-[0.98] transition">
+            <DollarSign size={16} className="inline mr-2" />
+            Price Ranges
+          </button>
+        </Link>
       </div>
-
-      <Link to="/officer/price-ranges" className="block">
-        <button className="w-full rounded-xl px-4 py-3 font-display font-semibold text-sm text-paddy border border-paddy/30 hover:bg-paddy/5 active:scale-[0.98] transition">
-          <DollarSign size={16} className="inline mr-2" />
-          Manage Price Ranges
-        </button>
-      </Link>
     </div>
   )
 }

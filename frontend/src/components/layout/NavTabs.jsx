@@ -14,7 +14,7 @@ const tabsByRole = {
   buyer: [
     { to: '/buyer', icon: LayoutDashboard, label: 'nav.dashboard' },
     { to: '/marketplace', icon: Store, label: 'nav.market' },
-    { to: '/buyer/post', icon: FilePlus2, label: 'nav.post' },
+    { to: '/buyer/alerts', icon: AlertTriangle, label: 'nav.alerts' },
     { to: '/buyer/fulfilment', icon: FileText, label: 'nav.fulfilment' },
     { to: '/profile', icon: User, label: 'nav.profile' },
   ],

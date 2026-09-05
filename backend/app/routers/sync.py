@@ -110,6 +110,11 @@ async def sync(body: SyncRequest, user: dict = Depends(get_current_user)):
             elif action.type == "disease_scan":
                 raw = action.payload.get("image_b64", "")
                 image_bytes = base64.b64decode(raw) if raw else b""
+
+                # Store image as base64 data URL for officer viewing
+                content_type = "image/jpeg"
+                image_data_url = f"data:{content_type};base64,{raw}" if raw else None
+
                 result = analyze_leaf(image_bytes)
                 
                 scan = {
@@ -118,10 +123,15 @@ async def sync(body: SyncRequest, user: dict = Depends(get_current_user)):
                     "crop_type": action.payload.get("crop_type", "unknown"),
                     "region": user["region"],
                     "client_action_id": action.client_action_id,
+                    "image_url": image_data_url,
                     **result,
                     "scanned_at": date.today().isoformat(),
-                    "flagged": result["severity"] == "high",
-                    "review_status": "pending" if result["severity"] == "high" else "none",
+                    "flagged": result["severity"] in ("high", "critical"),
+                    "review_status": "pending" if result["severity"] in ("high", "critical") else "none",
+                    "officer_solution": None,
+                    "safety_precautions": result.get("safety_precautions", []),
+                    "reviewed_by": None,
+                    "reviewed_at": None,
                 }
                 
                 insert_result = await db.scans.insert_one(scan)

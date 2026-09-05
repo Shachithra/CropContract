@@ -6,7 +6,7 @@ import Card from '../../components/common/Card.jsx'
 import { useAuth } from '../../hooks/useAuth.jsx'
 import api from '../../lib/api.js'
 
-export default function FarmerAlerts() {
+export default function BuyerAlerts() {
   const { t } = useTranslation()
   const { user } = useAuth()
 
